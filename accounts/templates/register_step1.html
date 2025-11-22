@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran - Langkah 1</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #eef2f6; font-family: 'Segoe UI', sans-serif; }
+        .step-circle { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; margin-right: 8px; }
+        .step-active { background-color: #2563eb; color: white; }
+        .step-inactive { background-color: #e0e0e0; color: #999; }
+        .btn-dark-custom { background-color: #0f172a; border-color: #0f172a; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            
+            <div class="text-center mb-4">
+                <h3 class="fw-bold">Pendaftaran Akun Mahasiswa</h3>
+                <p class="text-muted">Sistem Manajemen Presensi & SKS - Face Recognition</p>
+            </div>
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <small class="fw-bold text-dark">Langkah 1 dari 3</small>
+                    <small class="fw-bold text-dark">33%</small>
+                </div>
+                <div class="progress mb-4" style="height: 8px;">
+                    <div class="progress-bar bg-dark" role="progressbar" style="width: 33%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between px-2">
+                    <div class="d-flex align-items-center">
+                        <div class="step-circle step-active">1</div>
+                        <span class="fw-bold text-primary">Akun</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="step-circle step-inactive">2</div>
+                        <span class="text-muted">Akademik</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="step-circle step-inactive">3</div>
+                        <span class="text-muted">Foto</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <h5 class="fw-bold mb-1">Data Akun & Identitas</h5>
+                    <p class="text-muted small mb-4">Silakan masukkan data akun untuk login dan identitas dasar Anda.</p>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Lengkap</label>
+                            {{ form.nama_lengkap }}
+                            {% if form.nama_lengkap.errors %}<div class="text-danger small">{{ form.nama_lengkap.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nomor Induk Mahasiswa (NIM)</label>
+                            {{ form.nim }}
+                            {% if form.nim.errors %}<div class="text-danger small">{{ form.nim.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kelas</label>
+                            {{ form.kelas }}
+                            {% if form.kelas.errors %}<div class="text-danger small">{{ form.kelas.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Password</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Konfirmasi Password</label>
+                            {{ form.confirm_password }}
+                            {% if form.confirm_password.errors %}<div class="text-danger small">{{ form.confirm_password.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-dark-custom fw-bold text-white px-4">
+                                Lanjut ke Data Akademik &nbsp; &rarr;
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
