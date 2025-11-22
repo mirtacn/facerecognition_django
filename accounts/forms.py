@@ -1,128 +1,76 @@
 # forms.py
 
 from django import forms
-from .models import Jenjang_Pendidikan, Tahun_Ajaran, Dosen, Kegiatan_PA 
-# Pastikan semua model yang relevan sudah di-import dari models.py Anda
+from .models import Jenjang_Pendidikan, Tahun_Ajaran, Dosen, Kegiatan_PA
 
-# --- STEP 1: Akun & Identitas (TIDAK BERUBAH) ---
+# --- STEP 1: Akun & Identitas ---
 class Step1Form(forms.Form):
-    """
-    Form untuk pendaftaran/akun baru.
-    """
-    nama_lengkap = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan nama lengkap'})
-    )
-    nim = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contoh: 2021001234'})
-    )
-    email = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'nama@universitas.ac.id'})
-    )
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Minimal 8 karakter'})
-    )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Ulangi password'})
-    )
-    kelas = forms.CharField(
-        max_length=50,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contoh: A, B, atau C'})
-    )
+    nama_lengkap = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama Lengkap'}))
+    nim = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'NIM / NRP'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Ulangi Password'}))
+    kelas = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kelas (Misal: 3 D4 IT A)'}))
 
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
-
-        if password and confirm_password and password != confirm_password:
+        p1 = cleaned_data.get("password")
+        p2 = cleaned_data.get("confirm_password")
+        if p1 and p2 and p1 != p2:
             self.add_error('confirm_password', "Password tidak cocok.")
-            
         return cleaned_data
-    
-# -------------------------------------------------------------------
-# --- STEP 2: Akademik dan Kegiatan PA (REVISI BESAR DI SINI) ---
-# -------------------------------------------------------------------
 
+# --- STEP 2: Akademik ---
 class Step2Form(forms.Form):
-    """
-    Form untuk data akademik (Jenjang, Semester, Dosen, Kegiatan PA).
-    Revisi: Menggunakan 3 field Dosen Pembimbing terpisah.
-    """
-    
-    # 1. Jenjang (Jenjang_Pendidikan)
     jenjang = forms.ModelChoiceField(
         queryset=Jenjang_Pendidikan.objects.all(),
-        empty_label="Pilih Jenjang Pendidikan",
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Jenjang Pendidikan"
+        empty_label="Pilih Jenjang",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-
-    # 2. Semester (Tahun_Ajaran)
     semester = forms.ModelChoiceField(
-        queryset=Tahun_Ajaran.objects.filter(status_aktif='aktif').order_by('-tanggal_mulai'),
-        empty_label="Pilih Semester Aktif",
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Tahun Ajaran/Semester"
+        queryset=Tahun_Ajaran.objects.filter(status_aktif='aktif'),
+        empty_label="Pilih Semester",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-
-    # --- INPUT DOSEN PEMBIMBING (3 Field) ---
-    
-    # 3. Dosen Pembimbing 1 (Wajib)
     dosen_pembimbing1 = forms.ModelChoiceField(
         queryset=Dosen.objects.all(),
-        empty_label="Pilih Pembimbing 1 (Wajib)",
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Dosen Pembimbing 1"
+        empty_label="Pilih Pembimbing 1",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-    
-    # 4. Dosen Pembimbing 2 (Wajib)
     dosen_pembimbing2 = forms.ModelChoiceField(
         queryset=Dosen.objects.all(),
-        empty_label="Pilih Pembimbing 2 (Wajib)",
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Dosen Pembimbing 2"
+        empty_label="Pilih Pembimbing 2",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
-    
-    # 5. Dosen Pembimbing 3 (Opsional)
     dosen_pembimbing3 = forms.ModelChoiceField(
         queryset=Dosen.objects.all(),
+        required=False,
         empty_label="Pilih Pembimbing 3 (Opsional)",
-        required=False, # Dibuat opsional
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Dosen Pembimbing 3"
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    kegiatan_pa_diambil = forms.ModelMultipleChoiceField(
+        queryset=Kegiatan_PA.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'list-unstyled'}),
+        label="Kegiatan PA"
     )
 
-    # 6. Kegiatan PA (Menggantikan MataKuliah)
-    kegiatan_pa_diambil = forms.ModelMultipleChoiceField(
-        queryset=Kegiatan_PA.objects.all(), 
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'list-unstyled'}), 
-        label="Kegiatan PA yang Akan Diikuti"
-    )
-    
     def clean(self):
-        """Validasi untuk memastikan Dosen Pembimbing tidak sama."""
         cleaned_data = super().clean()
         d1 = cleaned_data.get('dosen_pembimbing1')
         d2 = cleaned_data.get('dosen_pembimbing2')
         d3 = cleaned_data.get('dosen_pembimbing3')
         
-        dosen_list = [d for d in [d1, d2, d3] if d is not None]
-        
-        # Validasi: Dosen harus berbeda
+        # Pastikan dosen unik
+        dosen_list = [d for d in [d1, d2, d3] if d]
         if len(dosen_list) != len(set(dosen_list)):
-             # Gunakan non_field_errors agar pesan muncul di bagian atas form
-             raise forms.ValidationError(
-                "Dosen Pembimbing yang dipilih harus berbeda satu sama lain."
-            )
-        
+             raise forms.ValidationError("Dosen Pembimbing tidak boleh sama.")
         return cleaned_data
 
-# --- STEP 3: Upload Foto (TIDAK BERUBAH) ---
+# --- STEP 3: Foto (Gunakan Form Biasa) ---
 class Step3Form(forms.Form):
-    """
-    Form untuk upload foto wajah.
-    """
-    file_path = forms.FileField(
+    # Kita gunakan Form biasa agar validasi lebih mudah dikontrol di views
+    file_path = forms.ImageField(
+        required=True,
         widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
-        label="Upload Foto Wajah (Ambil minimal 5 foto wajah untuk dataset)"
+        label="Upload Foto Wajah"
     )

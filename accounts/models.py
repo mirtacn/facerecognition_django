@@ -2,7 +2,9 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
+from django.conf import settings
 
 # --- 1. Master Data (Jenjang, Tahun Ajaran) ---
 
@@ -43,67 +45,82 @@ class Tahun_Ajaran(models.Model):
 
 # --- 2. Akun dan Pengguna (Mahasiswa, Dosen) ---
 
-class Mahasiswa(models.Model):
+# models.py (Bagian yang diubah dan ditambahkan)
+
+# --- 2. Akun dan Pengguna (Mahasiswa, Dosen) ---
+
+class Akun(AbstractUser):
     """
-    Entitas Mahasiswa (Relasi One-to-One ke Akun/User)
+    Model ini menggantikan auth_user default.
+    Field bawaan AbstractUser: username, password, first_name, last_name, email, is_active, date_joined
+    Kita tambahkan field sesuai diagram Anda.
     """
-    # id_mahasiswa (PK) otomatis oleh Django
-    
-    # id_akun (FK)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mahasiswa_profile')
-    
-    # nrp (nullable, untuk mahasiswa) - Diwakili oleh 'nim' atau 'nrp'
+    # id_akun otomatis dibuat Django sebagai 'id' (BigInt)
+
+    # nrp (nullable, untuk mahasiswa)
     nrp = models.CharField(max_length=20, unique=True, null=True, blank=True)
+
+    # role ENUM('admin', 'mahasiswa')
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('mahasiswa', 'Mahasiswa'),
+    ]
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='mahasiswa')
+
+    # status ENUM('aktif', 'nonaktif')
+    # Catatan: Django punya field bawaan 'is_active' (Boolean). 
+    # Kita bisa pakai field baru 'status_akun' jika ingin string ENUM persis diagram.
+    STATUS_AKUN_CHOICES = [
+        ('aktif', 'Aktif'),
+        ('nonaktif', 'Nonaktif'),
+    ]
+    status_akun = models.CharField(max_length=10, choices=STATUS_AKUN_CHOICES, default='aktif')
+
+    # 'nama' sudah terwakili oleh first_name + last_name di AbstractUser, 
+    # tapi jika ingin satu kolom 'nama_lengkap':
+    nama_lengkap = models.CharField(max_length=150, blank=True)
+
+    # Menghapus field email bawaan agar bisa kita atur ulang (opsional, tapi bawaan sudah ada)
+    # Kita override agar email menjadi unique (biasanya best practice)
+    email = models.EmailField(unique=True)
+
+    def __str__(self):
+        return f"{self.username} ({self.get_role_display()})"
     
-    # Relasi ke Jenjang_Pendidikan
+    class Meta:
+        verbose_name = "Akun"
+        verbose_name_plural = "Akun"
+
+
+# --- 3. Profile Mahasiswa & Dosen ---
+
+class Mahasiswa(models.Model):
+    # Relasi ke Custom User Model (Akun)
+    # PENTING: Gunakan settings.AUTH_USER_MODEL, bukan 'User'
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='mahasiswa_profile')
+    
+    # Data Spesifik Akademik (Data akun pindah ke model Akun di atas)
     jenjang_pendidikan = models.ForeignKey(Jenjang_Pendidikan, on_delete=models.SET_NULL, null=True)
-    
-    nama = models.CharField(max_length=100) # Nama Mahasiswa
-    semester = models.CharField(max_length=20)
+    semester = models.CharField(max_length=20) 
     kelas = models.CharField(max_length=50)
     sks_total_tempuh = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     
+    kegiatan_pa = models.ManyToManyField('Kegiatan_PA', blank=True) 
+    
     def __str__(self):
-        return self.nama
+        return self.user.nama_lengkap if self.user.nama_lengkap else self.user.username
     
     class Meta:
         verbose_name = "Mahasiswa"
         verbose_name_plural = "Mahasiswa"
 
-
 class Dosen(models.Model):
-    """
-    Entitas Dosen (Relasi One-to-One ke Akun/User)
-    """
-    # id_dosen (PK) otomatis oleh Django
-    
-    # id_akun (FK)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='dosen_profile')
-    
-    nama_dosen = models.CharField(max_length=100)
-    # Anda bisa menambahkan field NIP/NIDN di sini jika diperlukan
-    
-    def __str__(self):
-        return self.nama_dosen
-    
-    class Meta:
-        verbose_name = "Dosen"
-        verbose_name_plural = "Dosen"
+    nip = models.CharField(max_length=30, unique=True)
+    nama_dosen = models.CharField(max_length=150)
+    prodi = models.CharField(max_length=100)
+    def __str__(self): return f"{self.nama_dosen} ({self.nip})"
+    class Meta: verbose_name_plural = "Dosen"
 
-class Semester(models.Model):
-    """
-    Tabel lookup sederhana untuk nama-nama semester (misal: Ganjil, Genap, Pendek).
-    """
-    # id (PK) otomatis oleh Django
-    nama = models.CharField(max_length=50, unique=True) # Contoh: Ganjil, Genap
-
-    def __str__(self):
-        return self.nama
-    
-    class Meta:
-        verbose_name = "Nama Semester (Lookup)"
-        verbose_name_plural = "Nama Semester (Lookup)"
-        
 class Mahasiswa_Dosen(models.Model):
     """
     Entitas Mahasiswa_Dosen (Relasi Many-to-Many antara Mahasiswa dan Dosen)
@@ -151,7 +168,8 @@ class Kegiatan_PA(models.Model):
     
     nama_kegiatan = models.CharField(max_length=200)
     jumlah_sks = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    total_jam_target = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    total_jam_minggu = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    target_jam = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     
     def __str__(self):
         return self.nama_kegiatan
@@ -286,3 +304,5 @@ class Pengajuan_Pendaftaran(models.Model):
     class Meta:
         verbose_name = "Pengajuan Pendaftaran"
         verbose_name_plural = "Pengajuan Pendaftaran"
+
+# --- 6. Dosen_Pembimbing ---
