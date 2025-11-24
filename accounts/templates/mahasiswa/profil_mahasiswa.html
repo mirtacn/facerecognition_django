@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil Mahasiswa - {{ mahasiswa.nama }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 fw-bold text-dark">Profil Mahasiswa</h1>
+        <button class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-calendar-alt me-2"></i> Semester Ganjil 2024/2025
+        </button>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-12">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-3"
+                        style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: bold; background-color: #f0f0f8; color: #6c63ff;">
+                        {{ mahasiswa.inisial }}
+                    </div>
+
+                    <h5 class="card-title fw-bold">{{ mahasiswa.nama }}</h5>
+                    <p class="mb-2">{{ mahasiswa.nrp }}</p>
+                    <p class="mb-2">{{ mahasiswa.jurusan }}</p>
+
+                    <div><span class="badge mb-2" style="background-color: #e9e9f4; color: #495057;">
+                            {{ mahasiswa.jenjang }}
+                        </span>
+                    </div>
+
+                    <div> <span class="badge mb-4" style="background-color: #e9e9f4; color: #6c63ff;">
+                            {{ mahasiswa.mk_pa }}
+                        </span></div>
+
+
+                    {% if mahasiswa.nrp %}
+                    <a href="{% url 'edit_profil' nim=mahasiswa.nrp %}" class="btn w-100 mt-2 text-white"
+                        style="background-color: #6c63ff; border-color: #6c63ff;">
+                        <i class="bi bi-pencil me-1"></i> Edit Profil
+                    </a>
+                    {% elif mahasiswa.user.username %}
+                    <a href="{% url 'edit_profil' nim=mahasiswa.user.username %}" class="btn w-100 mt-2 text-white"
+                        style="background-color: #6c63ff; border-color: #6c63ff;">
+                        <i class="bi bi-pencil me-1"></i> Edit Profil
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary w-100 mt-2" disabled>
+                        <i class="bi bi-pencil me-1"></i> Edit Profil
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-md-12">
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold text-primary mb-3"><i class="fas fa-info-circle me-2"></i>
+                                Informasi Detail</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-envelope text-secondary me-2"></i>
+                                        <strong class="text-dark">Email:</strong>
+                                    </div>
+                                    <div class="ms-4">
+                                        {{ mahasiswa.email }}
+                                    </div>
+                                </li>
+
+                                <li class="mb-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-calendar text-secondary me-2"></i>
+                                        <strong class="text-dark">Angkatan:</strong>
+                                    </div>
+                                    <div class="ms-4">
+                                        {{ mahasiswa.angkatan }}
+                                    </div>
+                                </li>
+
+                                <li class="mb-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-school text-secondary me-2"></i>
+                                        <strong class="text-dark">Kelas:</strong>
+                                    </div>
+                                    <div class="ms-4">
+                                        {{ mahasiswa.kelas }}
+                                    </div>
+                                </li>
+
+                                <li class="mb-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-graduation-cap text-secondary me-2"></i>
+                                        <strong class="text-dark">Semester:</strong>
+                                    </div>
+                                    <div class="ms-4">
+                                        {{ mahasiswa.semester }}
+                                    </div>
+                                </li>
+
+                                <li class="mb-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-book text-secondary me-2"></i>
+                                        <strong class="text-dark">Mata Kuliah PA:</strong>
+                                    </div>
+                                    <div class="ms-4 fw-bold">
+                                        {{ mahasiswa.mk_pa }}
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold text-primary mb-3"><i class="fas fa-user-tie me-2"></i> Dosen
+                                Pembimbing</h5>
+                            <ol class="list-group list-group-numbered">
+                                {% for dosen in dosen_pembimbing %}
+                                <li
+                                    class="list-group-item d-flex justify-content-between align-items-start border-0 ps-0">
+                                    <div class="ms-2 me-auto">
+                                        <span class="fw-semibold">{{ dosen.nama }}</span><br>
+                                        <small class="text-muted">{{ dosen.gelar }}</small>
+                                    </div>
+                                </li>
+                                {% empty %}
+                                <p class="text-muted">Data dosen pembimbing belum tersedia.</p>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

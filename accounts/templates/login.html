@@ -1,12 +1,115 @@
-<h2>Login</h2>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<form method="POST">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Username"><br><br>
-    <input type="password" name="password" placeholder="Password"><br><br>
-    <button type="submit">Login</button>
-</form>
+    <style>
+        body {
+            background: #e6e4fc;
+        }
+
+        .login-wrapper {
+            max-width: 900px;
+            width: 100%;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .left-image {
+            background-image: url("{% static 'img/absen.png' %}");
+            background-size: cover;
+            background-position: center;
+            height: 100%;
+            min-height: 460px;
+        }
+
+        .form-section {
+            padding: 40px 35px;
+        }
+
+        .form-control {
+            height: 45px;
+            border-radius: 10px;
+        }
+
+        .btn-login {
+            height: 45px;
+            border-radius: 10px;
+        }
+
+        .title {
+            font-weight: 700;
+            font-size: 26px;
+        }
+
+        /* 📱 Responsive fix */
+        @media (max-width: 768px) {
+            .left-image {
+                min-height: 250px;
+            }
+            .form-section {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="login-wrapper row g-0">
+
+        <!-- LEFT IMAGE -->
+        <div class="col-md-6 d-none d-md-block">
+            <div class="left-image"></div>
+        </div>
+
+        <!-- RIGHT FORM -->
+        <div class="col-md-6 col-12 d-flex align-items-center">
+            <div class="form-section w-100">
+
+                <div class="text-center mb-4">
+                    <img src="{% static 'img/logoMSECT.png' %}" width="100" alt="icon">
+                    <h3 class="title mt-3">Selamat Datang di Lab MSECT!</h3>
+                    <p class="text-muted mb-1">Silahkan login untuk melanjutkan</p>
+                </div>
+
+                {% if error %}
+                <p class="text-danger text-center">{{ error }}</p>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <input type="text" name="username" class="form-control" placeholder="NRP" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-login mt-2">Login</button>
+
+                    <div class="text-center mt-3">
+                        New here?
+                        <a href="{% url 'register' %}" class="fw-bold">Register now</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

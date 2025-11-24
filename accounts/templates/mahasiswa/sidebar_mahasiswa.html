@@ -1,0 +1,72 @@
+{% load static %}
+
+<div class="d-flex flex-column p-3 h-100">
+
+    <a href="{% url 'profil_mahasiswa' %}" 
+   class="d-flex justify-content-center align-items-center mb-3 text-decoration-none text-white w-100">
+    <i class="fa-solid fa-user-graduate me-2 fs-4"></i>
+    <span class="fs-5 fw-bold sidebar-text">Mahasiswa</span>
+    </a>
+
+
+    <hr class="text-white">
+
+    <ul class="nav nav-pills flex-column mb-auto">
+
+        <li class="nav-item mb-2">
+            <a href="{% url 'profil_mahasiswa' %}" 
+               class="nav-link text-white {% if request.resolver_match.url_name == 'profil_mahasiswa' %}active bg-primary{% endif %}">
+                <i class="fa-solid fa-user me-2"></i>
+                <span class="sidebar-text">Profil Mahasiswa</span>
+            </a>
+        </li>
+
+        <li class="nav-item mb-2">
+            <a href="{% url 'data_wajah' %}" 
+               class="nav-link text-white {% if request.resolver_match.url_name == 'data_wajah' %}active bg-primary{% endif %}">
+                <i class="fa-solid fa-camera me-2"></i>
+                <span class="sidebar-text">Data Wajah</span>
+            </a>
+        </li>
+
+        <li class="nav-item mb-2">
+            <a href="{% url 'riwayat_presensi' %}" 
+               class="nav-link text-white {% if request.resolver_match.url_name == 'riwayat_presensi' %}active bg-primary{% endif %}">
+                <i class="fa-solid fa-clock-rotate-left me-2"></i>
+                <span class="sidebar-text">Riwayat Presensi</span>
+            </a>
+        </li>
+
+        <li class="nav-item mb-2">
+            <a href="{% url 'progress_sks' %}"
+               class="nav-link text-white {% if request.resolver_match.url_name == 'progress_sks' %}active bg-primary{% endif %}">
+                <i class="fa-solid fa-chart-line me-2"></i>
+                <span class="sidebar-text">Progress SKS</span>
+            </a>
+        </li>
+
+    </ul>
+
+    <hr class="text-white">
+
+    <a href="{% url 'logout' %}" class="text-white text-decoration-none">
+        <i class="fa-solid fa-right-from-bracket me-2"></i>
+        <span class="sidebar-text">Logout</span>
+    </a>
+
+</div>
+
+<style>
+    /* Saat sidebar collapse, sembunyikan teks */
+    #sidebar.sidebar-collapsed .sidebar-text {
+        display: none;
+    }
+
+    #sidebar.sidebar-collapsed a {
+        text-align: center;
+    }
+
+    #sidebar.sidebar-collapsed i {
+        margin-right: 0 !important;
+    }
+</style>

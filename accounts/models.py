@@ -3,8 +3,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator
 from django.conf import settings
+from datetime import date
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # --- 1. Master Data (Jenjang, Tahun Ajaran) ---
 
@@ -91,7 +92,8 @@ class Akun(AbstractUser):
         verbose_name = "Akun"
         verbose_name_plural = "Akun"
 
-
+def current_year():
+    return date.today().year
 # --- 3. Profile Mahasiswa & Dosen ---
 
 class Mahasiswa(models.Model):
@@ -104,7 +106,15 @@ class Mahasiswa(models.Model):
     semester = models.CharField(max_length=20) 
     kelas = models.CharField(max_length=50)
     sks_total_tempuh = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    
+    angkatan = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[
+            MinValueValidator(1900),
+            MaxValueValidator(current_year)
+        ]
+    )
+    jurusan = models.CharField(max_length=255)
     kegiatan_pa = models.ManyToManyField('Kegiatan_PA', blank=True) 
     
     def __str__(self):

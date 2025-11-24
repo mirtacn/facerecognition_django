@@ -12,6 +12,8 @@ from .models import (
     Tahun_Ajaran, Dosen, Mahasiswa_Dosen, Pengajuan_Pendaftaran,
     Status_Pemenuhan_SKS
 )
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 def register_wizard(request, step=1):
     # Gunakan Custom User Model
@@ -152,7 +154,8 @@ def login_view(request):
             login(request, user)
             # Redirect berdasarkan role
             if getattr(user, 'role', '') == 'mahasiswa': 
-                return redirect('mahasiswa_dashboard')
+                # !!! PERBAIKAN UTAMA DI SINI !!!
+                return redirect('profil_mahasiswa')
             elif getattr(user, 'role', '') == 'admin' or user.is_superuser: 
                 return redirect('admin_dashboard')
             else: 
@@ -161,15 +164,80 @@ def login_view(request):
             messages.error(request, 'Login Gagal.')
     return render(request, 'login.html')
 
+def edit_profil(request, nim):
+    return render(request, 'mahasiswa/edit_profil.html')
+
+def data_wajah(request):
+    return render(request, 'mahasiswa/data_wajah.html')
+
+def riwayat_presensi(request):
+    return render(request, 'mahasiswa/riwayat_presensi.html')
+
+def progress_sks(request):
+    return render(request, 'mahasiswa/progress_sks.html')
+
+def logout_view(request):
+    logout(request) 
+    return redirect('login') 
+
 # --- DASHBOARD VIEWS ---
 @login_required
 def admin_dashboard(request):
-    return render(request, 'admin_dashboard.html')
+    # Asumsi admin_dashboard.html ada di templates/admin/
+    return render(request, 'admin/admin_dashboard.html')
 
 @login_required
-def mahasiswa_dashboard(request):
-    return render(request, 'mahasiswa_dashboard.html')
-
-@login_required
-def dosen_dashboard(request):
-    return render(request, 'dosen_dashboard.html')
+def profil_mahasiswa(request):
+    user = request.user
+    try:
+        mahasiswa = Mahasiswa.objects.select_related('jenjang_pendidikan', 'user').get(user=user)
+        # Inisial dari nama lengkap
+        nama_lengkap = user.nama_lengkap or user.get_full_name() or user.username
+        inisial = ''.join([x[0] for x in nama_lengkap.split() if x]).upper()[:3]
+        nrp = user.nrp or user.username
+        email = user.email
+        angkatan = mahasiswa.angkatan
+        jurusan = mahasiswa.jurusan if mahasiswa.jurusan else ''
+        jenjang = mahasiswa.jenjang_pendidikan.nama_jenjang if mahasiswa.jenjang_pendidikan else ''
+        semester = mahasiswa.semester
+        kelas = mahasiswa.kelas
+        # Status PA: ambil dari pengajuan atau status lain jika ada
+        try:
+            pengajuan = Pengajuan_Pendaftaran.objects.get(mahasiswa=mahasiswa)
+            status_pa = pengajuan.get_status_pengajuan_display()
+        except Pengajuan_Pendaftaran.DoesNotExist:
+            status_pa = 'Belum mengajukan'
+        # Mata Kuliah PA: ambil dari kegiatan_pa pertama
+        mk_pa = mahasiswa.kegiatan_pa.first().nama_kegiatan if mahasiswa.kegiatan_pa.exists() else '-'
+        # Dosen pembimbing urut
+        dosen_pembimbing_qs = Mahasiswa_Dosen.objects.filter(mahasiswa=mahasiswa).select_related('dosen').order_by('tipe_pembimbing')
+        dosen_pembimbing = []
+        for idx, md in enumerate(dosen_pembimbing_qs, 1):
+            dosen_pembimbing.append({
+                'nomor': idx,
+                'nama': md.dosen.nama_dosen,
+                'gelar': md.dosen.prodi,
+            })
+        context = {
+            'mahasiswa': {
+                'inisial': inisial,
+                'nama': nama_lengkap,
+                'nrp': nrp,
+                'email': email,
+                'angkatan': angkatan,
+                'jurusan': jurusan,
+                'jenjang': jenjang,
+                'semester': semester,
+                'status_pa': status_pa,
+                'mk_pa': mk_pa,
+                'user': user,
+                'kelas': kelas,
+            },
+            'dosen_pembimbing': dosen_pembimbing,
+        }
+    except Mahasiswa.DoesNotExist:
+        context = {
+            'mahasiswa': None,
+            'dosen_pembimbing': [],
+        }
+    return render(request, 'mahasiswa/profil_mahasiswa.html', context)
