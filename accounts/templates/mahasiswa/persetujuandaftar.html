@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persetujuan Akun - Sedang Diproses</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background-color: #eef2f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .status-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            border: 1px solid #e9ecef;
+        }
+
+        .header-title {
+            color: #1a1a1a;
+            font-size: 1.4rem;
+            font-weight: 700; /* Bold */
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .status-label {
+            display: inline-flex;
+            align-items: center;
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            margin: 0 auto 25px auto; /* Center dengan margin auto */
+            border: 1px solid #ffeaa7;
+            justify-content: center; /* Rata tengah konten */
+            text-align: center; /* Rata tengah teks */
+            display: block; /* Agar margin auto bekerja */
+            width: fit-content; /* Sesuai dengan konten */
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 25px 0;
+        }
+
+        .success-section {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .success-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #d4edda;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+        }
+
+        .success-icon i {
+            font-size: 24px;
+            color: #28a745;
+        }
+
+        .section-title {
+            color: #28a745;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .verification-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 3px solid #007bff;
+        }
+
+        .verification-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .clock-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+
+        .clock-icon i {
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        .verification-title {
+            color: #007bff;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .verification-desc {
+            color: #495057;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .warning-icon {
+            color: #ffc107;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .warning-text {
+            color: #856404;
+            font-weight: 500;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .info-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .info-list li {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-list li:before {
+            content: "•";
+            color: #6c757d;
+            position: absolute;
+            left: 0;
+        }
+
+        .email-notice {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 3px solid #6c757d;
+        }
+
+        .email-label {
+            color: #495057;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .email-address {
+            color: #1a1a1a;
+            font-weight: 500;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .login-button {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 25px;
+            font-weight: 500;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 25px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .login-button:hover {
+            background-color: #1a252f;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+
+        .contact-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 576px) {
+            .status-container {
+                padding: 20px;
+            }
+            
+            .header-title {
+                font-size: 1.2rem;
+            }
+            
+            .verification-box {
+                padding: 15px;
+            }
+            
+            .status-label {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="status-container">
+        <!-- Header - Bold -->
+        <h1 class="header-title" style="font-weight: 700;">Persetujuan Akun Anda Sedang Diproses</h1>
+        
+        <!-- Status Label - Rata Tengah -->
+        <div class="status-label">
+            <i class="bi bi-clock me-2"></i>
+            Status: Menunggu Verifikasi Admin
+        </div>
+
+        <!-- Divider -->
+        <div class="divider"></div>
+
+        <!-- Success Section -->
+        <div class="success-section">
+            <div class="success-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <h2 class="section-title">Akun Anda telah terdaftar!</h2>
+        </div>
+
+        <!-- Verification Box -->
+        <div class="verification-box">
+            <div class="verification-header">
+                <div class="clock-icon">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <h3 class="verification-title">Proses Verifikasi</h3>
+            </div>
+            
+            <p class="verification-desc">
+                Kami sedang memverifikasi data akademik dan validasi foto wajah Anda.
+            </p>
+            
+            <div class="warning-box">
+                <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+                <p class="warning-text">Mohon tunggu maksimal 3×24 jam</p>
+            </div>
+            
+            <ul class="info-list">
+                <li>Anda akan menerima notifikasi email setelah disetujui.</li>
+                <li>Silakan cek email Anda secara berkala untuk update status akun.</li>
+            </ul>
+        </div>
+
+        <!-- Email Notice -->
+        <!-- <div class="email-notice">
+            <div class="email-label">Notifikasi akan dikirim ke:</div>
+            <div class="email-address">
+                {% if request.user.is_authenticated and request.user.email %}
+                    {{ request.user.email }}
+                {% elif user_email %}
+                    {{ user_email }}
+                {% else %}
+                    mirachashirotin@gmail.com
+                {% endif %}
+            </div>
+        </div> -->
+
+        <!-- Login Button -->
+        <a href="{% url 'login' %}" class="login-button">
+            <i class="bi bi-box-arrow-in-right me-2"></i>
+            Kembali ke Halaman Login
+        </a>
+
+        <!-- Footer Note -->
+        <div class="footer-note">
+            Jika tidak menerima email dalam 24 jam, hubungi 
+            <a href="mailto:admin@universitas.edu" class="contact-link">admin@universitas.edu</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Update email if available from session
+            const sessionEmail = sessionStorage.getItem('user_email') || 
+                                localStorage.getItem('user_email');
+            
+            if (sessionEmail) {
+                const emailElement = document.querySelector('.email-address');
+                if (emailElement && emailElement.textContent.includes('mirachashirotin@gmail.com')) {
+                    emailElement.textContent = sessionEmail;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

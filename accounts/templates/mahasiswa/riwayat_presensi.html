@@ -1,0 +1,334 @@
+<!-- riwayat_presensi.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Riwayat Presensi{% endblock %}
+{% block page_title %}Riwayat Presensi{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Card utama -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Riwayat Presensi
+                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-info text-dark">
+                            <i class="bi bi-book me-1"></i>
+                            Total SKS: {{ total_sks }} SKS
+                        </span>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-filter me-1"></i> Filter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('ganjil')">Semester Ganjil</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('genap')">Semester Genap</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="showAll()">Tampilkan Semua</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Info SKS -->
+                    <div class="alert alert-primary mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                <strong>Kegiatan SKS Semester Ini</strong> - Total SKS: {{ total_sks }} SKS
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabel Riwayat Presensi -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered" id="presensiTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 8%; font-size: 13px;">Tanggal</th>
+                                    <th style="width: 10%; font-size: 13px;">NRP</th>
+                                    <th style="width: 15%; font-size: 13px;">Nama</th>
+                                    <th style="width: 8%; font-size: 13px;">Kelas</th>
+                                    <th style="width: 8%; font-size: 13px;">Tingkatan</th>
+                                    <th style="width: 8%; font-size: 13px;">Check-in</th>
+                                    <th style="width: 8%; font-size: 13px;">Check-out</th>
+                                    <th style="width: 8%; font-size: 13px;">Durasi</th>
+                                    <th style="width: 8%; font-size: 13px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if presensi_list %}
+                                    {% for presensi in presensi_list %}
+                                    <tr class="{% if presensi.status == 'Hadir' %}table-success{% elif presensi.status == 'Terlambat' %}table-warning{% elif presensi.status == 'Alpha' %}table-danger{% endif %}">
+                                        <td style="font-size: 13px;">{{ presensi.tanggal|date:"d/m/Y" }}</td>
+                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.nrp }}</td>
+                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.nama }}</td>
+                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.kelas }}</td>
+                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.jenjang }}</td>
+                                        <td style="font-size: 13px;">
+                                            {% if presensi.check_in %}
+                                                <span class="badge bg-success bg-opacity-10 text-success">{{ presensi.check_in|time:"H:i" }}</span>
+                                            {% else %}
+                                                <span class="badge bg-danger bg-opacity-10 text-danger">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="font-size: 13px;">
+                                            {% if presensi.check_out %}
+                                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ presensi.check_out|time:"H:i" }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="font-size: 13px;">
+                                            {% if presensi.durasi %}
+                                                <span class="badge bg-info bg-opacity-10 text-dark">{{ presensi.durasi }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="font-size: 13px;">
+                                            {% if presensi.status == 'Hadir' %}
+                                                <span class="badge bg-success">Hadir</span>
+                                            {% elif presensi.status == 'Terlambat' %}
+                                                <span class="badge bg-warning text-dark">Terlambat</span>
+                                            {% elif presensi.status == 'Izin' %}
+                                                <span class="badge bg-info">Izin</span>
+                                            {% elif presensi.status == 'Sakit' %}
+                                                <span class="badge bg-primary">Sakit</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Alpha</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="9" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="bi bi-calendar-x display-6 mb-3"></i>
+                                                <p>Belum ada data presensi</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Informasi Semester -->
+                    <div class="alert alert-secondary mt-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-calendar-date me-2"></i>
+                                <strong>Semester:</strong> {{ semester_nama }}
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportToExcel()">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistik Presensi
+                    <div class="row mt-4">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card border-primary bg-primary bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-1 text-primary">{{ statistik.hadir }}</h3>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">Hadir</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card border-warning bg-warning bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-1 text-warning">{{ statistik.terlambat }}</h3>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">Terlambat</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card border-info bg-info bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-1 text-info">{{ statistik.izin }}</h3>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">Izin</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card border-danger bg-danger bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-1 text-danger">{{ statistik.alpha }}</h3>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">Alpha</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    .badge {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+    
+    .card-title {
+        color: #2d3748;
+    }
+    
+    .table-responsive {
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+    
+    /* Style untuk status badge */
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .bg-warning {
+        background-color: #ffc107 !important;
+    }
+    
+    .bg-info {
+        background-color: #17a2b8 !important;
+    }
+    
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fungsi untuk filter berdasarkan semester
+    function filterBySemester(semester) {
+        // Simulasi filter - implementasi sesuai kebutuhan
+        const rows = document.querySelectorAll('#presensiTable tbody tr');
+        let count = 0;
+        
+        rows.forEach(row => {
+            // Logika filter berdasarkan semester
+            // Contoh: jika semester ganjil, tampilkan data tanggal ganjil
+            const tanggalCell = row.querySelector('td:nth-child(1)');
+            if (tanggalCell) {
+                const hari = parseInt(tanggalCell.textContent.split('/')[0]);
+                if ((semester === 'ganjil' && hari % 2 === 1) || 
+                    (semester === 'genap' && hari % 2 === 0)) {
+                    row.style.display = '';
+                    count++;
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+        
+        showNotification(`Menampilkan ${count} data presensi semester ${semester}`, 'info');
+    }
+    
+    // Fungsi untuk menampilkan semua data
+    function showAll() {
+        const rows = document.querySelectorAll('#presensiTable tbody tr');
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+        showNotification('Menampilkan semua data presensi', 'info');
+    }
+    
+    // Fungsi untuk export ke Excel
+    function exportToExcel() {
+        // Simulasi export Excel
+        showNotification('Mempersiapkan file Excel...', 'info');
+        
+        // Simulasi delay download
+        setTimeout(() => {
+            const link = document.createElement('a');
+            link.href = 'data:application/vnd.ms-excel;base64,' + btoa('Simulated Excel Data');
+            link.download = `riwayat_presensi_${new Date().toISOString().slice(0,10)}.xls`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('File Excel berhasil diunduh', 'success');
+        }, 1500);
+    }
+    
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification(message, type) {
+        // Hapus notifikasi lama
+        const oldAlerts = document.querySelectorAll('.alert.position-fixed');
+        oldAlerts.forEach(alert => alert.remove());
+        
+        // Buat notifikasi baru
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = `
+            z-index: 1060;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            max-width: 400px;
+        `;
+        
+        const icon = type === 'success' ? 'bi-check-circle-fill' : 
+                     type === 'info' ? 'bi-info-circle-fill' : 
+                     type === 'warning' ? 'bi-exclamation-triangle-fill' : 
+                     'bi-exclamation-circle-fill';
+        
+        alert.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${icon} me-2 fs-5"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Auto hide setelah 3 detik
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }
+    
+    // Inisialisasi DataTable (jika menggunakan library DataTables)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Jika menggunakan DataTables, uncomment kode di bawah
+        /*
+        $('#presensiTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
+            },
+            "order": [[0, "desc"]],
+            "pageLength": 10
+        });
+        */
+    });
+</script>
+{% endblock %}

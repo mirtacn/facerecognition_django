@@ -1,0 +1,635 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Column - Statistics -->
+        <div class="col-lg-8">
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <!-- Card 1: Presensi Hari Ini -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">Presensi Hari Ini</h6>
+                                    <h2 class="card-title mb-0" style="color: #f59e0b;">11</h2>
+                                    <small class="text-muted">Dari 45 mahasiswa</small>
+                                </div>
+                                <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                                    <i class="bi bi-calendar-check fs-4 text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Rata-rata Kehadiran -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">Rata-rata Kehadiran</h6>
+                                    <h2 class="card-title mb-2" style="color: #8b5cf6;">74%</h2>
+                                    <div class="d-flex align-items-center mt-2">
+                                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                            <div class="progress-bar" style="width: 74%; background-color: #8b5cf6;"></div>
+                                        </div>
+                                        <small class="text-muted">Minggu ini</small>
+                                    </div>
+                                </div>
+                                <div class="p-3 rounded-circle" style="background-color: rgba(139, 92, 246, 0.1);">
+                                    <i class="bi bi-bar-chart-line fs-4" style="color: #8b5cf6;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Semester -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">Semester</h6>
+                                    <h5 class="card-title mb-3">Ganjil 2025/2026</h5>
+                                    <div class="progress mb-2" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" style="width: 75%"></div>
+                                    </div>
+                                    <small class="text-muted">Sisa 8 minggu</small>
+                                </div>
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                    <i class="bi bi-calendar-week fs-4 text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Attendance Chart (tetap sama) -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Presensi Mingguan per Program :</h5>
+                    
+                    <!-- Chart Container -->
+                    <div class="chart-container mb-4">
+                        <div class="d-flex justify-content-between align-items-end mb-3" style="height: 200px;">
+                            <!-- Senin -->
+                            <div class="day-column text-center" style="flex: 1;">
+                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
+                                    <div class="bar-group d-flex align-end h-100">
+                                        <!-- D3 -->
+                                        <div class="bar bg-primary mx-1" style="height: 60%; width: 15px;" 
+                                             data-bs-toggle="tooltip" title="D3: 12 hadir"></div>
+                                        <!-- D4 -->
+                                        <div class="bar bg-info mx-1" style="height: 80%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D4: 16 hadir"></div>
+                                        <!-- LJ -->
+                                        <div class="bar bg-success mx-1" style="height: 40%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="LJ: 8 hadir"></div>
+                                        <!-- S2 -->
+                                        <div class="bar bg-warning mx-1" style="height: 70%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="S2: 14 hadir"></div>
+                                    </div>
+                                </div>
+                                <div class="day-label fw-bold">Senin</div>
+                                <small class="text-muted">Total: 50</small>
+                            </div>
+
+                            <!-- Selasa -->
+                            <div class="day-column text-center" style="flex: 1;">
+                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
+                                    <div class="bar-group d-flex align-end h-100">
+                                        <div class="bar bg-primary mx-1" style="height: 70%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D3: 14 hadir"></div>
+                                        <div class="bar bg-info mx-1" style="height: 85%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D4: 17 hadir"></div>
+                                        <div class="bar bg-success mx-1" style="height: 45%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="LJ: 9 hadir"></div>
+                                        <div class="bar bg-warning mx-1" style="height: 65%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="S2: 13 hadir"></div>
+                                    </div>
+                                </div>
+                                <div class="day-label fw-bold">Selasa</div>
+                                <small class="text-muted">Total: 53</small>
+                            </div>
+
+                            <!-- Rabu -->
+                            <div class="day-column text-center" style="flex: 1;">
+                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
+                                    <div class="bar-group d-flex align-end h-100">
+                                        <div class="bar bg-primary mx-1" style="height: 65%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D3: 13 hadir"></div>
+                                        <div class="bar bg-info mx-1" style="height: 90%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D4: 18 hadir"></div>
+                                        <div class="bar bg-success mx-1" style="height: 50%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="LJ: 10 hadir"></div>
+                                        <div class="bar bg-warning mx-1" style="height: 60%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="S2: 12 hadir"></div>
+                                    </div>
+                                </div>
+                                <div class="day-label fw-bold">Rabu</div>
+                                <small class="text-muted">Total: 53</small>
+                            </div>
+
+                            <!-- Kamis -->
+                            <div class="day-column text-center" style="flex: 1;">
+                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
+                                    <div class="bar-group d-flex align-end h-100">
+                                        <div class="bar bg-primary mx-1" style="height: 75%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D3: 15 hadir"></div>
+                                        <div class="bar bg-info mx-1" style="height: 75%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D4: 15 hadir"></div>
+                                        <div class="bar bg-success mx-1" style="height: 50%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="LJ: 10 hadir"></div>
+                                        <div class="bar bg-warning mx-1" style="height: 60%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="S2: 12 hadir"></div>
+                                    </div>
+                                </div>
+                                <div class="day-label fw-bold">Kamis</div>
+                                <small class="text-muted">Total: 52</small>
+                            </div>
+
+                            <!-- Jumat -->
+                            <div class="day-column text-center" style="flex: 1;">
+                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
+                                    <div class="bar-group d-flex align-end h-100">
+                                        <div class="bar bg-primary mx-1" style="height: 55%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D3: 11 hadir"></div>
+                                        <div class="bar bg-info mx-1" style="height: 70%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="D4: 14 hadir"></div>
+                                        <div class="bar bg-success mx-1" style="height: 35%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="LJ: 7 hadir"></div>
+                                        <div class="bar bg-warning mx-1" style="height: 50%; width: 15px;"
+                                             data-bs-toggle="tooltip" title="S2: 10 hadir"></div>
+                                    </div>
+                                </div>
+                                <div class="day-label fw-bold">Jumat</div>
+                                <small class="text-muted">Total: 42</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="d-flex justify-content-center">
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                            <div class="d-flex align-items-center">
+                                <div class="color-box bg-primary me-2" style="width: 15px; height: 15px;"></div>
+                                <span>D3</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="color-box bg-info me-2" style="width: 15px; height: 15px;"></div>
+                                <span>D4</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="color-box bg-success me-2" style="width: 15px; height: 15px;"></div>
+                                <span>LJ</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="color-box bg-warning me-2" style="width: 15px; height: 15px;"></div>
+                                <span>S2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Table -->
+                    <div class="mt-4">
+                        <h6>Detail Presensi Minggu Ini :</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Jenjang</th>
+                                        <th>Jumlah Hadir</th>
+                                        <th>Total Mahasiswa</th>
+                                        <th>Persentase</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge bg-primary">D3</span></td>
+                                        <td>15</td>
+                                        <td>20</td>
+                                        <td>75%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-info">D4</span></td>
+                                        <td>15</td>
+                                        <td>20</td>
+                                        <td>75%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-success">LJ</span></td>
+                                        <td>10</td>
+                                        <td>15</td>
+                                        <td>67%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-warning">S2</span></td>
+                                        <td>12</td>
+                                        <td>15</td>
+                                        <td>80%</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fw-bold">
+                                        <td>Total</td>
+                                        <td>52</td>
+                                        <td>70</td>
+                                        <td>74%</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Recent Activity & Quick Actions -->
+        <div class="col-lg-4">
+            <!-- Recent Activity -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Aktivitas Terbaru</h5>
+                    <p class="text-muted small mb-4">Updates real-time kegiatan mahasiswa</p>
+                    
+                    <div class="activity-list">
+                        <div class="activity-item mb-3">
+                            <div class="d-flex">
+                                <div class="avatar-sm me-3 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="text-primary fw-bold">AR</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Ahmad Rizki</h6>
+                                    <small class="text-muted">NIM: 75087000001</small>
+                                    <p class="mb-0 small">Projek Akhir D4 - Check-in</p>
+                                </div>
+                                <div class="ms-auto text-end">
+                                    <small class="text-muted">08:30</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item mb-3">
+                            <div class="d-flex">
+                                <div class="avatar-sm me-3 bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="text-success fw-bold">SM</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Siti Mulyani</h6>
+                                    <small class="text-muted">NIM: 75087000002</small>
+                                    <p class="mb-0 small">Proyek Tridi 52 - Check-out</p>
+                                </div>
+                                <div class="ms-auto text-end">
+                                    <small class="text-muted">09:15</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item mb-3">
+                            <div class="d-flex">
+                                <div class="avatar-sm me-3 bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="text-info fw-bold">RS</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Rizki Saputra</h6>
+                                    <small class="text-muted">NIM: 75087000003</small>
+                                    <p class="mb-0 small">Projek Akhir 2 D4 - Upload file</p>
+                                </div>
+                                <div class="ms-auto text-end">
+                                    <small class="text-muted">08:45</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item mb-3">
+                            <div class="d-flex">
+                                <div class="avatar-sm me-3 bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="text-warning fw-bold">RD</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Rina Devi</h6>
+                                    <small class="text-muted">NIM: 75087000004</small>
+                                    <p class="mb-0 small">Proyek Akhir 03 - Check-in</p>
+                                </div>
+                                <div class="ms-auto text-end">
+                                    <small class="text-muted">08:00</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="d-flex">
+                                <div class="avatar-sm me-3 bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="text-danger fw-bold">MI</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Muhammad Iqbal</h6>
+                                    <small class="text-muted">NIM: 75087000005</small>
+                                    <p class="mb-0 small">Proyek Tridi 123 - Submit laporan</p>
+                                </div>
+                                <div class="ms-auto text-end">
+                                    <small class="text-muted">07:45</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Aksi Cepat :</h5>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{% url 'approval_pendaftaran' %}" class="btn btn-outline-primary w-100 d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-check-circle fs-4 mb-2"></i>
+                                <span>Approval Pendaftaran</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'data_mahasiswa' %}" class="btn btn-outline-success w-100 d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-people fs-4 mb-2"></i>
+                                <span>Data Mahasiswa</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'monitor_durasi' %}" class="btn btn-outline-info w-100 d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-clock fs-4 mb-2"></i>
+                                <span>Monitor Durasi</span>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'kamera_presensi_mhs' %}" class="btn btn-outline-warning w-100 d-flex flex-column align-items-center py-3">
+                                <i class="bi bi-camera-video fs-4 mb-2"></i>
+                                <span>Kamera Presensi</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Day Details -->
+<div class="modal fade" id="dayDetailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Presensi - <span id="modalDay"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Jenjang</th>
+                                <th>Jumlah Hadir</th>
+                                <th>Total Mahasiswa</th>
+                                <th>Persentase</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalDetailBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+    
+    .activity-item {
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+    }
+    
+    /* Chart Styles */
+    .day-column {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 10px 5px;
+        border-radius: 8px;
+    }
+    
+    .day-column:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    .day-column.active {
+        background-color: rgba(37, 99, 235, 0.1);
+    }
+    
+    .bars-container {
+        position: relative;
+    }
+    
+    .bar {
+        border-radius: 4px 4px 0 0;
+        transition: all 0.3s ease;
+    }
+    
+    .bar:hover {
+        opacity: 0.8;
+        transform: scaleY(1.05);
+    }
+    
+    .day-label {
+        font-size: 14px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .chart-container .d-flex {
+            flex-direction: column;
+            height: auto !important;
+        }
+        
+        .day-column {
+            margin-bottom: 20px;
+            flex: none !important;
+            width: 100%;
+        }
+        
+        .bars-container {
+            height: 100px !important;
+        }
+        
+        .activity-item .d-flex {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .activity-item .ms-auto {
+            margin-left: 0 !important;
+            margin-top: 8px;
+            width: 100%;
+            text-align: left !important;
+        }
+        
+        .btn-outline-primary, .btn-outline-success, .btn-outline-info, .btn-outline-warning {
+            padding: 12px 8px !important;
+        }
+        
+        .btn-outline-primary span, 
+        .btn-outline-success span, 
+        .btn-outline-info span, 
+        .btn-outline-warning span {
+            font-size: 12px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Data for each day (this would normally come from backend)
+        const dayData = {
+            'Senin': [
+                { jenjang: 'D3', hadir: 12, total: 20, percentage: 60 },
+                { jenjang: 'D4', hadir: 16, total: 20, percentage: 80 },
+                { jenjang: 'LJ', hadir: 8, total: 15, percentage: 53 },
+                { jenjang: 'S2', hadir: 14, total: 15, percentage: 93 }
+            ],
+            'Selasa': [
+                { jenjang: 'D3', hadir: 14, total: 20, percentage: 70 },
+                { jenjang: 'D4', hadir: 17, total: 20, percentage: 85 },
+                { jenjang: 'LJ', hadir: 9, total: 15, percentage: 60 },
+                { jenjang: 'S2', hadir: 13, total: 15, percentage: 87 }
+            ],
+            'Rabu': [
+                { jenjang: 'D3', hadir: 13, total: 20, percentage: 65 },
+                { jenjang: 'D4', hadir: 18, total: 20, percentage: 90 },
+                { jenjang: 'LJ', hadir: 10, total: 15, percentage: 67 },
+                { jenjang: 'S2', hadir: 12, total: 15, percentage: 80 }
+            ],
+            'Kamis': [
+                { jenjang: 'D3', hadir: 15, total: 20, percentage: 75 },
+                { jenjang: 'D4', hadir: 15, total: 20, percentage: 75 },
+                { jenjang: 'LJ', hadir: 10, total: 15, percentage: 67 },
+                { jenjang: 'S2', hadir: 12, total: 15, percentage: 80 }
+            ],
+            'Jumat': [
+                { jenjang: 'D3', hadir: 11, total: 20, percentage: 55 },
+                { jenjang: 'D4', hadir: 14, total: 20, percentage: 70 },
+                { jenjang: 'LJ', hadir: 7, total: 15, percentage: 47 },
+                { jenjang: 'S2', hadir: 10, total: 15, percentage: 67 }
+            ]
+        };
+        
+        // Get modal elements
+        const modal = new bootstrap.Modal(document.getElementById('dayDetailModal'));
+        const modalDayTitle = document.getElementById('modalDay');
+        const modalDetailBody = document.getElementById('modalDetailBody');
+        
+        // Add click event to day columns
+        document.querySelectorAll('.day-column').forEach(column => {
+            const day = column.querySelector('.day-label').textContent;
+            
+            column.addEventListener('click', function() {
+                // Remove active class from all columns
+                document.querySelectorAll('.day-column').forEach(col => {
+                    col.classList.remove('active');
+                });
+                
+                // Add active class to clicked column
+                this.classList.add('active');
+                
+                // Update modal title
+                modalDayTitle.textContent = day;
+                
+                // Populate modal with data
+                const data = dayData[day];
+                let html = '';
+                let totalHadir = 0;
+                let totalMahasiswa = 0;
+                
+                data.forEach(item => {
+                    html += `
+                        <tr>
+                            <td><span class="badge bg-${getBadgeColor(item.jenjang)}">${item.jenjang}</span></td>
+                            <td>${item.hadir}</td>
+                            <td>${item.total}</td>
+                            <td>${item.percentage}%</td>
+                        </tr>
+                    `;
+                    totalHadir += item.hadir;
+                    totalMahasiswa += item.total;
+                });
+                
+                // Add total row
+                const totalPercentage = totalMahasiswa > 0 ? Math.round((totalHadir / totalMahasiswa) * 100) : 0;
+                html += `
+                    <tr class="fw-bold">
+                        <td>Total</td>
+                        <td>${totalHadir}</td>
+                        <td>${totalMahasiswa}</td>
+                        <td>${totalPercentage}%</td>
+                    </tr>
+                `;
+                
+                modalDetailBody.innerHTML = html;
+                
+                // Show modal
+                modal.show();
+            });
+        });
+        
+        // Helper function to get badge color based on jenjang
+        function getBadgeColor(jenjang) {
+            switch(jenjang) {
+                case 'D3': return 'primary';
+                case 'D4': return 'info';
+                case 'LJ': return 'success';
+                case 'S2': return 'warning';
+                default: return 'secondary';
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -4,94 +4,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi (Step 3) - Upload Foto</title>
-
-    <!-- Bootstrap -->
+    <title>Pendaftaran - Upload Foto</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
-        body {
-            background: #f8f9fa;
+        body { background-color: #eef2f6; font-family: 'Segoe UI', sans-serif; }
+        .step-circle { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; margin-right: 8px; }
+        .step-active { background-color: #2563eb; color: white; }
+        .step-done { background-color: #2563eb; color: white; }
+        .step-inactive { background-color: #e0e0e0; color: #999; }
+        .btn-dark-custom { background-color: #0f172a; border-color: #0f172a; }
+        
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        .wizard-container {
-            max-width: 600px;
-            margin: 40px auto;
+        
+        .upload-area:hover {
+            border-color: #2563eb;
+            background-color: #f0f7ff;
         }
-        .photo-preview {
-            width: 160px;
-            height: 160px;
+        
+        .photo-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .photo-item {
+            position: relative;
+            width: 120px;
+            height: 120px;
             border-radius: 8px;
-            object-fit: cover;
+            overflow: hidden;
             border: 2px solid #dee2e6;
         }
-        .step-title {
-            font-weight: 600;
-            font-size: 1.2rem;
+        
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .photo-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .guideline-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .guideline-list li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 8px;
+        }
+        
+        .guideline-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #6b7280;
+        }
+        
+        .photo-counter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        /* Catatan Penting dengan styling khusus */
+        .important-note {
+            background-color: #FEFCEA;
+            border: 1px solid #FCF193;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .important-note .note-content {
+            color: #804E13;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .important-note .note-title {
+            color: #804E13;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        /* Login link plain text tanpa background */
+        .login-link-text {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        
+        .login-link-text p {
+            color: #000000; /* Hitam */
+        }
+        
+        .login-link-text a {
+            color: #4b5cf2; /* Ungu */
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .login-link-text a:hover {
+            color: #4b5cf2;
+            text-decoration: underline;
         }
     </style>
 </head>
-
 <body>
 
-<div class="wizard-container bg-white p-4 rounded shadow-sm">
-    
-    <!-- Progress Bar -->
-    <div class="mb-3">
-        <label class="form-label mb-1">Progress Registrasi</label>
-        <div class="progress" style="height: 12px;">
-            <div class="progress-bar bg-success"
-                 role="progressbar"
-                 style="width: 100%;">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            
+            <div class="text-center mb-4">
+                <h3 class="fw-bold">Pendaftaran Akun Mahasiswa</h3>
+                <p class="text-muted">Sistem Manajemen Presensi & SKS - Face Recognition</p>
             </div>
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <small class="fw-bold text-dark">Langkah 3 dari 3</small>
+                    <small class="fw-bold text-dark">100%</small>
+                </div>
+                <div class="progress mb-4" style="height: 8px;">
+                    <div class="progress-bar bg-dark" role="progressbar" style="width: 100%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between px-2">
+                    <div class="d-flex align-items-center">
+                        <div class="step-circle step-done"><i class="bi bi-check"></i></div> 
+                        <span class="fw-bold text-primary">Akun</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="step-circle step-done"><i class="bi bi-check"></i></div>
+                        <span class="fw-bold text-primary">Akademik</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="step-circle step-active">3</div>
+                        <span class="fw-bold text-primary">Foto</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <h5 class="fw-bold mb-1">Upload Foto Wajah :</h5>
+                    <p class="text-muted small mb-4">Upload foto wajah untuk sistem presensi face recognition</p>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                             <p class="fw-bold mb-0">Kesalahan Validasi:</p>
+                             {% for error in form.non_field_errors %}
+                                 <p class="mb-0 small">{{ error }}</p>
+                             {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" id="upload-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-2">Panduan Kualitas Foto:</h6>
+                            <ul class="guideline-list text-muted small">
+                                <li>Latarbelakang polos (disarankan putih/abu-abu)</li>
+                                <li>Pencahayaan cukup, wajah terlihat jelas</li>
+                                <li>Tidak menggunakan kacamata hitam, topi, atau masker</li>
+                                <li>Upload minimal 10 foto dengan sudut dan ekspresi berbeda</li>
+                                <li>Format: JPG, PNG, maksimal 5MB per file</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="upload-area" id="drop-area">
+                                <div class="mb-3">
+                                    <i class="bi bi-cloud-arrow-up-fill text-primary" style="font-size: 48px;"></i>
+                                </div>
+                                <h5 class="mb-2">Klik untuk upload foto atau drag & drop</h5>
+                                <p class="text-muted mb-0">JPG, PNG (Max. 5MB per file)</p>
+                                
+                                <input type="file" 
+                                       id="id_file_path" 
+                                       name="file_path" 
+                                       accept=".jpg,.jpeg,.png" 
+                                       class="d-none">
+                            </div>
+                            
+                            <div id="photo-preview-container" class="photo-list"></div>
+                            
+                            <div class="alert alert-primary bg-light border-0 d-flex align-items-center mt-3">
+                                <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                                <span class="text-primary fw-bold small">
+                                    <span id="photo-count">0</span> dari 10 foto terupload
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Catatan Penting dengan styling baru -->
+                        <div class="important-note mb-4">
+                            <div class="d-flex align-items-start">
+                                <span class="photo-counter">!</span>
+                                <div class="ms-2">
+                                    <p class="note-title mb-1">Catatan Penting:</p>
+                                    <p class="note-content mb-0">
+                                        Sistem akan membutuhkan minimal 10 foto dengan sudut dan ekspresi berbeda 
+                                        untuk akurasi terbaik dalam pengenalan wajah.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if form.file_path.errors %}
+                            <div class="alert alert-danger small mb-4">
+                                {{ form.file_path.errors }}
+                            </div>
+                        {% endif %}
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'register_step' step=2 %}" class="btn btn-outline-secondary px-4"> &larr; Kembali</a>
+                            
+                            <button type="submit" class="btn btn-dark-custom fw-bold text-white px-4" id="submit-btn" disabled>
+                                Kirim Data & Ajukan Persetujuan
+                            </button>
+                        </div>
+                        
+                        <!-- Login link plain text -->
+                    </form>
+
+                </div>
+            </div>
+
         </div>
     </div>
-
-    <p class="step-title mb-4">Step 3: Upload Foto Wajah</p>
-
-    <!-- Form -->
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <div class="mb-3">
-            <label class="form-label">Upload Foto Wajah</label>
-            <div class="text-center mb-3">
-                <img id="previewImg" class="photo-preview"
-                     src="{% static 'img/default-avatar.png' %}" alt="Preview Foto">
-            </div>
-
-            {{ form.file_path.errors }}
-            {{ form.file_path }}
-
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    const fileInput = document.querySelector("#id_file_path");
-                    const preview = document.querySelector("#previewImg");
-
-                    if (fileInput) {
-                        fileInput.addEventListener("change", function() {
-                            const file = this.files[0];
-                            if (file) {
-                                preview.src = URL.createObjectURL(file);
-                            }
-                        });
-                    }
-                });
-            </script>
-        </div>
-
-        <!-- Buttons -->
-        <div class="d-flex justify-content-between mt-4">
-            <a href="{% url 'register_step' 2 %}" class="btn btn-outline-secondary">
-                &larr; Kembali
-            </a>
-
-            <button type="submit" class="btn btn-success px-4">
-                Selesaikan Registrasi
-            </button>
-        </div>
-
-    </form>
+    <div class="login-link-text">
+                            <p class="small">
+                                Sudah punya akun? <a href="{% url 'login' %}">Login di sini</a>
+                            </p>
+                        </div>
 </div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('id_file_path');
+    const photoPreview = document.getElementById('photo-preview-container');
+    const photoCount = document.getElementById('photo-count');
+    const submitBtn = document.getElementById('submit-btn');
+    const MIN_PHOTOS = 10;
+    
+    let files = [];
+    
+    // Click to upload
+    dropArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+    
+    // Drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+            dropArea.classList.add('border-primary');
+            dropArea.style.backgroundColor = '#f0f7ff';
+        });
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, () => {
+            dropArea.classList.remove('border-primary');
+            dropArea.style.backgroundColor = '';
+        });
+    });
+    
+    dropArea.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const droppedFiles = dt.files;
+        handleFiles(droppedFiles);
+    });
+    
+    // Process files
+    function handleFiles(selectedFiles) {
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
+            
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert(`File "${file.name}" bukan gambar. Hanya JPG, PNG yang diperbolehkan.`);
+                continue;
+            }
+            
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`File "${file.name}" terlalu besar. Maksimal 5MB.`);
+                continue;
+            }
+            
+            files.push(file);
+        }
+        
+        updatePreview();
+        updateCount();
+        updateSubmitButton();
+    }
+    
+    // Update preview
+    function updatePreview() {
+        photoPreview.innerHTML = '';
+        
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item';
+                
+                photoItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <div class="photo-remove" onclick="removePhoto(${index})">
+                        <i class="bi bi-x"></i>
+                    </div>
+                `;
+                
+                photoPreview.appendChild(photoItem);
+            };
+            
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Update count
+    function updateCount() {
+        photoCount.textContent = files.length;
+        
+        // Update message based on count
+        const message = files.length >= MIN_PHOTOS 
+            ? `<span class="text-success">${files.length} dari 10 foto terupload ✓</span>`
+            : `${files.length} dari 10 foto terupload`;
+        
+        photoCount.innerHTML = message;
+    }
+    
+    // Update submit button state
+    function updateSubmitButton() {
+        if (files.length >= MIN_PHOTOS) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn-secondary');
+            submitBtn.classList.add('btn-dark-custom');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.classList.remove('btn-dark-custom');
+            submitBtn.classList.add('btn-secondary');
+        }
+    }
+    
+    // Remove photo
+    window.removePhoto = function(index) {
+        files.splice(index, 1);
+        updatePreview();
+        updateCount();
+        updateSubmitButton();
+    };
+    
+    // Form submission
+    const form = document.getElementById('upload-form');
+    form.addEventListener('submit', function(e) {
+        if (files.length < MIN_PHOTOS) {
+            e.preventDefault();
+            alert(`Minimal ${MIN_PHOTOS} foto diperlukan. Anda baru mengupload ${files.length} foto.`);
+            return;
+        }
+        
+        // Update file input with all files
+        const dataTransfer = new DataTransfer();
+        files.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+    });
+    
+    // Initialize
+    updateSubmitButton();
+});
+</script>
 
 </body>
 </html>

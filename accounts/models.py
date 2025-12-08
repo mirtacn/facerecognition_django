@@ -24,24 +24,34 @@ class Jenjang_Pendidikan(models.Model):
         verbose_name_plural = "Jenjang Pendidikan"
 
 
+
 class Tahun_Ajaran(models.Model):
     """
     Entitas Tahun_Ajaran
     """
-    # id_tahun_ajaran (PK) otomatis oleh Django
-    nama_semester = models.CharField(max_length=50) # Contoh: Ganjil 2024/2025
+    nama_tahun_ajaran = models.CharField(max_length=100, null=True, blank=True, default=None)  # contoh: 2024/2025
     tanggal_mulai = models.DateField()
     tanggal_selesai = models.DateField()
-    
     STATUS_CHOICES = [('aktif', 'Aktif'), ('nonaktif', 'Nonaktif')]
     status_aktif = models.CharField(max_length=10, choices=STATUS_CHOICES, default='nonaktif')
-
+    
     def __str__(self):
-        return self.nama_semester
+        return self.nama_tahun_ajaran
     
     class Meta:
         verbose_name = "Tahun Ajaran"
         verbose_name_plural = "Tahun Ajaran"
+
+# Semester: Semester 1 - Semester 8
+class Semester(models.Model):
+    nama_semester = models.CharField(max_length=20, unique=True)  # contoh: Semester 1, Semester 2, ..., Semester 8
+
+    def __str__(self):
+        return self.nama_semester
+
+    class Meta:
+        verbose_name = "Semester"
+        verbose_name_plural = "Semester"
 
 
 # --- 2. Akun dan Pengguna (Mahasiswa, Dosen) ---
@@ -96,14 +106,11 @@ def current_year():
     return date.today().year
 # --- 3. Profile Mahasiswa & Dosen ---
 
+
 class Mahasiswa(models.Model):
-    # Relasi ke Custom User Model (Akun)
-    # PENTING: Gunakan settings.AUTH_USER_MODEL, bukan 'User'
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='mahasiswa_profile')
-    
-    # Data Spesifik Akademik (Data akun pindah ke model Akun di atas)
     jenjang_pendidikan = models.ForeignKey(Jenjang_Pendidikan, on_delete=models.SET_NULL, null=True)
-    semester = models.CharField(max_length=20) 
+    semester = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True)  # relasi ke Semester
     kelas = models.CharField(max_length=50)
     sks_total_tempuh = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     angkatan = models.PositiveSmallIntegerField(
@@ -114,12 +121,10 @@ class Mahasiswa(models.Model):
             MaxValueValidator(current_year)
         ]
     )
-    jurusan = models.CharField(max_length=255)
-    kegiatan_pa = models.ManyToManyField('Kegiatan_PA', blank=True) 
-    
+    jurusan = models.CharField(max_length=255, null=True, blank=True)
+    kegiatan_pa = models.ManyToManyField('Kegiatan_PA', blank=True)
     def __str__(self):
         return self.user.nama_lengkap if self.user.nama_lengkap else self.user.username
-    
     class Meta:
         verbose_name = "Mahasiswa"
         verbose_name_plural = "Mahasiswa"
@@ -168,22 +173,14 @@ class Kegiatan_PA(models.Model):
     """
     Entitas Kegiatan_PA (Kegiatan yang menghasilkan SKS)
     """
-    # id_kegiatan_pa (PK) otomatis oleh Django
-    
-    # id_jenjang_pendidikan (FK)
     jenjang_pendidikan = models.ForeignKey(Jenjang_Pendidikan, on_delete=models.CASCADE)
-    
-    # id_tahun_ajaran (FK)
-    tahun_ajaran = models.ForeignKey(Tahun_Ajaran, on_delete=models.CASCADE)
-    
+    tahun_ajaran = models.ForeignKey(Tahun_Ajaran, on_delete=models.CASCADE)  # relasi ke Tahun_Ajaran
     nama_kegiatan = models.CharField(max_length=200)
     jumlah_sks = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     total_jam_minggu = models.IntegerField(default=0, validators=[MinValueValidator(0)])
     target_jam = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    
     def __str__(self):
         return self.nama_kegiatan
-    
     class Meta:
         verbose_name = "Kegiatan PA"
         verbose_name_plural = "Kegiatan PA"
@@ -269,6 +266,7 @@ class Durasi(models.Model):
         verbose_name_plural = "Durasi Presensi"
 
 
+# models.py - perbaiki model FotoWajah
 class FotoWajah(models.Model):
     """
     Entitas Foto_Wajah
@@ -281,13 +279,20 @@ class FotoWajah(models.Model):
     # file_path (Diwakili oleh ImageField)
     file_path = models.ImageField(upload_to='dataset_wajah/')
     
+    # Tambahkan field keterangan
+    keterangan = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Tambahkan timestamp
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     def __str__(self):
-        return f"Foto Wajah {self.id} milik {self.mahasiswa.nama}"
+        return f"Foto Wajah {self.id} milik {self.mahasiswa.user.nama_lengkap}"
     
     class Meta:
         verbose_name = "Foto Wajah"
         verbose_name_plural = "Foto Wajah"
-
+        ordering = ['-created_at']  # Urutkan berdasarkan waktu upload
+        
 # --- 5. Pengajuan Pendaftaran ---
 
 class Pengajuan_Pendaftaran(models.Model):

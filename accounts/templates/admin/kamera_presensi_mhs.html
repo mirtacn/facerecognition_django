@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Kamera Presensi Mahasiswa{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Bagian 3: Daftar Mahasiswa -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Daftar Mahasiswa</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" 
+                                id="refresh-btn">
+                            <i class="fas fa-redo"></i>
+                            <span>Refresh</span>
+                        </button>
+                    </div>
+                </div>
+            <span class="badge bg-secondary">Total: 2 mahasiswa</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Gambar</th>
+                                <th>Nama</th>
+                                <th>Tanggal</th>
+                                <th>Jam Check-in</th>
+                                <th>Jam Check-out</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-table-body">
+                            <tr>
+                                <td>1</td>
+                                <td>
+                                    <div class="placeholder-img" style="width: 40px; height: 40px; background-color: #ddd; border-radius: 50%;"></div>
+                                </td>
+                                <td>Budi Santoso</td>
+                                <td>24/9/2025</td>
+                                <td>07.50</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>
+                                    <div class="placeholder-img" style="width: 40px; height: 40px; background-color: #ddd; border-radius: 50%;"></div>
+                                </td>
+                                <td>Ahmad Rizki Pratama</td>
+                                <td>24/9/2025</td>
+                                <td>07.00</td>
+                                <td>16.20</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding-top: 56px;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    }
+    
+    main {
+        padding-top: 70px;
+    }
+    
+    .placeholder-img {
+        display: inline-block;
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    #refresh-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+
+<script>
+    // Fungsi untuk refresh data
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        // Tampilkan indikator loading
+        const btn = this;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
+        btn.disabled = true;
+        
+        // Simulasi request AJAX untuk mendapatkan data terbaru
+        setTimeout(function() {
+            // Di sini Anda bisa mengganti dengan AJAX request sebenarnya
+            // Contoh: fetch('/api/students')
+            //   .then(response => response.json())
+            //   .then(data => updateTable(data));
+            
+            // Untuk demo, kita hanya akan menambah data baru (simulasi)
+            const tableBody = document.getElementById('student-table-body');
+            const totalStudents = document.querySelector('.badge.bg-secondary');
+            
+            // Contoh data baru (dalam aplikasi nyata, data ini berasal dari server)
+            const newData = [
+                {
+                    no: 3,
+                    name: "Siti Nurhaliza",
+                    date: "25/9/2025",
+                    checkIn: "08.00",
+                    checkOut: "-"
+                },
+                {
+                    no: 4,
+                    name: "Rizky Pratama",
+                    date: "25/9/2025",
+                    checkIn: "08.30",
+                    checkOut: "15.45"
+                }
+            ];
+            
+            // Tambah data baru ke tabel
+            newData.forEach(student => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${student.no}</td>
+                    <td>
+                        <div class="placeholder-img" style="width: 40px; height: 40px; background-color: #ddd; border-radius: 50%;"></div>
+                    </td>
+                    <td>${student.name}</td>
+                    <td>${student.date}</td>
+                    <td>${student.checkIn}</td>
+                    <td>${student.checkOut}</td>
+                `;
+                tableBody.appendChild(newRow);
+            });
+            
+            // Update total mahasiswa
+            const currentCount = parseInt(totalStudents.textContent.match(/\d+/)[0]);
+            totalStudents.textContent = `Total: ${currentCount + newData.length} mahasiswa`;
+            
+            // Reset tombol
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            
+            // Tampilkan notifikasi sukses (opsional)
+            showNotification('Data berhasil direfresh!', 'success');
+            
+        }, 1000); // Simulasi delay 1 detik
+    });
+    
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification(message, type = 'info') {
+        // Hapus notifikasi sebelumnya jika ada
+        const existingNotification = document.querySelector('.refresh-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        // Buat elemen notifikasi
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} refresh-notification`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 250px;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+        `;
+        notification.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>${message}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        // Tambahkan ke body
+        document.body.appendChild(notification);
+        
+        // Auto remove setelah 3 detik
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+        
+        // Tambahkan event listener untuk close button
+        notification.querySelector('.btn-close').addEventListener('click', function() {
+            notification.remove();
+        });
+    }
+    
+    // Tambahkan style untuk animasi
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

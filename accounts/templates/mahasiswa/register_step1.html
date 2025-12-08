@@ -66,37 +66,37 @@
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Lengkap</label>
+                            <label class="form-label fw-bold">Nama Lengkap :</label>
                             {{ form.nama_lengkap }}
                             {% if form.nama_lengkap.errors %}<div class="text-danger small">{{ form.nama_lengkap.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nomor Induk Mahasiswa (NIM)</label>
+                            <label class="form-label fw-bold">Nomor Induk Mahasiswa (NRP) :</label>
                             {{ form.nim }}
                             {% if form.nim.errors %}<div class="text-danger small">{{ form.nim.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Kelas</label>
+                            <label class="form-label fw-bold">Kelas :</label>
                             {{ form.kelas }}
                             {% if form.kelas.errors %}<div class="text-danger small">{{ form.kelas.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Email</label>
+                            <label class="form-label fw-bold">Email :</label>
                             {{ form.email }}
                             {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Password</label>
+                            <label class="form-label fw-bold">Password :</label>
                             {{ form.password }}
                             {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Konfirmasi Password</label>
+                            <label class="form-label fw-bold">Konfirmasi Password :</label>
                             {{ form.confirm_password }}
                             {% if form.confirm_password.errors %}<div class="text-danger small">{{ form.confirm_password.errors }}</div>{% endif %}
                         </div>

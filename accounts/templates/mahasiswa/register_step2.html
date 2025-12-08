@@ -99,38 +99,39 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Jenjang Pendidikan <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Jenjang Pendidikan :<span class="text-danger">*</span></label>
                                 {{ form.jenjang }}
                                 {% if form.jenjang.errors %}<div class="text-danger small">{{ form.jenjang.errors }}</div>{% endif %}
                             </div>
 
                             <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold">Semester Saat Ini <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Semester Saat Ini :<span class="text-danger">*</span></label>
                                 {{ form.semester }}
                                 {% if form.semester.errors %}<div class="text-danger small">{{ form.semester.errors }}</div>{% endif %}
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Kegiatan PA yang Diikuti <span class="text-danger">*</span></label>
-                            <p class="text-muted small">Ceklis semua kegiatan yang sedang Anda ikuti untuk pemenuhan SKS PA</p>
+                     <div class="mb-3">
+    <label class="form-label fw-bold">Kegiatan PA yang Diikuti :<span class="text-danger">*</span></label>
+    <p class="text-muted small">Ceklis semua kegiatan yang sedang Anda ikuti untuk pemenuhan SKS PA</p>
 
-                            <div class="border rounded p-3 bg-light">
-                                {% for checkbox in form.kegiatan_pa_diambil %}
-                                <div class="mk-option" onclick="toggleCheckbox(this)">
-                                    {{ checkbox.tag }} 
-                                    
-                                    <div>
-                                        <div class="fw-bold text-dark">
-                                            {{ checkbox.choice_label }}
-                                        </div>
-                                        <small class="text-muted">Detail SKS dan Jam Target</small> 
-                                    </div>
-                                </div>
-                                {% endfor %}
-                                {% if form.kegiatan_pa_diambil.errors %}<div class="text-danger small mt-2">{{ form.kegiatan_pa_diambil.errors }}</div>{% endif %}
-                            </div>
-                        </div>
+    <div id="kegiatan-pa-container" class="border rounded p-3 bg-light">
+        {% for checkbox in form.kegiatan_pa_diambil %}
+        <div class="mk-option" onclick="toggleCheckbox(this)">
+            {{ checkbox.tag }}
+
+            <div>
+                <div class="fw-bold text-dark">{{ checkbox.choice_label }}</div>
+                <small class="text-muted">Detail SKS dan Jam Target</small>
+            </div>
+        </div>
+        {% endfor %}
+        {% if form.kegiatan_pa_diambil.errors %}
+            <div class="text-danger small mt-2">{{ form.kegiatan_pa_diambil.errors }}</div>
+        {% endif %}
+    </div>
+</div>
+
 
                         <div class="alert alert-primary bg-light border-0 d-flex align-items-center mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle-fill text-primary me-2" viewBox="0 0 16 16">
@@ -140,7 +141,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold d-block">Dosen Pembimbing <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold d-block">Dosen Pembimbing :<span class="text-danger">*</span></label>
                             <p class="text-muted small mb-3">Pilih dua dosen pembimbing (wajib) dan satu dosen tambahan (opsional).</p>
                             
                             <div class="row">
@@ -182,13 +183,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Fungsi agar klik di kotak (div) juga mencentang checkbox
-    function toggleCheckbox(element) {
+    // Fungsi untuk menangani klik pada kotak pilihan
+    function handleMkOptionClick(event) {
+        const element = event.currentTarget;
         const checkbox = element.querySelector('input[type="checkbox"]');
         
-        if (event.target !== checkbox) {
-            checkbox.checked = !checkbox.checked;
-        }
+        // Cegah double trigger
+        if (event.target === checkbox) return;
+        
+        // Toggle status checkbox
+        checkbox.checked = !checkbox.checked;
+        
+        // Trigger event change untuk checkbox
+        const changeEvent = new Event('change', { bubbles: true });
+        checkbox.dispatchEvent(changeEvent);
         
         updateStyle(element, checkbox);
         updateCount();
@@ -205,33 +213,116 @@
 
     // Hitung total yang dipilih
     function updateCount() {
-        // Menggunakan nama field yang baru: kegiatan_pa_diambil
         const checkboxes = document.querySelectorAll('input[name="kegiatan_pa_diambil"]:checked');
         document.getElementById('total-count').innerText = checkboxes.length;
     }
 
-    // Inisialisasi saat halaman dimuat
-    document.addEventListener("DOMContentLoaded", function() {
+    // Inisialisasi semua elemen mk-option
+    function initializeMkOptions() {
         const options = document.querySelectorAll('.mk-option');
         options.forEach(opt => {
             const checkbox = opt.querySelector('input[type="checkbox"]');
             
-            // Tambahkan class form-check-input bootstrap ke checkbox django
-            checkbox.classList.add('form-check-input'); 
-            
-            // Set style awal
-            if(checkbox.checked) {
-                opt.classList.add('selected');
+            if (checkbox) {
+                // Tambahkan class form-check-input bootstrap ke checkbox
+                checkbox.classList.add('form-check-input');
+                
+                // Set style awal berdasarkan status checked
+                if (checkbox.checked) {
+                    opt.classList.add('selected');
+                }
+                
+                // Event listener untuk perubahan checkbox
+                checkbox.addEventListener('change', function() {
+                    updateStyle(opt, this);
+                    updateCount();
+                });
+                
+                // Event listener untuk klik pada div
+                opt.addEventListener('click', handleMkOptionClick);
             }
-            
-            // Event listener change asli (jaga-jaga)
-            checkbox.addEventListener('change', function() {
-                if(this.checked) opt.classList.add('selected');
-                else opt.classList.remove('selected');
-                updateCount();
-            });
         });
         updateCount();
+    }
+
+    // Fungsi untuk mendapatkan nilai checkbox yang terpilih sebagai array
+    function getSelectedKegiatanIds() {
+        const selected = [];
+        document.querySelectorAll('input[name="kegiatan_pa_diambil"]:checked').forEach(cb => {
+            selected.push(parseInt(cb.value));
+        });
+        return selected;
+    }
+
+    // Render checkbox berdasarkan jenjang
+    function renderKegiatanByJenjang(jenjangId, previouslySelected = []) {
+        const kegiatanContainer = document.getElementById("kegiatan-pa-container");
+        
+        if (!jenjangId) {
+            kegiatanContainer.innerHTML = `<p class="text-muted">Pilih jenjang terlebih dahulu</p>`;
+            return;
+        }
+
+        fetch(`/api/kegiatan-pa-by-jenjang/${jenjangId}/`)
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.json();
+            })
+            .then(data => {
+                if (!data.kegiatan || data.kegiatan.length === 0) {
+                    kegiatanContainer.innerHTML = `<p class="text-muted">Tidak ada kegiatan untuk jenjang ini</p>`;
+                    return;
+                }
+
+                let html = "";
+                data.kegiatan.forEach(k => {
+                    const isChecked = previouslySelected.includes(k.id);
+                    html += `
+                    <label class="mk-option ${isChecked ? 'selected' : ''}">
+                        <input type="checkbox" name="kegiatan_pa_diambil" 
+                               value="${k.id}" ${isChecked ? 'checked' : ''}>
+                        <div>
+                            <div class="fw-bold text-dark">${k.nama_kegiatan}</div>
+                            <small class="text-muted">${k.jumlah_sks} SKS • Target ${k.target_jam} jam</small>
+                        </div>
+                    </label>`;
+                });
+
+                kegiatanContainer.innerHTML = html;
+                
+                // Inisialisasi ulang event handlers
+                initializeMkOptions();
+            })
+            .catch(error => {
+                console.error('Error fetching kegiatan:', error);
+                kegiatanContainer.innerHTML = `<p class="text-danger">Error memuat data kegiatan</p>`;
+            });
+    }
+
+    // Inisialisasi saat halaman dimuat
+    document.addEventListener("DOMContentLoaded", function() {
+        // Inisialisasi awal
+        initializeMkOptions();
+        
+        // Setup event listener untuk dropdown jenjang
+        const jenjangSelect = document.querySelector('select[name="jenjang"]');
+        
+        if (jenjangSelect) {
+            // Simpan pilihan sebelumnya sebelum mengubah
+            let previouslySelected = getSelectedKegiatanIds();
+            
+            jenjangSelect.addEventListener("change", function() {
+                // Simpan pilihan yang saat ini terpilih sebelum refresh
+                previouslySelected = getSelectedKegiatanIds();
+                
+                renderKegiatanByJenjang(this.value, previouslySelected);
+            });
+
+            // Trigger load jika sudah ada value sebelumnya
+            if (jenjangSelect.value) {
+                renderKegiatanByJenjang(jenjangSelect.value, previouslySelected);
+            }
+        }
     });
 </script>
 

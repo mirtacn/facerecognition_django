@@ -1,0 +1,398 @@
+<!-- progress_sks.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Progress SKS{% endblock %}
+{% block page_title %}Progress SKS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Card utama -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Progress SKS
+                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary">
+                            <i class="bi bi-book me-1"></i>
+                            SKS: 12 SKS
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Info SKS -->
+                    <div class="alert alert-primary mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                <strong>Progress SKS Semester Ini</strong> - Total SKS: 12 SKS
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar dan Statistik -->
+                    <div class="row mb-4">
+                        <!-- Progress Bar Utama -->
+                        <div class="col-12 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0">Progress Keseluruhan Semester</h6>
+                                        <span class="badge bg-success">68%</span>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 25px;">
+                                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                                             role="progressbar" 
+                                             style="width: 68%"
+                                             aria-valuenow="68" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            68%
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">Jam Terselesaikan: 234 jam</small>
+                                        <small class="text-muted">Jam Target: 344 jam</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistik Card -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-primary bg-primary bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h2 class="mb-1 text-primary">12</h2>
+                                    <p class="mb-0 text-muted" style="font-size: 14px;">
+                                        <i class="bi bi-tools me-1"></i> Total SKS
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-success bg-success bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h2 class="mb-1 text-success">234</h2>
+                                    <p class="mb-0 text-muted" style="font-size: 14px;">
+                                        <i class="bi bi-clock-history me-1"></i> Jam Terselesaikan
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-info bg-info bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h2 class="mb-1 text-info">110</h2>
+                                    <p class="mb-0 text-muted" style="font-size: 14px;">
+                                        <i class="bi bi-clock me-1"></i> Jam Tersisa
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detail Progress -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-bar-chart me-2"></i>
+                                        Detail Progress SKS
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Deskripsi</th>
+                                                    <th class="text-center">Jumlah</th>
+                                                    <th class="text-center">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-tools me-2"></i>
+                                                        <strong>Total SKS</strong>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-primary">12 SKS</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-info">Aktif</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-clock-history me-2"></i>
+                                                        <strong>Jam Terselesaikan</strong>
+                                                        <p class="mb-0 text-muted small">Dari 344 jam target</p>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-success">234 jam</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-success">68%</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-clock me-2"></i>
+                                                        <strong>Jam Tersisa</strong>
+                                                        <p class="mb-0 text-muted small">Untuk mencapai target</p>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-warning text-dark">110 jam</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-warning text-dark">Dalam Proses</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <i class="bi bi-target me-2"></i>
+                                                        <strong>Jam Target Total</strong>
+                                                        <p class="mb-0 text-muted small">Target semester ini</p>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-primary">344 jam</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-primary">Target</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ringkasan -->
+                    <div class="alert alert-success mt-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <strong>Status Progress:</strong> 
+                                <span class="text-success">Sangat Baik</span>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportProgressReport()">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Export Laporan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estimasi Penyelesaian -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-calendar-check me-2"></i>
+                                        Estimasi Penyelesaian
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="mb-1">
+                                                <strong>Rata-rata per Minggu:</strong> 
+                                                <span class="text-success">15.6 jam</span>
+                                            </p>
+                                            <p class="mb-0">
+                                                <strong>Estimasi Selesai:</strong> 
+                                                <span class="text-primary">25 Desember 2024</span>
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <p class="mb-1">
+                                                <strong>Sisa Waktu:</strong> 
+                                                <span class="text-warning">45 hari</span>
+                                            </p>
+                                            <p class="mb-0">
+                                                <strong>Rekomendasi/jam:</strong> 
+                                                <span class="text-info">2.44 jam/hari</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .progress {
+        border-radius: 10px;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 25px;
+    }
+    
+    .card-title {
+        color: #2d3748;
+    }
+    
+    .badge {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+    
+    .table-responsive {
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+    
+    /* Style untuk card statistik */
+    .card.border-primary .card-body h2 {
+        color: #0d6efd;
+    }
+    
+    .card.border-success .card-body h2 {
+        color: #198754;
+    }
+    
+    .card.border-info .card-body h2 {
+        color: #0dcaf0;
+    }
+    
+    .card.border-warning .card-body h2 {
+        color: #ffc107;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Data statis (hardcoded) untuk menghindari error
+    const progressPercentage = 68; // (234/344)*100 = 68%
+    const jamTerselesaikan = 234;
+    const jamSisa = 110; // 344 - 234
+    
+    console.log('Progress:', progressPercentage + '%');
+    console.log('Jam Terselesaikan:', jamTerselesaikan + ' jam');
+    console.log('Jam Sisa:', jamSisa + ' jam');
+    
+    // Fungsi untuk export laporan
+    function exportProgressReport() {
+        showNotification('Mempersiapkan laporan progress SKS...', 'info');
+        
+        // Simulasi delay download
+        setTimeout(() => {
+            // Buat konten laporan
+            const reportContent = `
+                LAPORAN PROGRESS SKS
+                ====================
+                Tanggal: ${new Date().toLocaleDateString('id-ID')}
+                
+                Total SKS: 12 SKS
+                Jam Target Total: 344 jam
+                Jam Terselesaikan: 234 jam (68%)
+                Jam Tersisa: 110 jam
+                
+                Status: Sangat Baik
+                
+                Estimasi Selesai: 25 Desember 2024
+                Rekomendasi: 2.44 jam per hari
+            `;
+            
+            // Simulasi download file
+            const link = document.createElement('a');
+            link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportContent);
+            link.download = `progress_sks_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Laporan progress berhasil diunduh', 'success');
+        }, 1500);
+    }
+    
+    // Fungsi untuk menampilkan notifikasi
+    function showNotification(message, type) {
+        // Hapus notifikasi lama
+        const oldAlerts = document.querySelectorAll('.alert.position-fixed');
+        oldAlerts.forEach(alert => alert.remove());
+        
+        // Buat notifikasi baru
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = `
+            z-index: 1060;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            max-width: 400px;
+        `;
+        
+        const icon = type === 'success' ? 'bi-check-circle-fill' : 
+                     type === 'info' ? 'bi-info-circle-fill' : 
+                     type === 'warning' ? 'bi-exclamation-triangle-fill' : 
+                     'bi-exclamation-circle-fill';
+        
+        alert.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${icon} me-2 fs-5"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Auto hide setelah 3 detik
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 3000);
+    }
+    
+    // Animasi progress bar saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animasikan progress bar
+        const progressBar = document.querySelector('.progress-bar');
+        let currentProgress = 0;
+        const interval = setInterval(() => {
+            if (currentProgress >= progressPercentage) {
+                clearInterval(interval);
+                return;
+            }
+            currentProgress += 1;
+            progressBar.style.width = currentProgress + '%';
+            progressBar.setAttribute('aria-valuenow', currentProgress);
+            progressBar.textContent = currentProgress + '%';
+        }, 20);
+        
+        console.log('Animasi progress bar dimulai...');
+    });
+</script>
+{% endblock %}
