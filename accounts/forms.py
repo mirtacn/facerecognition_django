@@ -1,16 +1,84 @@
 # forms.py
 
 from django import forms
+from django.core.validators import MinValueValidator, MaxValueValidator
+from datetime import datetime
 from .models import Jenjang_Pendidikan, Tahun_Ajaran, Dosen, Kegiatan_PA, Semester, FotoWajah
 
 # --- STEP 1: Akun & Identitas ---
 class Step1Form(forms.Form):
-    nama_lengkap = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama Lengkap'}))
-    nim = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'NIM / NRP'}))
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Ulangi Password'}))
-    kelas = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Kelas (Misal: 3 D4 IT A)'}))
+    nama_lengkap = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nama Lengkap'})
+    )
+    nim = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'NIM / NRP'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'})
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Ulangi Password'})
+    )
+    
+    # Field Jurusan dengan pilihan
+    JURUSAN_CHOICES = [
+        ('', 'Pilih Jurusan'),
+        ('Teknik Informatika', 'Teknik Informatika'),
+        ('Sains Data Terapan', 'Sains Data Terapan'),
+    ]
+    
+    jurusan = forms.ChoiceField(
+        choices=JURUSAN_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    KELAS_CHOICES = [
+        ('', 'Pilih Kelas'),
+        ('1 D4 IT A', '1 D4 IT A'),
+        ('1 D4 IT B', '1 D4 IT B'),
+        ('2 D4 IT A', '2 D4 IT A'),
+        ('2 D4 IT B', '2 D4 IT B'),
+        ('3 D4 IT A', '3 D4 IT A'),
+        ('3 D4 IT B', '3 D4 IT B'),
+        ('4 D4 IT A', '4 D4 IT A'),
+        ('4 D4 IT B', '4 D4 IT B'),
+        ('1 D3 IT A', '1 D3 IT A'),
+        ('1 D3 IT B', '1 D3 IT B'),
+        ('2 D3 IT A', '2 D3 IT A'),
+        ('2 D3 IT B', '2 D3 IT B'),
+        ('3 D3 IT A', '3 D3 IT A'),
+        ('3 D3 IT B', '3 D3 IT B'),
+        ('1 D4 SD A', '1 D4 SD A'),
+        ('1 D4 SD B', '1 D4 SD B'),
+        ('2 D4 SD A', '2 D4 SD A'),
+        ('2 D4 SD B', '2 D4 SD B'),
+        ('3 D4 SD A', '3 D4 SD A'),
+        ('3 D4 SD B', '3 D4 SD B'),
+        ('4 D4 SD A', '4 D4 SD A'),
+        ('4 D4 SD B', '4 D4 SD B'),
+    ]
+    
+    kelas = forms.ChoiceField(
+        choices=KELAS_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    # Field Angkatan - menambahkan pilihan tahun dinamis
+    def get_tahun_angkatan_choices():
+        current_year = datetime.now().year
+        # Buat pilihan dari 5 tahun sebelumnya hingga 1 tahun ke depan
+        years = []
+        for year in range(current_year - 5, current_year + 2):
+            years.append((str(year), str(year)))
+        return [('', 'Pilih Tahun Angkatan')] + years
+    
+    angkatan = forms.ChoiceField(
+        choices=get_tahun_angkatan_choices(),
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -18,8 +86,13 @@ class Step1Form(forms.Form):
         p2 = cleaned_data.get("confirm_password")
         if p1 and p2 and p1 != p2:
             self.add_error('confirm_password', "Password tidak cocok.")
+        
+        # Validasi tambahan: cek jika NIM sesuai dengan angkatan
+        nim = cleaned_data.get("nim")
+        angkatan = cleaned_data.get("angkatan")
+        
         return cleaned_data
-
+    
 # --- STEP 2: Akademik ---
 # (hapus duplikasi definisi field di bawah, cukup satu definisi saja di atas)
 class Step2Form(forms.Form):

@@ -11,6 +11,7 @@
         .step-active { background-color: #2563eb; color: white; }
         .step-inactive { background-color: #e0e0e0; color: #999; }
         .btn-dark-custom { background-color: #0f172a; border-color: #0f172a; }
+        .form-hint { font-size: 0.85rem; color: #6c757d; margin-top: 0.25rem; }
     </style>
 </head>
 <body>
@@ -62,7 +63,7 @@
                         </div>
                     {% endif %}
 
-                    <form method="post">
+                    <form method="post" id="registrationForm">
                         {% csrf_token %}
                         
                         <div class="mb-3">
@@ -74,13 +75,30 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nomor Induk Mahasiswa (NRP) :</label>
                             {{ form.nim }}
+                            <div class="form-hint">Contoh: 2345678901 (10-12 digit angka)</div>
                             {% if form.nim.errors %}<div class="text-danger small">{{ form.nim.errors }}</div>{% endif %}
                         </div>
 
+                        <!-- Field Jurusan -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Jurusan :</label>
+                            {{ form.jurusan }}
+                            {% if form.jurusan.errors %}<div class="text-danger small">{{ form.jurusan.errors }}</div>{% endif %}
+                        </div>
+
+                        <!-- Field Kelas (akan diupdate oleh JavaScript) -->
                         <div class="mb-3">
                             <label class="form-label fw-bold">Kelas :</label>
                             {{ form.kelas }}
                             {% if form.kelas.errors %}<div class="text-danger small">{{ form.kelas.errors }}</div>{% endif %}
+                        </div>
+
+                        <!-- Field Angkatan Baru -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tahun Angkatan :</label>
+                            {{ form.angkatan }}
+                            <div class="form-hint">Pilih tahun masuk kuliah Anda</div>
+                            {% if form.angkatan.errors %}<div class="text-danger small">{{ form.angkatan.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
@@ -92,6 +110,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Password :</label>
                             {{ form.password }}
+                            <div class="form-hint">Minimal 8 karakter, kombinasi huruf dan angka</div>
                             {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors }}</div>{% endif %}
                         </div>
 
@@ -116,5 +135,131 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Data kelas berdasarkan jurusan
+    const kelasOptions = {
+        'Teknik Informatika': [
+            ['', 'Pilih Kelas'],
+            ['1 D4 IT A', '1 D4 IT A'],
+            ['1 D4 IT B', '1 D4 IT B'],
+            ['2 D4 IT A', '2 D4 IT A'],
+            ['2 D4 IT B', '2 D4 IT B'],
+            ['3 D4 IT A', '3 D4 IT A'],
+            ['3 D4 IT B', '3 D4 IT B'],
+            ['4 D4 IT A', '4 D4 IT A'],
+            ['4 D4 IT B', '4 D4 IT B'],
+            ['1 D3 IT A', '1 D3 IT A'],
+            ['1 D3 IT B', '1 D3 IT B'],
+            ['2 D3 IT A', '2 D3 IT A'],
+            ['2 D3 IT B', '2 D3 IT B'],
+            ['3 D3 IT A', '3 D3 IT A'],
+            ['3 D3 IT B', '3 D3 IT B']
+        ],
+        'Sains Data Terapan': [
+            ['', 'Pilih Kelas'],
+            ['1 D4 SDT A', '1 D4 SDT A'],
+            ['1 D4 SDT B', '1 D4 SDT B'],
+            ['2 D4 SDT A', '2 D4 SDT A'],
+            ['2 D4 SDT B', '2 D4 SDT B'],
+            ['3 D4 SDT A', '3 D4 SDT A'],
+            ['3 D4 SDT B', '3 D4 SDT B'],
+            ['4 D4 SDT A', '4 D4 SDT A'],
+            ['4 D4 SDT B', '4 D4 SDT B']
+        ]
+    };
+
+    // Element references
+    const jurusanSelect = document.querySelector('#id_jurusan');
+    const kelasSelect = document.querySelector('#id_kelas');
+    const angkatanSelect = document.querySelector('#id_angkatan');
+    const nimInput = document.querySelector('#id_nim');
+
+    // Fungsi untuk mengupdate pilihan kelas
+    function updateKelasOptions() {
+        const selectedJurusan = jurusanSelect.value;
+        
+        // Reset dan enable/disable kelas select
+        kelasSelect.innerHTML = '';
+        if (selectedJurusan && kelasOptions[selectedJurusan]) {
+            kelasSelect.disabled = false;
+            
+            // Tambahkan opsi berdasarkan jurusan
+            kelasOptions[selectedJurusan].forEach(([value, text]) => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = text;
+                kelasSelect.appendChild(option);
+            });
+        } else {
+            kelasSelect.disabled = true;
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Pilih Jurusan Terlebih Dahulu';
+            kelasSelect.appendChild(option);
+        }
+    }
+
+    // Event listener untuk perubahan jurusan
+    jurusanSelect.addEventListener('change', updateKelasOptions);
+    
+    // Event listener untuk perubahan angkatan
+    angkatanSelect.addEventListener('change', suggestNIM);
+    
+    // Event listener untuk input NIM
+    nimInput.addEventListener('input', function() {
+        // Validasi input NIM hanya angka
+        this.value = this.value.replace(/\D/g, '');
+        
+        // Batasi panjang NIM
+        if (this.value.length > 12) {
+            this.value = this.value.substring(0, 12);
+        }
+    });
+
+    // Inisialisasi awal
+    document.addEventListener('DOMContentLoaded', function() {
+        updateKelasOptions();
+        
+        // Set placeholder untuk angkatan select
+        if (angkatanSelect.value === '') {
+            const currentYear = new Date().getFullYear();
+            angkatanSelect.querySelector('option[value=""]').textContent = `Pilih Tahun Angkatan (misal: ${currentYear})`;
+        }
+    });
+
+    // Validasi form sebelum submit
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        let hasError = false;
+        
+        // Reset error styles
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        
+        if (jurusanSelect.value === '') {
+            jurusanSelect.classList.add('is-invalid');
+            hasError = true;
+        }
+        
+        if (kelasSelect.value === '' || kelasSelect.disabled) {
+            kelasSelect.classList.add('is-invalid');
+            hasError = true;
+        }
+        
+        if (angkatanSelect.value === '') {
+            angkatanSelect.classList.add('is-invalid');
+            hasError = true;
+        }
+        
+        if (hasError) {
+            e.preventDefault();
+            alert('Silakan lengkapi semua data yang diperlukan sebelum melanjutkan.');
+            
+            // Scroll ke field pertama yang error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+</script>
 </body>
 </html>

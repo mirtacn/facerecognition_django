@@ -1,0 +1,271 @@
+{% load static %}
+<div class="container-fluid">
+    <form id="editMahasiswaForm" method="post" action="{% url 'edit_mahasiswa' mahasiswa.id %}">
+        {% csrf_token %}
+
+        <!-- Data Pribadi -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h6 class="text-primary mb-3 fw-bold">
+                    <i class="fas fa-user me-2"></i>Data Pribadi
+                </h6>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="nama_lengkap" class="form-label fw-semibold">Nama Lengkap *</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="nama_lengkap" 
+                       name="nama_lengkap" 
+                       value="{{ mahasiswa.user.nama_lengkap }}"
+                       required>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="nrp" class="form-label fw-semibold">NRP *</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="nrp" 
+                       name="nrp" 
+                       value="{{ mahasiswa.user.nrp }}"
+                       required>
+                <small class="text-muted">Nomor Registrasi Pokok (unik)</small>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label fw-semibold">Email *</label>
+                <input type="email" 
+                       class="form-control" 
+                       id="email" 
+                       name="email" 
+                       value="{{ mahasiswa.user.email }}"
+                       required>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="status_akun" class="form-label fw-semibold">Status Akun</label>
+                <select class="form-select" id="status_akun" name="status_akun">
+                    <option value="aktif" {% if mahasiswa.user.is_active %}selected{% endif %}>Aktif</option>
+                    <option value="nonaktif" {% if not mahasiswa.user.is_active %}selected{% endif %}>Nonaktif</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Data Akademik -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h6 class="text-primary mb-3 fw-bold">
+                    <i class="fas fa-graduation-cap me-2"></i>Data Akademik
+                </h6>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="jenjang_pendidikan" class="form-label fw-semibold">Jenjang Pendidikan</label>
+                <select class="form-select" id="jenjang_pendidikan" name="jenjang_pendidikan">
+                    <option value="">Pilih Jenjang</option>
+                    {% for jenjang in jenjang_pendidikan_list %}
+                    <option value="{{ jenjang.id }}" 
+                            {% if mahasiswa.jenjang_pendidikan.id == jenjang.id %}selected{% endif %}>
+                        {{ jenjang.nama_jenjang }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="semester" class="form-label fw-semibold">Semester</label>
+                <select class="form-select" id="semester" name="semester">
+                    <option value="">Pilih Semester</option>
+                    {% for sem in semester_list %}
+                    <option value="{{ sem.id }}" 
+                            {% if mahasiswa.semester.id == sem.id %}selected{% endif %}>
+                        {{ sem.nama_semester }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="kelas" class="form-label fw-semibold">Kelas</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="kelas" 
+                       name="kelas" 
+                       value="{{ mahasiswa.kelas|default:'' }}">
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="angkatan" class="form-label fw-semibold">Angkatan</label>
+                <input type="number" 
+                       class="form-control" 
+                       id="angkatan" 
+                       name="angkatan" 
+                       value="{{ mahasiswa.angkatan|default:'' }}"
+                       min="2000" max="2030">
+            </div>
+            
+            <div class="col-12 mb-3">
+                <label for="jurusan" class="form-label fw-semibold">Jurusan/Prodi</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="jurusan" 
+                       name="jurusan" 
+                       value="{{ mahasiswa.jurusan|default:'' }}">
+            </div>
+        </div>
+
+        <!-- Kegiatan SKS -->
+        {% if kegiatan_pa_list %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <h6 class="text-primary mb-3 fw-bold">
+                    <i class="fas fa-book me-2"></i>Kegiatan SKS
+                </h6>
+                <div class="form-group">
+                    <label class="form-label fw-semibold">Pilih Kegiatan</label>
+                    <div class="row">
+                        {% for kegiatan in kegiatan_pa_list %}
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       name="kegiatan_pa" 
+                                       value="{{ kegiatan.id }}"
+                                       id="kegiatan{{ kegiatan.id }}"
+                                       {% if kegiatan in mahasiswa.kegiatan_pa.all %}checked{% endif %}>
+                                <label class="form-check-label" for="kegiatan{{ kegiatan.id }}">
+                                    {{ kegiatan.nama_kegiatan }}
+                                    <span class="badge bg-primary ms-2">{{ kegiatan.jumlah_sks }} SKS</span>
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer Buttons -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Batal
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitEdit">
+                        <i class="fas fa-save me-2"></i>Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editMahasiswaForm');
+    const submitButton = document.getElementById('submitEdit');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const originalText = submitButton.innerHTML;
+        
+        // Show loading
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
+        submitButton.disabled = true;
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showAlert('Data mahasiswa berhasil diperbarui!', 'success');
+                
+                // Close modal after 1.5 seconds
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    modal.hide();
+                    
+                    // Reload page to see changes
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                }, 1500);
+            } else {
+                showAlert(data.message || 'Terjadi kesalahan', 'error');
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
+        })
+        .catch(error => {
+            showAlert('Terjadi kesalahan jaringan', 'error');
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        });
+    });
+    
+    function showAlert(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas ${icon} me-2"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        // Insert at the beginning of form
+        form.insertBefore(alertDiv, form.firstChild);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+});
+</script>
+
+<style>
+.avatar-lg {
+    width: 70px;
+    height: 70px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+hr {
+    opacity: 0.1;
+}
+</style>

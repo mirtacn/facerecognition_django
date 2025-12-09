@@ -185,6 +185,16 @@
                 <div class="card-body p-4 p-md-5">
                     
                     <h5 class="fw-bold mb-1">Upload Foto Wajah :</h5>
+                    {% if messages %}
+                        <div class="messages-container mb-4">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     <p class="text-muted small mb-4">Upload foto wajah untuk sistem presensi face recognition</p>
                     
                     {% if form.non_field_errors %}
@@ -418,8 +428,13 @@ document.addEventListener("DOMContentLoaded", function() {
     };
     
     // Form submission
+    // Di dalam script, tambahkan sebelum form submission:
+
     const form = document.getElementById('upload-form');
     form.addEventListener('submit', function(e) {
+        console.log('Form submit triggered');
+        console.log('Files count:', files.length);
+        
         if (files.length < MIN_PHOTOS) {
             e.preventDefault();
             alert(`Minimal ${MIN_PHOTOS} foto diperlukan. Anda baru mengupload ${files.length} foto.`);
@@ -430,6 +445,10 @@ document.addEventListener("DOMContentLoaded", function() {
         const dataTransfer = new DataTransfer();
         files.forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
+        
+        // Tampilkan loading
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
     });
     
     // Initialize

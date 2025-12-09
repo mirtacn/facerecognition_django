@@ -4,15 +4,7 @@
 {% block page_title %}Approval Pendaftaran Akun Mahasiswa{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1 fw-bold">Daftar Pengajuan Akun Mahasiswa</h4>
-            <p class="text-muted mb-0">Verifikasi dan approval pendaftaran akun mahasiswa baru</p>
-        </div>
-    </div>
-
+<div class="container-fluid">
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
         <div class="col-xl-3 col-md-6">
@@ -117,7 +109,7 @@
     <div class="card border-0 shadow-sm rounded-3">
         <div class="card-header bg-white border-0 rounded-top-3 py-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">Daftar Pendaftaran</h5>
+                <h5 class="mb-0 fw-bold">Daftar Pengajuan Akun Mahasiswa :</h5>
                 <span class="badge bg-primary rounded-pill fs-6">Total {{ total_pendaftaran }} pendaftaran ditemukan</span>
             </div>
         </div>
@@ -126,20 +118,36 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-3 ps-4" style="width: 15%; min-width: 120px;">Foto Wajah</th>
-                            <th class="py-3" style="width: 20%; min-width: 200px;">Nama Mahasiswa</th>
-                            <th class="py-3" style="width: 15%; min-width: 120px;">NRP</th>
-                            <th class="py-3" style="width: 15%; min-width: 100px;">Prodi</th>
-                            <th class="py-3" style="width: 15%; min-width: 150px;">Email</th>
-                            <th class="py-3" style="width: 10%; min-width: 100px;">Status</th>
-                            <th class="py-3 pe-4" style="width: 10%; min-width: 150px;">Aksi</th>
+                            <th class="py-3 ps-4" style="width: 10%;">Tanggal Pengajuan</th>
+                            <th class="py-3" style="width: 10%;">Tanggal ACC/Tolak</th>
+                            <th class="py-3" style="width: 10%;">Foto Wajah</th>
+                            <th class="py-3" style="width: 15%;">Nama Mahasiswa</th>
+                            <th class="py-3" style="width: 10%;">NRP</th>
+                            <th class="py-3" style="width: 10%;">Prodi</th>
+                            <th class="py-3" style="width: 15%;">Email</th>
+                            <th class="py-3" style="width: 10%;">Status</th>
+                            <th class="py-3 pe-4" style="width: 10%;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for pendaftaran in pendaftaran_list %}
                         <tr class="align-middle">
-                            <!-- Foto Wajah -->
+                            <!-- Tanggal Pengajuan -->
                             <td class="ps-4">
+                                <small class="text-muted">{{ pendaftaran.mahasiswa.user.date_joined|date:"d M Y H:i" }}</small>
+                            </td>
+
+                            <!-- Tanggal ACC/Tolak -->
+                            <td>
+                                {% if pendaftaran.status_pengajuan == 'disetujui' or pendaftaran.status_pengajuan == 'ditolak' %}
+                                <small class="text-muted">{{ pendaftaran.updated_at|date:"d M Y H:i" }}</small>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Foto Wajah -->
+                            <td>
                                 <div class="d-flex align-items-center">
                                     {% with pendaftaran.mahasiswa.foto_wajah.all|slice:":3" as foto_list %}
                                     {% for foto in foto_list %}
@@ -147,8 +155,8 @@
                                         <div class="avatar-sm rounded-circle overflow-hidden border">
                                             {% if foto.file_path %}
                                             <img src="{{ foto.file_path.url }}" alt="Foto" 
-                                                 class="img-fluid w-100 h-100 object-fit-cover"
-                                                 onerror="this.onerror=null;">
+                                                class="img-fluid w-100 h-100 object-fit-cover"
+                                                onerror="this.onerror=null;">
                                             {% else %}
                                             <div class="bg-secondary w-100 h-100 d-flex align-items-center justify-content-center">
                                                 <i class="fas fa-user text-white"></i>
@@ -175,8 +183,7 @@
                             <!-- Nama Mahasiswa -->
                             <td>
                                 <div class="d-flex flex-column">
-                                    <strong class="mb-1">{{ pendaftaran.mahasiswa.user.nama_lengkap }}</strong>
-                                    <small class="text-muted">{{ pendaftaran.mahasiswa.user.date_joined|date:"d M Y" }}</small>
+                                    <small class="text-break">{{ pendaftaran.mahasiswa.user.nama_lengkap }}</small>
                                 </div>
                             </td>
                             
@@ -188,11 +195,13 @@
                             <!-- Prodi -->
                             <td>
                                 {% if pendaftaran.mahasiswa.jurusan %}
-                                <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                <span class="badge bg-info text-white">
                                     {{ pendaftaran.mahasiswa.jurusan }}
                                 </span>
                                 {% else %}
-                                <span class="text-muted">-</span>
+                                <span class="badge bg-secondary text-white">
+                                    Belum diisi
+                                </span>
                                 {% endif %}
                             </td>
                             
@@ -204,15 +213,15 @@
                             <!-- Status -->
                             <td>
                                 {% if pendaftaran.status_pengajuan == 'pending' %}
-                                <span class="badge bg-warning bg-opacity-15 text-warning border border-warning">
+                                <span class="badge bg-warning text-dark fw-bold">
                                     <i class="fas fa-clock me-1"></i> Pending
                                 </span>
                                 {% elif pendaftaran.status_pengajuan == 'disetujui' %}
-                                <span class="badge bg-success bg-opacity-15 text-success border border-success">
+                                <span class="badge bg-success text-white fw-bold">
                                     <i class="fas fa-check me-1"></i> Disetujui
                                 </span>
                                 {% else %}
-                                <span class="badge bg-danger bg-opacity-15 text-danger border border-danger">
+                                <span class="badge bg-danger text-white fw-bold">
                                     <i class="fas fa-times me-1"></i> Ditolak
                                 </span>
                                 {% endif %}
@@ -231,27 +240,27 @@
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     
-                                    <!-- Tombol ACC -->
+                                    <!-- Tombol ACC (hanya untuk status pending) -->
+                                    {% if pendaftaran.status_pengajuan == 'pending' %}
                                     <button type="button" 
                                             class="btn btn-outline-success btn-approve" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#approveModal"
                                             data-pengajuan-id="{{ pendaftaran.id }}"
-                                            {% if pendaftaran.status_pengajuan != 'pending' %}disabled{% endif %}
                                             title="Approve">
                                         <i class="fas fa-check"></i>
                                     </button>
                                     
-                                    <!-- Tombol Tolak -->
+                                    <!-- Tombol Tolak (hanya untuk status pending) -->
                                     <button type="button" 
                                             class="btn btn-outline-danger btn-reject" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#rejectModal"
                                             data-pengajuan-id="{{ pendaftaran.id }}"
-                                            {% if pendaftaran.status_pengajuan != 'pending' %}disabled{% endif %}
                                             title="Reject">
                                         <i class="fas fa-times"></i>
                                     </button>
+                                    {% endif %}
                                     
                                     <!-- Tombol Download -->
                                     <button type="button" 
@@ -267,7 +276,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center py-5">
+                            <td colspan="9" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
                                     <h5 class="mb-2">Tidak ada data pendaftaran</h5>
@@ -427,7 +436,72 @@
     .modal-footer {
         padding: 1rem 1.5rem;
     }
-    
+
+    /* Responsif untuk tabel */
+    @media (max-width: 992px) {
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table th, .table td {
+            white-space: nowrap;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+        }
+        
+        .modal-xl .modal-body {
+            padding: 1rem;
+        }
+    }
+
+    /* Gaya untuk modal detail */
+    #detailModal .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+    }
+
+    #detailModal .modal-title {
+        font-weight: 600;
+    }
+
+    #detailModal .card {
+        transition: transform 0.2s;
+    }
+
+    #detailModal .card:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Gaya untuk search */
+    .search-form .input-group:focus-within {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+
+    /* Gaya untuk stats cards */
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+        
     /* Responsif untuk mobile */
     @media (max-width: 768px) {
         .table-responsive {
@@ -472,6 +546,39 @@
         .modal-dialog {
             margin: 0.5rem;
         }
+
+                /* Responsif untuk modal detail */
+        @media (max-width: 768px) {
+            .avatar-lg {
+                width: 60px !important;
+                height: 60px !important;
+            }
+            
+            .avatar-md {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            .modal-xl .modal-body {
+                padding: 1rem;
+            }
+            
+            .row-cols-lg-5 > .col {
+                flex: 0 0 33.333333%;
+                max-width: 33.333333%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .row-cols-sm-3 > .col {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+            
+            .modal-xl .modal-body {
+                padding: 0.5rem;
+            }
+        }
     }
 </style>
 
@@ -505,14 +612,17 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                searchForm.submit();
-            }, 500);
+                if (this.value.length >= 2 || this.value.length === 0) {
+                    searchForm.submit();
+                }
+            }, 800);
         });
         
         // Enter untuk search langsung
         searchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
+                clearTimeout(searchTimeout);
                 searchForm.submit();
             }
         });

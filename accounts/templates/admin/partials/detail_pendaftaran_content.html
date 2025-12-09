@@ -1,234 +1,285 @@
 {% load static %}
-<div class="container-fluid">
-    <!-- Foto Wajah - SEMUA FOTO -->
-    <div class="row mb-4">
+<div class="container-fluid p-3">
+    <!-- Foto Wajah -->
+    <div class="row mb-5">
         <div class="col-12">
-            <h6 class="text-primary mb-3 fw-bold">Foto Wajah <span class="badge bg-primary rounded-pill">{{ foto_wajah|length }} foto</span></h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-primary mb-0">
+                    <i class="fas fa-camera me-2"></i>Foto Wajah
+                    <span class="badge bg-primary rounded-pill ms-2">{{ foto_wajah|length }}</span>
+                </h5>
+                {% if foto_wajah %}
+                <button type="button" 
+                        class="btn btn-primary btn-sm"
+                        onclick="downloadAllPhotos('{{ mahasiswa.id }}', '{{ mahasiswa.user.nama_lengkap }}', '{{ mahasiswa.user.nrp }}')">
+                    <i class="fas fa-download me-2"></i>Download ZIP
+                </button>
+                {% endif %}
+            </div>
             
-            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mb-4">
+            {% if foto_wajah %}
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
                 {% for foto in foto_wajah %}
                 <div class="col">
-                    <div class="card border h-100 shadow-sm">
-                        <div class="card-body p-2 text-center d-flex flex-column">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-2 text-center">
                             {% if foto.file_path %}
-                            <img src="{{ foto.file_path.url }}" alt="Foto {{ forloop.counter }}" 
-                                 class="img-fluid rounded mb-2 flex-grow-1 object-fit-cover"
-                                 style="height: 120px; width: 100%;"
+                            <img src="{{ foto.file_path.url }}" 
+                                 alt="Foto {{ forloop.counter }}" 
+                                 class="img-fluid rounded mb-2"
+                                 style="height: 100px; object-fit: cover; width: 100%;"
                                  onerror="this.onerror=null;">
                             {% else %}
-                            <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2 flex-grow-1" 
-                                 style="height: 120px;">
-                                <i class="fas fa-image text-muted fa-2x"></i>
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" 
+                                 style="height: 100px;">
+                                <i class="fas fa-user text-muted fa-2x"></i>
                             </div>
                             {% endif %}
-                            <small class="text-muted">Foto {{ forloop.counter }}</small>
-                            {% if foto.created_at %}
-                            <small class="text-muted">{{ foto.created_at|date:"d/m/Y" }}</small>
-                            {% endif %}
+                            <small class="text-muted d-block">Foto {{ forloop.counter }}</small>
                         </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Tidak ada foto wajah yang diupload
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <button type="button" 
-                        class="btn btn-primary btn-download-modal"
-                        data-mahasiswa-id="{{ mahasiswa.id }}"
-                        data-nama="{{ mahasiswa.user.nama_lengkap }}"
-                        data-nrp="{{ mahasiswa.user.nrp }}">
-                    <i class="fas fa-download me-2"></i> Download Semua Foto (ZIP)
-                </button>
-                <small class="text-muted">Total {{ foto_wajah|length }} foto ditemukan</small>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Tidak ada foto wajah yang diupload
             </div>
+            {% endif %}
         </div>
     </div>
-    
-    <hr class="my-4">
-    
+
     <!-- Informasi Mahasiswa -->
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12">
-            <h6 class="text-primary mb-3 fw-bold">Informasi Mahasiswa</h6>
+            <h5 class="fw-bold text-primary mb-3">
+                <i class="fas fa-info-circle me-2"></i>Informasi Mahasiswa
+            </h5>
         </div>
         
         <div class="col-md-6 mb-3">
-            <div class="card border shadow-sm">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <table class="table table-sm table-borderless mb-0">
-                        <tbody>
-                            <tr>
-                                <th style="width: 40%;" class="text-muted">Nama Lengkap</th>
-                                <td><strong>{{ mahasiswa.user.nama_lengkap }}</strong></td>
-                            </tr>
-                            <tr>
-                                <th class="text-muted">NRP</th>
-                                <td><code class="bg-light p-2 rounded">{{ mahasiswa.user.nrp }}</code></td>
-                            </tr>
-                            <tr>
-                                <th class="text-muted">Email</th>
-                                <td>{{ mahasiswa.user.email }}</td>
-                            </tr>
-                            <tr>
-                                <th class="text-muted">Tanggal Daftar</th>
-                                <td>{{ mahasiswa.user.date_joined|date:"d M Y H:i" }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h6 class="card-title text-primary fw-semibold mb-3">Data Pribadi</h6>
+                    <div class="info-item mb-3">
+                        <div class="text-muted small mb-1">Nama Lengkap</div>
+                        <div class="fw-bold">{{ mahasiswa.user.nama_lengkap }}</div>
+                    </div>
+                    <div class="info-item mb-3">
+                        <div class="text-muted small mb-1">NRP</div>
+                        <div class="fw-bold font-monospace">{{ mahasiswa.user.nrp }}</div>
+                    </div>
+                    <div class="info-item mb-3">
+                        <div class="text-muted small mb-1">Email</div>
+                        <div class="fw-bold">{{ mahasiswa.user.email }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="text-muted small mb-1">Tanggal Daftar</div>
+                        <div class="fw-bold">{{ mahasiswa.user.date_joined|date:"d M Y H:i" }}</div>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div class="col-md-6 mb-3">
-            <div class="card border shadow-sm">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <table class="table table-sm table-borderless mb-0">
-                        <tbody>
-                            <tr>
-                                <th style="width: 40%;" class="text-muted">Jenjang</th>
-                                <td>
-                                    {% if mahasiswa.jenjang_pendidikan %}
-                                    <span class="badge bg-secondary">{{ mahasiswa.jenjang_pendidikan.nama_jenjang }}</span>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="text-muted">Semester</th>
-                                <td>
-                                    {% if mahasiswa.semester %}
-                                    {{ mahasiswa.semester.nama_semester }}
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th class="text-muted">Angkatan</th>
-                                <td>{{ mahasiswa.angkatan|default:"-" }}</td>
-                            </tr>
-                            <tr>
-                                <th class="text-muted">Kelas</th>
-                                <td>{{ mahasiswa.kelas|default:"-" }}</td>
-                            </tr>
-                            <tr>
-                                <th class="text-muted">Jurusan/Prodi</th>
-                                <td>
-                                    {% if mahasiswa.jurusan %}
-                                    <span class="badge bg-info">{{ mahasiswa.jurusan }}</span>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <h6 class="card-title text-primary fw-semibold mb-3">Data Akademik</h6>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="text-muted small mb-1">Jenjang</div>
+                            <div>
+                                {% if mahasiswa.jenjang_pendidikan %}
+                                <span class="badge bg-secondary">{{ mahasiswa.jenjang_pendidikan.nama_jenjang }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-muted small mb-1">Semester</div>
+                            <div>
+                                {% if mahasiswa.semester %}
+                                <span class="badge bg-info">{{ mahasiswa.semester.nama_semester }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-muted small mb-1">Angkatan</div>
+                            <div class="fw-bold">{{ mahasiswa.angkatan|default:"-" }}</div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-muted small mb-1">Kelas</div>
+                            <div class="fw-bold">{{ mahasiswa.kelas|default:"-" }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="text-muted small mb-1">Jurusan/Prodi</div>
+                            <div>
+                                {% if mahasiswa.jurusan %}
+                                <span class="badge bg-primary">{{ mahasiswa.jurusan }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Dosen Pembimbing (Semua: 1, 2, 3) -->
-    <div class="row mb-4">
+
+    <!-- Dosen Pembimbing (Minimalis) -->
+    {% if dosen_pembimbing_list %}
+    <div class="row mb-5">
         <div class="col-12">
-            <h6 class="text-primary mb-3 fw-bold">Dosen Pembimbing</h6>
+            <h5 class="fw-bold text-primary mb-3">
+                <i class="fas fa-user-tie me-2"></i>Dosen Pembimbing
+            </h5>
         </div>
         
-        {% if dosen_pembimbing_list %}
         {% for pembimbing in dosen_pembimbing_list %}
         <div class="col-md-4 mb-3">
-            <div class="card border shadow-sm h-100">
-                <div class="card-body">
-                    <h6 class="card-title text-primary fw-bold">
-                        {{ pembimbing.get_tipe_pembimbing_display }}
-                    </h6>
-                    <div class="d-flex align-items-center">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start">
                         <div class="flex-shrink-0">
-                            <div class="avatar-lg rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-user-graduate text-primary fs-4"></i>
+                            <div class="avatar-sm rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-user-graduate text-primary"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-1 fw-bold">{{ pembimbing.dosen.nama_dosen }}</h6>
-                            <p class="text-muted mb-1 small">
-                                <i class="fas fa-id-card me-1"></i> NIP: {{ pembimbing.dosen.nip }}
-                            </p>
-                            <p class="text-muted mb-0 small">
-                                <i class="fas fa-building me-1"></i> {{ pembimbing.dosen.prodi }}
-                            </p>
+                            <h6 class="mb-1 fw-bold text-primary">{{ pembimbing.get_tipe_pembimbing_display }}</h6>
+                            <p class="mb-0 fw-semibold">{{ pembimbing.dosen.nama_dosen }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         {% endfor %}
-        {% else %}
-        <div class="col-12">
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i> Belum ada dosen pembimbing yang ditetapkan
-            </div>
-        </div>
-        {% endif %}
     </div>
-    
-    <!-- Mata Kuliah Lab -->
+    {% endif %}
+
+    <!-- Mata Kuliah Lab (Minimalis) -->
+    {% if kegiatan_pa_list %}
     <div class="row">
         <div class="col-12">
-            <h6 class="text-primary mb-3 fw-bold">Mata Kuliah Lab</h6>
+            <h5 class="fw-bold text-primary mb-3">
+                <i class="fas fa-flask me-2"></i>Mata Kuliah Lab
+            </h5>
         </div>
         
-        {% if kegiatan_pa_list %}
-        <div class="col-12">
-            <div class="row row-cols-1 row-cols-md-2 g-3">
-                {% for kegiatan in kegiatan_pa_list %}
-                <div class="col">
-                    <div class="card border shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="mb-0 fw-bold">{{ kegiatan.nama_kegiatan }}</h6>
-                                <span class="badge bg-primary">{{ kegiatan.jumlah_sks }} SKS</span>
-                            </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Target Jam</small>
-                                    <span class="fw-bold">{{ kegiatan.target_jam }} jam</span>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Jam/Minggu</small>
-                                    <span class="fw-bold">{{ kegiatan.total_jam_minggu }} jam</span>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <small class="text-muted">Tahun Ajaran:</small>
-                                <div class="fw-bold">{{ kegiatan.tahun_ajaran.nama_tahun_ajaran }}</div>
-                            </div>
+        {% for kegiatan in kegiatan_pa_list %}
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 fw-bold">{{ kegiatan.nama_kegiatan }}</h6>
+                        <span class="badge bg-primary">{{ kegiatan.jumlah_sks }} SKS</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <small class="text-muted d-block">Target Jam</small>
+                            <span class="fw-bold">{{ kegiatan.target_jam }} jam</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Jam/Minggu</small>
+                            <span class="fw-bold">{{ kegiatan.total_jam_minggu }} jam</span>
                         </div>
                     </div>
+                    <div class="border-top pt-2 mt-2">
+                        <small class="text-muted">Tahun Ajaran:</small>
+                        <div class="fw-bold">{{ kegiatan.tahun_ajaran.nama_tahun_ajaran }}</div>
+                    </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
-        {% else %}
-        <div class="col-12">
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Belum ada mata kuliah lab yang ditetapkan
-            </div>
-        </div>
-        {% endif %}
+        {% endfor %}
     </div>
+    {% endif %}
 </div>
 
 <script>
-// Script untuk modal detail (akan dieksekusi setelah konten dimuat)
-document.addEventListener('DOMContentLoaded', function() {
-    // Event listener untuk tombol download di modal sudah ditangani di parent
-    // Tidak perlu script tambahan karena sudah menggunakan event delegation
-});
+function downloadAllPhotos(mahasiswaId, nama, nrp) {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    // Show loading
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
+    button.disabled = true;
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.href = `?download=${mahasiswaId}`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Reset button setelah 2 detik
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        // Show success message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <div>Download foto berhasil dimulai</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) alertDiv.remove();
+        }, 3000);
+    }, 2000);
+}
 </script>
+
+<style>
+.avatar-lg {
+    width: 70px;
+    height: 70px;
+}
+
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+}
+
+.info-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.modal-content {
+    border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+    .avatar-lg {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .col-md-4, .col-md-6 {
+        margin-bottom: 1rem;
+    }
+}
+</style>

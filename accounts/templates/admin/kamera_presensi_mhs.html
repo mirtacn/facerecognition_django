@@ -1,62 +1,215 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block page_title %}Kamera Presensi Mahasiswa{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <!-- Bagian 3: Daftar Mahasiswa -->
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Daftar Mahasiswa</h5>
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" 
-                                id="refresh-btn">
-                            <i class="fas fa-redo"></i>
-                            <span>Refresh</span>
-                        </button>
-                    </div>
+                    <h5 class="mb-0">Daftar Presensi Mahasiswa</h5>
+                    <span class="badge bg-secondary">Total: {{ total_mahasiswa }} mahasiswa</span>
                 </div>
-            <span class="badge bg-secondary">Total: 2 mahasiswa</span>
+                <small class="text-muted">Tanggal: {{ today|date:"d/m/Y" }}</small>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="presensi-table">
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Gambar</th>
+                                <th>Gambar checkin</th>
+                                <th>Gambar checkout</th>
                                 <th>Nama</th>
+                                <th>NRP</th>
+                                <th>Kelas</th>
                                 <th>Tanggal</th>
                                 <th>Jam Check-in</th>
                                 <th>Jam Check-out</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="student-table-body">
-                            <tr>
-                                <td>1</td>
-                                <td>
-                                    <div class="placeholder-img" style="width: 40px; height: 40px; background-color: #ddd; border-radius: 50%;"></div>
+                            {% for data in presensi_data %}
+                            <tr id="row-{{ data.mahasiswa.id }}">
+                                <td>{{ forloop.counter }}</td>
+                               <td>
+                                    {% if data.presensi and data.presensi.foto_checkin %}
+                                        <img src="{{ data.presensi.foto_checkin.url }}" 
+                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
+                                            alt="Foto Check-in" 
+                                            class="img-thumbnail">
+                                    {% else %}
+                                        <div class="avatar-circle" ...>
+                                        {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
+                                        </div>
+                                    {% endif %}
                                 </td>
-                                <td>Budi Santoso</td>
-                                <td>24/9/2025</td>
-                                <td>07.50</td>
-                                <td>-</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
                                 <td>
-                                    <div class="placeholder-img" style="width: 40px; height: 40px; background-color: #ddd; border-radius: 50%;"></div>
+                                    {% if data.presensi and data.presensi.foto_checkout %}
+                                        <img src="{{ data.presensi.foto_checkout.url }}" 
+                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
+                                            alt="Foto Check-out" 
+                                            class="img-thumbnail">
+                                    {% else %}
+                                        <div class="avatar-circle" ...>
+                                        {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
+                                        </div>
+                                    {% endif %}
                                 </td>
-                                <td>Ahmad Rizki Pratama</td>
-                                <td>24/9/2025</td>
-                                <td>07.00</td>
-                                <td>16.20</td>
+                                <td>
+                                    <strong>{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ data.mahasiswa.user.nrp|default:"-" }}</span>
+                                </td>
+                                <td>{{ data.mahasiswa.kelas|default:"-" }}</td>
+                                <td>{{ today|date:"d/m/Y" }}</td>
+                                <td id="checkin-{{ data.mahasiswa.id }}">
+                                    {% if data.presensi and data.presensi.jam_checkin %}
+                                        <span class="badge bg-success">{{ data.presensi.jam_checkin|time:"H:i" }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td id="checkout-{{ data.mahasiswa.id }}">
+                                    {% if data.presensi and data.presensi.jam_checkout %}
+                                        <span class="badge bg-warning">{{ data.presensi.jam_checkout|time:"H:i" }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" 
+                                                class="btn {% if data.is_checked_in %}btn-outline-secondary disabled{% else %}btn-success{% endif %} btn-checkin"
+                                                data-mahasiswa-id="{{ data.mahasiswa.id }}"
+                                                data-mahasiswa-nama="{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}"
+                                                {% if data.is_checked_in %}disabled{% endif %}
+                                                title="Check-in">
+                                            <i class="fas fa-sign-in-alt"></i>
+                                            <span class="d-none d-md-inline"> Check-in</span>
+                                        </button>
+                                        <button type="button" 
+                                                class="btn {% if not data.is_checked_in %}btn-outline-secondary disabled{% else %}btn-warning{% endif %} btn-checkout"
+                                                data-mahasiswa-id="{{ data.mahasiswa.id }}"
+                                                data-mahasiswa-nama="{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}"
+                                                {% if not data.is_checked_in %}disabled{% endif %}
+                                                title="Check-out">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                            <span class="d-none d-md-inline"> Check-out</span>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-user-check fa-3x mb-3 opacity-25"></i>
+                                        <h5 class="mb-2">Belum ada mahasiswa yang disetujui</h5>
+                                        <p>Semua mahasiswa yang status pengajuannya sudah disetujui akan muncul di sini</p>
+                                        <a href="{% url 'approval_pendaftaran' %}" class="btn btn-outline-primary mt-2">
+                                            <i class="fas fa-clipboard-check"></i> Ke Approval Pendaftaran
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="card-footer">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i> 
+                    Hanya menampilkan mahasiswa yang status pengajuannya sudah DISETUJUI.
+                    Dalam sehari bisa beberapa kali check-in/out, harus check-out dulu sebelum check-in lagi.
+                    Data direset setiap hari baru.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Kamera -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cameraModalLabel">Ambil Foto Presensi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="camera-container mb-3">
+                            <div class="card">
+                                <div class="card-header bg-dark text-white py-2">
+                                    <i class="fas fa-video"></i> Kamera Live
+                                </div>
+                                <div class="card-body p-0">
+                                    <video id="cameraPreview" autoplay playsinline 
+                                           style="width: 100%; height: 300px; object-fit: cover; background-color: #000;"></video>
+                                    <div class="text-center bg-dark py-2">
+                                        <div class="text-white small">
+                                            <i class="fas fa-lightbulb"></i> Pastikan wajah terlihat jelas
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <canvas id="cameraCanvas" style="display: none;"></canvas>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" class="btn btn-primary btn-lg" id="captureBtn">
+                                <i class="fas fa-camera"></i> Ambil Foto
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-lg" id="retakeBtn" style="display: none;">
+                                <i class="fas fa-redo"></i> Ambil Ulang
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="preview-container">
+                            <div class="card">
+                                <div class="card-header bg-info text-white py-2">
+                                    <i class="fas fa-image"></i> Preview
+                                </div>
+                                <div class="card-body text-center">
+                                    <img id="photoPreview" src="" 
+                                         style="width: 100%; max-height: 200px; object-fit: cover; border: 2px dashed #ddd; border-radius: 4px; display: none;">
+                                    <div id="noPreview" class="text-muted py-5">
+                                        <i class="fas fa-user-circle fa-3x mb-3"></i>
+                                        <p>Foto akan muncul di sini</p>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="alert alert-info p-2">
+                                            <i class="fas fa-user"></i> 
+                                            <strong id="mahasiswaInfo"></strong>
+                                        </div>
+                                        <div class="alert alert-warning p-2">
+                                            <i class="fas fa-clock"></i> 
+                                            <strong id="actionType"></strong>
+                                        </div>
+                                        <div class="alert alert-light p-2">
+                                            <small><i class="fas fa-exclamation-circle"></i> Foto akan disimpan sebagai bukti presensi</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button type="button" class="btn btn-success" id="confirmBtn" style="display: none;">
+                    <i class="fas fa-check"></i> Konfirmasi & Simpan
+                </button>
             </div>
         </div>
     </div>
@@ -77,144 +230,456 @@
         padding-top: 70px;
     }
     
-    .placeholder-img {
-        display: inline-block;
+    .btn-checkin:disabled, .btn-checkout:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
     
-    .form-check-input:checked {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background-color: #4e73df;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
     }
     
-    #refresh-btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-top: none;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        padding: 12px 8px;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+    }
+    
+    #cameraPreview {
+        border-radius: 4px 4px 0 0;
+    }
+    
+    .btn-checkin:not(:disabled):hover {
+        background-color: #198754;
+        border-color: #198754;
+        color: white;
+    }
+    
+    .btn-checkout:not(:disabled):hover {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: black;
     }
 </style>
 
 <script>
-    // Fungsi untuk refresh data
-    document.getElementById('refresh-btn').addEventListener('click', function() {
-        // Tampilkan indikator loading
-        const btn = this;
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
-        btn.disabled = true;
-        
-        // Simulasi request AJAX untuk mendapatkan data terbaru
-        setTimeout(function() {
-            // Di sini Anda bisa mengganti dengan AJAX request sebenarnya
-            // Contoh: fetch('/api/students')
-            //   .then(response => response.json())
-            //   .then(data => updateTable(data));
-            
-            // Untuk demo, kita hanya akan menambah data baru (simulasi)
-            const tableBody = document.getElementById('student-table-body');
-            const totalStudents = document.querySelector('.badge.bg-secondary');
-            
-            // Contoh data baru (dalam aplikasi nyata, data ini berasal dari server)
-            const newData = [
-                {
-                    no: 3,
-                    name: "Siti Nurhaliza",
-                    date: "25/9/2025",
-                    checkIn: "08.00",
-                    checkOut: "-"
-                },
-                {
-                    no: 4,
-                    name: "Rizky Pratama",
-                    date: "25/9/2025",
-                    checkIn: "08.30",
-                    checkOut: "15.45"
-                }
-            ];
-            
-            // Tambah data baru ke tabel
-            newData.forEach(student => {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${student.no}</td>
-                    <td>
-                        <div class="placeholder-img" style="width: 40px; height: 40px; background-color: #ddd; border-radius: 50%;"></div>
-                    </td>
-                    <td>${student.name}</td>
-                    <td>${student.date}</td>
-                    <td>${student.checkIn}</td>
-                    <td>${student.checkOut}</td>
-                `;
-                tableBody.appendChild(newRow);
-            });
-            
-            // Update total mahasiswa
-            const currentCount = parseInt(totalStudents.textContent.match(/\d+/)[0]);
-            totalStudents.textContent = `Total: ${currentCount + newData.length} mahasiswa`;
-            
-            // Reset tombol
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-            
-            // Tampilkan notifikasi sukses (opsional)
-            showNotification('Data berhasil direfresh!', 'success');
-            
-        }, 1000); // Simulasi delay 1 detik
-    });
+// Variabel global
+let currentStream = null;
+let currentMahasiswaId = null;
+let currentMahasiswaNama = null;
+let currentAction = null;
+let capturedPhoto = null;
+
+// Inisialisasi modal kamera
+let cameraModal = null;
+document.addEventListener('DOMContentLoaded', function() {
+    cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
     
-    // Fungsi untuk menampilkan notifikasi
-    function showNotification(message, type = 'info') {
-        // Hapus notifikasi sebelumnya jika ada
-        const existingNotification = document.querySelector('.refresh-notification');
-        if (existingNotification) {
-            existingNotification.remove();
+    // Debug: Cek apakah tombol ada di DOM
+    console.log("Tombol Check-in ditemukan:", document.querySelectorAll('.btn-checkin').length);
+    console.log("Tombol Check-out ditemukan:", document.querySelectorAll('.btn-checkout').length);
+});
+
+// Inisialisasi kamera
+async function startCamera() {
+    try {
+        // Stop stream yang sedang berjalan
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
         }
         
-        // Buat elemen notifikasi
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'success' ? 'success' : 'info'} refresh-notification`;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-            min-width: 250px;
-            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
-        `;
-        notification.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <span>${message}</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        // Tambahkan ke body
-        document.body.appendChild(notification);
-        
-        // Auto remove setelah 3 detik
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 3000);
-        
-        // Tambahkan event listener untuk close button
-        notification.querySelector('.btn-close').addEventListener('click', function() {
-            notification.remove();
+        // Dapatkan akses kamera
+        currentStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'user',
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            },
+            audio: false 
         });
+        
+        const video = document.getElementById('cameraPreview');
+        video.srcObject = currentStream;
+        
+    } catch (err) {
+        console.error('Error accessing camera:', err);
+        showNotification('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.', 'danger');
+        if (cameraModal) cameraModal.hide();
+    }
+}
+
+// Ambil foto dari kamera
+function capturePhoto() {
+    const video = document.getElementById('cameraPreview');
+    const canvas = document.getElementById('cameraCanvas');
+    const preview = document.getElementById('photoPreview');
+    const noPreview = document.getElementById('noPreview');
+    
+    if (!video || !canvas || !preview || !noPreview) {
+        console.error('Elemen kamera tidak ditemukan');
+        return;
     }
     
-    // Tambahkan style untuk animasi
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Tampilkan preview
+    capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
+    preview.src = capturedPhoto;
+    preview.style.display = 'block';
+    noPreview.style.display = 'none';
+    
+    // Tampilkan tombol konfirmasi dan retake
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('retakeBtn').style.display = 'inline-block';
+    document.getElementById('confirmBtn').style.display = 'inline-block';
+}
+
+// Event Listeners untuk tombol Check-in/Check-out
+document.addEventListener('click', function(e) {
+    // Debug: Log klik
+    console.log('Element clicked:', e.target);
+    
+    // Tombol Check-in
+    const checkinBtn = e.target.closest('.btn-checkin');
+    if (checkinBtn && !checkinBtn.disabled) {
+        console.log('Check-in button clicked');
+        currentMahasiswaId = checkinBtn.getAttribute('data-mahasiswa-id');
+        currentMahasiswaNama = checkinBtn.getAttribute('data-mahasiswa-nama');
+        currentAction = 'checkin';
+        
+        // Update info di modal
+        document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
+        document.getElementById('actionType').textContent = 'Aksi: CHECK-IN';
+        
+        resetCameraModal();
+        if (cameraModal) cameraModal.show();
+    }
+    
+    // Tombol Check-out
+    const checkoutBtn = e.target.closest('.btn-checkout');
+    if (checkoutBtn && !checkoutBtn.disabled) {
+        console.log('Check-out button clicked');
+        currentMahasiswaId = checkoutBtn.getAttribute('data-mahasiswa-id');
+        currentMahasiswaNama = checkoutBtn.getAttribute('data-mahasiswa-nama');
+        currentAction = 'checkout';
+        
+        // Update info di modal
+        document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
+        document.getElementById('actionType').textContent = 'Aksi: CHECK-OUT';
+        
+        resetCameraModal();
+        if (cameraModal) cameraModal.show();
+    }
+});
+
+// Reset state modal kamera
+function resetCameraModal() {
+    const preview = document.getElementById('photoPreview');
+    const noPreview = document.getElementById('noPreview');
+    
+    if (preview) {
+        preview.style.display = 'none';
+        preview.src = '';
+    }
+    if (noPreview) {
+        noPreview.style.display = 'block';
+    }
+    
+    document.getElementById('captureBtn').style.display = 'inline-block';
+    document.getElementById('retakeBtn').style.display = 'none';
+    document.getElementById('confirmBtn').style.display = 'none';
+    
+    capturedPhoto = null;
+}
+
+// Event listener untuk modal
+const cameraModalElement = document.getElementById('cameraModal');
+if (cameraModalElement) {
+    cameraModalElement.addEventListener('shown.bs.modal', startCamera);
+    cameraModalElement.addEventListener('hidden.bs.modal', function() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+        capturedPhoto = null;
+        currentMahasiswaId = null;
+        currentMahasiswaNama = null;
+        currentAction = null;
+    });
+}
+
+// Tombol Ambil Foto
+document.getElementById('captureBtn')?.addEventListener('click', capturePhoto);
+
+// Tombol Ambil Ulang
+document.getElementById('retakeBtn')?.addEventListener('click', function() {
+    resetCameraModal();
+});
+
+// Tombol Konfirmasi
+document.getElementById('confirmBtn')?.addEventListener('click', async function() {
+    if (!capturedPhoto || !currentMahasiswaId) {
+        showNotification('Tidak ada foto yang diambil!', 'warning');
+        return;
+    }
+    
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    btn.disabled = true;
+    
+    try {
+        // Tentukan endpoint berdasarkan action
+        const endpoint = currentAction === 'checkin' ? '{% url "checkin_presensi" %}' : '{% url "checkout_presensi" %}';
+        console.log('Mengirim ke endpoint:', endpoint);
+        
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                mahasiswa_id: currentMahasiswaId,
+                foto: capturedPhoto
+            })
+        });
+        
+        const result = await response.json();
+        console.log('Response dari server:', result);
+        
+        if (result.success) {
+            // Update UI secara real-time
+            updatePresensiUI(currentMahasiswaId, currentAction, result.data);
+            
+            // Tampilkan notifikasi
+            showNotification(`${currentAction.toUpperCase()} berhasil untuk ${currentMahasiswaNama}`, 'success');
+            
+            // Tutup modal
+            if (cameraModal) cameraModal.hide();
+            
+            // Refresh data setelah 1 detik
+            setTimeout(refreshPresensiData, 1000);
+        } else {
+            showNotification(`Gagal: ${result.message}`, 'danger');
         }
         
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Terjadi kesalahan saat memproses: ' + error.message, 'danger');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
+// Fungsi untuk update UI setelah presensi
+function updatePresensiUI(mahasiswaId, action, data) {
+    const row = document.getElementById(`row-${mahasiswaId}`);
+    if (!row) {
+        console.error('Row tidak ditemukan untuk ID:', mahasiswaId);
+        return;
+    }
+    
+    const checkinCell = document.getElementById(`checkin-${mahasiswaId}`);
+    const checkoutCell = document.getElementById(`checkout-${mahasiswaId}`);
+    const checkinBtn = row.querySelector('.btn-checkin');
+    const checkoutBtn = row.querySelector('.btn-checkout');
+    
+    if (action === 'checkin') {
+        // Update waktu check-in
+        if (checkinCell) {
+            checkinCell.innerHTML = `<span class="badge bg-success">${data.jam_checkin}</span>`;
         }
+        
+        // Update tombol
+        if (checkinBtn) {
+            checkinBtn.classList.remove('btn-success');
+            checkinBtn.classList.add('btn-outline-secondary');
+            checkinBtn.disabled = true;
+        }
+        
+        if (checkoutBtn) {
+            checkoutBtn.classList.remove('btn-outline-secondary');
+            checkoutBtn.classList.add('btn-warning');
+            checkoutBtn.disabled = false;
+        }
+        
+    } else if (action === 'checkout') {
+        // Update waktu check-out
+        if (checkoutCell) {
+            checkoutCell.innerHTML = `<span class="badge bg-warning">${data.jam_checkout}</span>`;
+        }
+        
+        // Update tombol
+        if (checkoutBtn) {
+            checkoutBtn.classList.remove('btn-warning');
+            checkoutBtn.classList.add('btn-outline-secondary');
+            checkoutBtn.disabled = true;
+        }
+        
+        if (checkinBtn) {
+            checkinBtn.classList.remove('btn-outline-secondary');
+            checkinBtn.classList.add('btn-success');
+            checkinBtn.disabled = false;
+        }
+    }
+}
+
+// Fungsi untuk mendapatkan CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Fungsi untuk menampilkan notifikasi
+function showNotification(message, type = 'info') {
+    // Hapus notifikasi lama
+    const oldNotifications = document.querySelectorAll('.alert-notification');
+    oldNotifications.forEach(notif => notif.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-notification alert-dismissible fade show`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1060;
+        min-width: 300px;
+        animation: slideIn 0.3s ease-out;
     `;
-    document.head.appendChild(style);
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+            <div>${message}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove setelah 5 detik
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Animasi CSS untuk notifikasi
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Auto-refresh data setiap 30 detik
+function refreshPresensiData() {
+    fetch('{% url "get_presensi_today" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                data.data.forEach(item => {
+                    const row = document.getElementById(`row-${item.id}`);
+                    if (row) {
+                        const checkinCell = document.getElementById(`checkin-${item.id}`);
+                        const checkoutCell = document.getElementById(`checkout-${item.id}`);
+                        const checkinBtn = row.querySelector('.btn-checkin');
+                        const checkoutBtn = row.querySelector('.btn-checkout');
+                        
+                        // Update waktu check-in jika ada data
+                        if (item.presensi_today && item.presensi_today.length > 0) {
+                            const latest = item.presensi_today[0];
+                            if (latest.jam_checkin !== '-') {
+                                checkinCell.innerHTML = `<span class="badge bg-success">${latest.jam_checkin}</span>`;
+                            }
+                            if (latest.jam_checkout !== '-') {
+                                checkoutCell.innerHTML = `<span class="badge bg-warning">${latest.jam_checkout}</span>`;
+                            }
+                        }
+                        
+                        // Update status tombol
+                        if (checkinBtn) {
+                            checkinBtn.disabled = item.is_checked_in;
+                        }
+                        if (checkoutBtn) {
+                            checkoutBtn.disabled = !item.is_checked_in;
+                        }
+                        
+                        if (item.is_checked_in) {
+                            if (checkinBtn) {
+                                checkinBtn.classList.remove('btn-success');
+                                checkinBtn.classList.add('btn-outline-secondary');
+                            }
+                            if (checkoutBtn) {
+                                checkoutBtn.classList.remove('btn-outline-secondary');
+                                checkoutBtn.classList.add('btn-warning');
+                            }
+                        } else {
+                            if (checkinBtn) {
+                                checkinBtn.classList.remove('btn-outline-secondary');
+                                checkinBtn.classList.add('btn-success');
+                            }
+                            if (checkoutBtn) {
+                                checkoutBtn.classList.remove('btn-warning');
+                                checkoutBtn.classList.add('btn-outline-secondary');
+                            }
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => console.error('Error refreshing data:', error));
+}
+
+// Jalankan refresh otomatis
+setInterval(refreshPresensiData, 30000); // Refresh setiap 30 detik
+
+// Refresh saat halaman dibuka
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Halaman Kamera Presensi Mahasiswa dimuat');
+    refreshPresensiData();
+});
 </script>
 {% endblock %}
