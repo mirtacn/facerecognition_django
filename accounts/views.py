@@ -13,6 +13,8 @@ from .models import (
     Tahun_Ajaran, Dosen, Mahasiswa_Dosen, Pengajuan_Pendaftaran,
     Status_Pemenuhan_SKS, Semester, FotoWajah, Mahasiswa_Dosen, Presensi,Durasi
 )
+from django.db.models import Sum, F, Case, When, Value
+from django.db.models.functions import Coalesce
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import zipfile
@@ -29,6 +31,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 from datetime import datetime
+import logging
 
 def register_wizard(request, step=1):
     # Gunakan Custom User Model
@@ -502,8 +505,7 @@ def kamera_presensi_mhs(request):
         'user',
         'jenjang_pendidikan',
         'semester'
-    ).filter(
-        user__status_akun='aktif',  # hanya yang aktif
+    ).filter(  # hanya yang aktif
         pengajuan_pendaftaran__status_pengajuan='disetujui'  # hanya yang sudah di-approve
     ).order_by('user__nama_lengkap')
     
@@ -1042,7 +1044,87 @@ def admin_dashboard(request):
 @login_required
 def monitoring_presensi(request):
     """View untuk monitoring presensi admin"""
-    return render(request, 'admin/kamera_presensi_mhs.html')
+    return render(request, 'admin/status_pemenuhan_sks.html')
+
+@login_required
+def status_pemenuhan_sks(request):
+    # Query untuk mendapatkan data mahasiswa yang pengajuannya disetujui
+    mahasiswa_setuju = Mahasiswa.objects.filter(
+        pengajuan_pendaftaran__status_pengajuan='disetujui'
+    ).select_related('user', 'jenjang_pendidikan')
+    
+    # Ambil semua jenjang pendidikan dari database
+    jenjang_list = Jenjang_Pendidikan.objects.all().order_by('nama_jenjang')
+    
+    data_mahasiswa = []
+    
+    for mahasiswa in mahasiswa_setuju:
+        # DAPATKAN kegiatan yang terkait dengan mahasiswa
+        kegiatan_list = []
+        
+        # Jika mahasiswa memiliki relasi many-to-many ke Kegiatan_PA
+        if hasattr(mahasiswa, 'kegiatan_pa'):
+            kegiatan_pa_set = mahasiswa.kegiatan_pa.all()
+        else:
+            # Atau jika melalui Status_Pemenuhan_SKS
+            kegiatan_pa_set = Status_Pemenuhan_SKS.objects.filter(
+                mahasiswa=mahasiswa
+            ).select_related('kegiatan_pa')
+        
+        for kegiatan_rel in kegiatan_pa_set:
+            # DAPATKAN data SKS yang benar
+            if isinstance(kegiatan_rel, Kegiatan_PA):
+                kegiatan = kegiatan_rel
+                # Dapatkan status pemenuhan SKS untuk kegiatan ini
+                status_sks = Status_Pemenuhan_SKS.objects.filter(
+                    mahasiswa=mahasiswa,
+                    kegiatan_pa=kegiatan
+                ).first()
+                
+                sks_value = kegiatan.jumlah_sks if kegiatan.jumlah_sks > 0 else 0
+                jam_target_value = kegiatan.target_jam if kegiatan.target_jam > 0 else 0
+                jam_tercapai = status_sks.jam_tercapai if status_sks else 0
+            else:
+                # Jika langsung dari Status_Pemenuhan_SKS
+                kegiatan = kegiatan_rel.kegiatan_pa
+                sks_value = kegiatan_rel.jumlah_sks if kegiatan_rel.jumlah_sks > 0 else 0
+                jam_target_value = kegiatan_rel.jam_target if kegiatan_rel.jam_target > 0 else 0
+                jam_tercapai = kegiatan_rel.jam_tercapai
+            
+            kegiatan_list.append({
+                'nama_kegiatan': kegiatan.nama_kegiatan,
+                'sks': sks_value,
+                'jam_per_minggu': kegiatan.total_jam_minggu if hasattr(kegiatan, 'total_jam_minggu') else 0,
+                'jam_target': jam_target_value,
+                'jam_tercapai': jam_tercapai
+            })
+        
+        # Hitung total
+        total_jam_ditempuh = sum(k['jam_tercapai'] for k in kegiatan_list)
+        total_jam_target = sum(k['jam_target'] for k in kegiatan_list)
+        
+        # Tentukan status overall
+        status_overall = 'Memenuhi' if total_jam_ditempuh >= total_jam_target else 'Belum Memenuhi'
+        
+        data_mahasiswa.append({
+            'nama': mahasiswa.user.nama_lengkap or mahasiswa.user.username,
+            'jenjang': mahasiswa.jenjang_pendidikan.nama_jenjang if mahasiswa.jenjang_pendidikan else '-',
+            'kegiatan_list': kegiatan_list,
+            'total_jam_ditempuh': total_jam_ditempuh,
+            'total_jam_target': total_jam_target,
+            'status_overall': status_overall
+        })
+    
+    context = {
+        'data_mahasiswa': data_mahasiswa,
+        'total_mahasiswa': len(data_mahasiswa),
+        'total_sks_all': sum(sum(k['sks'] for k in m['kegiatan_list']) for m in data_mahasiswa),
+        'total_memenuhi': sum(1 for m in data_mahasiswa if m['status_overall'] == 'Memenuhi'),
+        'total_belum_memenuhi': sum(1 for m in data_mahasiswa if m['status_overall'] == 'Belum Memenuhi'),
+        'jenjang_list': jenjang_list,  # VARIABEL YANG DIPAKAI ADALAH jenjang_list
+    }
+    
+    return render(request, 'admin/status_pemenuhan_sks.html', context)
 
 @login_required
 def monitor_durasi(request):
@@ -1054,19 +1136,18 @@ def management_data(request):
     """View untuk management data admin"""
     return render(request, 'admin/management_data.html')
 
-
 @login_required
 def approval_pendaftaran(request):
     """View untuk approval pendaftaran admin"""
     
     search_query = request.GET.get('search', '').strip()
     
-    # SEKARANG SUDAH BISA PAKAI created_at
+    # Query dengan select_related untuk optimasi
     pendaftaran_list = Pengajuan_Pendaftaran.objects.select_related(
         'mahasiswa__user', 
         'mahasiswa__jenjang_pendidikan',
         'mahasiswa__semester'
-    ).all().order_by('-created_at')  # GUNAKAN -created_at
+    ).all()
     
     # Filter berdasarkan search
     if search_query:
@@ -1115,9 +1196,104 @@ def approval_pendaftaran(request):
             pengajuan_id = request.GET.get('pengajuan_id')
             return get_reject_modal(request, pengajuan_id)
     
-    # Jika POST untuk update status
+    # Jika POST untuk update status - PERBAIKAN
     if request.method == 'POST':
-        return update_status_pendaftaran(request)
+        print(f"\n=== DEBUG: POST REQUEST DITERIMA ===")
+        print(f"POST data: {dict(request.POST)}")
+        
+        pengajuan_id = request.POST.get('pengajuan_id')
+        action = request.POST.get('action')
+        alasan_penolakan = request.POST.get('alasan_penolakan', '')
+        
+        if not pengajuan_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'ID pengajuan tidak ditemukan'
+            })
+        
+        try:
+            # DAPATKAN OBJEK DARI DATABASE
+            pengajuan = Pengajuan_Pendaftaran.objects.get(id=pengajuan_id)
+            mahasiswa = pengajuan.mahasiswa
+            user = mahasiswa.user
+            
+            print(f"DEBUG: Status sebelum: {pengajuan.status_pengajuan}")
+            print(f"DEBUG: Mahasiswa: {user.nama_lengkap}")
+            
+            # GUNAKAN TRANSACTION ATOMIC UNTUK KONSISTENSI
+            with transaction.atomic():
+                if action == 'approve':
+                    pengajuan.status_pengajuan = 'disetujui'
+                    pengajuan.alasan_penolakan = ''
+                    
+                    # Aktifkan akun mahasiswa
+                    user.is_active = True
+                    user.status_akun = 'disetujui'  # Tambahan update status_akun
+
+                    
+                    print(f"DEBUG: Status diubah menjadi: disetujui")
+                    print(f"DEBUG: User {user.username} diaktifkan")
+                    
+                    messages.success(request, f'Pendaftaran {user.nama_lengkap} berhasil disetujui.')
+                    
+                elif action == 'reject':
+                    if not alasan_penolakan:
+                        return JsonResponse({
+                            'success': False,
+                            'message': 'Alasan penolakan harus diisi'
+                        })
+                    
+                    pengajuan.status_pengajuan = 'ditolak'
+                    pengajuan.alasan_penolakan = alasan_penolakan
+                    
+                    # Nonaktifkan akun mahasiswa
+                    user.is_active = False
+                    user.status_akun = 'ditolak'  # Tambahan update status_akun
+
+                    
+                    print(f"DEBUG: Status diubah menjadi: ditolak")
+                    print(f"DEBUG: User {user.username} dinonaktifkan")
+                    print(f"DEBUG: Alasan: {alasan_penolakan}")
+                    
+                    messages.warning(request, f'Pendaftaran {user.nama_lengkap} ditolak.')
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Action tidak valid'
+                    })
+                
+                # SIMPAN PERUBAHAN
+                pengajuan.save()
+                user.save()
+                
+                # TRANSACTION AKAN COMMIT OTOMATIS DI SINI JIKA TIDAK ADA ERROR
+                
+            # Refresh dari database untuk memastikan
+            pengajuan.refresh_from_db()
+            user.refresh_from_db()
+            
+            print(f"DEBUG: Status setelah refresh: {pengajuan.status_pengajuan}")
+            print(f"DEBUG: Updated at: {pengajuan.updated_at}")
+            print(f"DEBUG: User active: {user.is_active}")
+            print("=== DEBUG: SELESAI ===\n")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Status pendaftaran berhasil diperbarui',
+                'new_status': pengajuan.status_pengajuan
+            })
+                
+        except Pengajuan_Pendaftaran.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Pengajuan tidak ditemukan'
+            })
+        except Exception as e:
+            print(f"ERROR: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Terjadi kesalahan: {str(e)}'
+            })
     
     # GET request biasa - tampilkan halaman utama
     context = {
@@ -1135,10 +1311,10 @@ def get_detail_pendaftaran(request, mahasiswa_id):
     """Ambil data detail pendaftaran untuk modal"""
     mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
     
-    # Ambil SEMUA foto wajah (tidak dibatasi 5)
+    # Ambil semua foto wajah
     foto_wajah = FotoWajah.objects.filter(mahasiswa=mahasiswa).order_by('-created_at')
     
-    # Ambil semua dosen pembimbing (Pembimbing 1, 2, 3)
+    # Ambil semua dosen pembimbing
     dosen_pembimbing_list = Mahasiswa_Dosen.objects.filter(
         mahasiswa=mahasiswa
     ).select_related('dosen').order_by('tipe_pembimbing')
@@ -1175,112 +1351,14 @@ def get_reject_modal(request, pengajuan_id):
     
     return render(request, 'admin/partials/reject_modal_content.html', context)
 
-def update_status_pendaftaran(request):
-    """Update status pendaftaran (approve/reject)"""
-    pengajuan_id = request.POST.get('pengajuan_id')
-    action = request.POST.get('action')
-    alasan_penolakan = request.POST.get('alasan_penolakan', '')
-    
-    pengajuan = get_object_or_404(Pengajuan_Pendaftaran, id=pengajuan_id)
-    
-    with transaction.atomic():
-        if action == 'approve':
-            pengajuan.status_pengajuan = 'disetujui'
-            pengajuan.alasan_penolakan = ''
-            
-            # Aktifkan akun mahasiswa
-            mahasiswa = pengajuan.mahasiswa
-            user = mahasiswa.user
-            user.is_active = True
-            user.save()
-            
-            messages.success(request, f'Pendaftaran {user.nama_lengkap} berhasil disetujui.')
-            
-        elif action == 'reject':
-            if not alasan_penolakan:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Alasan penolakan harus diisi'
-                })
-            
-            pengajuan.status_pengajuan = 'ditolak'
-            pengajuan.alasan_penolakan = alasan_penolakan
-            
-            # Nonaktifkan akun mahasiswa
-            mahasiswa = pengajuan.mahasiswa
-            user = mahasiswa.user
-            user.is_active = False
-            user.save()
-            
-            messages.warning(request, f'Pendaftaran {user.nama_lengkap} ditolak.')
-        
-        pengajuan.save()  
-    
-    return JsonResponse({
-        'success': True,
-        'message': 'Status pendaftaran berhasil diperbarui'
-    })
-    """Update status pendaftaran (approve/reject)"""
-    pengajuan_id = request.POST.get('pengajuan_id')
-    action = request.POST.get('action')
-    alasan_penolakan = request.POST.get('alasan_penolakan', '')
-    
-    pengajuan = get_object_or_404(Pengajuan_Pendaftaran, id=pengajuan_id)
-    
-    with transaction.atomic():
-        if action == 'approve':
-            pengajuan.status_pengajuan = 'disetujui'
-            pengajuan.alasan_penolakan = ''
-            
-            # Aktifkan akun mahasiswa
-            mahasiswa = pengajuan.mahasiswa
-            user = mahasiswa.user
-            user.is_active = True
-            user.save()
-            
-            messages.success(request, f'Pendaftaran {user.nama_lengkap} berhasil disetujui.')
-            
-        elif action == 'reject':
-            if not alasan_penolakan:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Alasan penolakan harus diisi'
-                })
-            
-            pengajuan.status_pengajuan = 'ditolak'
-            pengajuan.alasan_penolakan = alasan_penolakan
-            
-            # Nonaktifkan akun mahasiswa
-            mahasiswa = pengajuan.mahasiswa
-            user = mahasiswa.user
-            user.is_active = False
-            user.save()
-            
-            messages.warning(request, f'Pendaftaran {user.nama_lengkap} ditolak.')
-        
-        pengajuan.save()
-    
-    return JsonResponse({
-        'success': True,
-        'message': 'Status pendaftaran berhasil diperbarui'
-    })
-
 def download_foto_wajah(request, mahasiswa_id):
     """Download semua foto wajah mahasiswa dalam format zip"""
-    import zipfile
-    import io
-    import os
-    from django.http import HttpResponse
-    from django.shortcuts import get_object_or_404
-    
     mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
     foto_wajah_list = FotoWajah.objects.filter(mahasiswa=mahasiswa)
     
     if not foto_wajah_list:
-        return HttpResponse(
-            '<script>alert("Tidak ada foto wajah untuk didownload"); window.history.back();</script>',
-            content_type='text/html'
-        )
+        messages.error(request, "Tidak ada foto wajah untuk didownload")
+        return redirect('approval_pendaftaran')
     
     # Create zip file in memory
     zip_buffer = io.BytesIO()
@@ -1288,11 +1366,9 @@ def download_foto_wajah(request, mahasiswa_id):
     try:
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             for foto in foto_wajah_list:
-                if foto.file_path and hasattr(foto.file_path, 'path'):
-                    file_path = foto.file_path.path
-                    if os.path.exists(file_path):
-                        file_name = f"{mahasiswa.user.nrp}_{mahasiswa.user.nama_lengkap}_{os.path.basename(file_path)}"
-                        zip_file.write(file_path, file_name)
+                if foto.file_path and os.path.exists(foto.file_path.path):
+                    file_name = f"{mahasiswa.user.nrp}_{mahasiswa.user.nama_lengkap}_{os.path.basename(foto.file_path.name)}"
+                    zip_file.write(foto.file_path.path, file_name)
         
         zip_buffer.seek(0)
         
@@ -1302,12 +1378,9 @@ def download_foto_wajah(request, mahasiswa_id):
         
         return response
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return HttpResponse(
-            f'<script>alert("Gagal membuat file zip. Pastikan file foto tersedia."); window.history.back();</script>',
-            content_type='text/html'
-        )
+        print(f"Error creating zip: {e}")
+        messages.error(request, "Gagal membuat file zip. Pastikan file foto tersedia.")
+        return redirect('approval_pendaftaran')
 
 def render_approval_page(request):
     """Render halaman utama approval"""
@@ -1334,13 +1407,9 @@ def data_mahasiswa(request):
     search_query = request.GET.get('search', '').strip()
     
     # Query dasar dengan semua relasi yang dibutuhkan
-    mahasiswa_list = Mahasiswa.objects.select_related(
-        'user',
-        'jenjang_pendidikan',
-        'semester'
-    ).prefetch_related(
-        'kegiatan_pa'
-    ).all()
+    mahasiswa_list = Mahasiswa.objects.filter(
+        pengajuan_pendaftaran__status_pengajuan__iexact='disetujui'
+    )
     
     # Filter berdasarkan jenjang pendidikan
     if jenjang_filter:
@@ -1567,12 +1636,381 @@ def hapus_mahasiswa(request, mahasiswa_id):
 @login_required
 def master_data_wajah(request):
     """View untuk master data wajah admin"""
-    return render(request, 'admin/master_data_wajah.html')
+    # Ambil data mahasiswa dengan jumlah foto
+    mahasiswa_list = Mahasiswa.objects.filter(
+        pengajuan_pendaftaran__status_pengajuan='disetujui'
+    ).select_related(
+        'user', 'jenjang_pendidikan', 'semester'
+    ).annotate(
+        jumlah_foto=Count('foto_wajah')
+    ).order_by('user__nama_lengkap')
+    
+    # Filter berdasarkan search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        mahasiswa_list = mahasiswa_list.filter(
+            user__nama_lengkap__icontains=search_query
+        ) | mahasiswa_list.filter(
+            user__nrp__icontains=search_query
+        ) | mahasiswa_list.filter(
+            jurusan__icontains=search_query
+        )
+    
+    context = {
+        'mahasiswa_list': mahasiswa_list,
+        'total_mahasiswa': Mahasiswa.objects.count(),
+        'total_foto': FotoWajah.objects.count(),
+        'search_query': search_query,
+    }
+    return render(request, 'admin/master_data_wajah.html', context)
+
+@login_required
+def get_foto_wajah_detail(request, mahasiswa_id):
+    """API untuk mendapatkan detail foto wajah mahasiswa (JSON response)"""
+    mahasiswa = get_object_or_404(
+        Mahasiswa.objects.select_related('user', 'jenjang_pendidikan', 'semester'),
+        id=mahasiswa_id
+    )
+    
+    foto_list = FotoWajah.objects.filter(mahasiswa=mahasiswa).order_by('-created_at')
+    
+    # Siapkan data untuk response JSON
+    foto_data = []
+    for foto in foto_list:
+        foto_data.append({
+            'id': foto.id,
+            'url': foto.file_path.url,
+            'created_at': foto.created_at.strftime("%d %b %Y %H:%M"),
+            'keterangan': foto.keterangan or ""
+        })
+    
+    response_data = {
+        'success': True,
+        'mahasiswa': {
+            'id': mahasiswa.id,
+            'nama_lengkap': mahasiswa.user.nama_lengkap,
+            'nrp': mahasiswa.user.nrp,
+            'jurusan': mahasiswa.jurusan,
+            'jenjang': mahasiswa.jenjang_pendidikan.nama_jenjang if mahasiswa.jenjang_pendidikan else '-',
+            'semester': mahasiswa.semester.nama_semester if mahasiswa.semester else '-',
+            'status_akun': mahasiswa.user.get_status_akun_display(),
+            'is_active': mahasiswa.user.status_akun == 'aktif',
+            'date_joined': mahasiswa.user.date_joined.strftime("%d %b %Y"),
+        },
+        'fotos': foto_data,
+        'total_fotos': len(foto_data)
+    }
+    
+    return JsonResponse(response_data)
+
+@login_required
+def download_all_fotos(request, mahasiswa_id):
+    """Download semua foto mahasiswa dalam format zip"""
+    mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
+    foto_list = FotoWajah.objects.filter(mahasiswa=mahasiswa)
+    
+    if not foto_list:
+        return JsonResponse({'error': 'Tidak ada foto untuk didownload'}, status=404)
+    
+    # Create zip file in memory
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for foto in foto_list:
+            if foto.file_path:
+                try:
+                    # Baca file dari storage
+                    file_content = foto.file_path.read()
+                    # Buat nama file yang rapi
+                    filename = f"{mahasiswa.user.nrp}_{foto.id:03d}_{foto.created_at.strftime('%Y%m%d_%H%M%S')}.jpg"
+                    zip_file.writestr(filename, file_content)
+                except Exception as e:
+                    continue
+    
+    zip_buffer.seek(0)
+    
+    response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename="foto_wajah_{mahasiswa.user.nrp}.zip"'
+    return response
 
 @login_required
 def data_sks(request):
-    """View untuk data SKS admin"""
-    return render(request, 'admin/data_sks.html')
+    """View untuk data SKS/Kegiatan admin"""
+    # Ambil semua kegiatan
+    kegiatan_list = Kegiatan_PA.objects.select_related('jenjang_pendidikan', 'tahun_ajaran').all().order_by('jenjang_pendidikan__nama_jenjang', 'nama_kegiatan')
+    
+    # Ambil semua jenjang untuk filter
+    jenjang_list = Jenjang_Pendidikan.objects.all()
+    
+    # Ambil semua tahun ajaran untuk tab semester
+    tahun_ajaran_list = Tahun_Ajaran.objects.all().order_by('-tanggal_mulai')
+    
+    # Filter berdasarkan jenjang
+    jenjang_filter = request.GET.get('jenjang', '')
+    if jenjang_filter:
+        kegiatan_list = kegiatan_list.filter(jenjang_pendidikan_id=jenjang_filter)
+    
+    # Filter berdasarkan pencarian
+    search_query = request.GET.get('search', '')
+    if search_query:
+        kegiatan_list = kegiatan_list.filter(
+            Q(nama_kegiatan__icontains=search_query) |
+            Q(jenjang_pendidikan__nama_jenjang__icontains=search_query)
+        )
+    
+    context = {
+        'kegiatan_list': kegiatan_list,
+        'jenjang_list': jenjang_list,
+        'tahun_ajaran_list': tahun_ajaran_list,
+        'total_kegiatan': kegiatan_list.count(),
+        'jenjang_filter': jenjang_filter,
+        'search_query': search_query,
+    }
+    return render(request, 'admin/data_sks.html', context)
+
+@login_required
+def tambah_kegiatan_sks(request):
+    """View untuk menambah kegiatan SKS baru"""
+    if request.method == 'POST':
+        try:
+            # Ambil data dari form
+            nama_kegiatan = request.POST.get('nama_kegiatan')
+            jenjang_id = request.POST.get('jenjang_pendidikan')
+            tahun_ajaran_id = request.POST.get('tahun_ajaran')
+            jumlah_sks = request.POST.get('jumlah_sks', 0)
+            total_jam_minggu = request.POST.get('total_jam_minggu', 0)
+            target_jam = request.POST.get('target_jam', 0)
+            
+            # Validasi data
+            if not nama_kegiatan or not jenjang_id:
+                messages.error(request, 'Nama kegiatan dan jenjang harus diisi')
+                return redirect('data_sks')
+            
+            # Jika tahun ajaran tidak dipilih, ambil tahun ajaran aktif
+            if not tahun_ajaran_id:
+                tahun_ajaran_aktif = Tahun_Ajaran.objects.filter(status_aktif='aktif').first()
+                if tahun_ajaran_aktif:
+                    tahun_ajaran_id = tahun_ajaran_aktif.id
+                else:
+                    messages.error(request, 'Tidak ada tahun ajaran aktif. Silakan aktifkan tahun ajaran terlebih dahulu.')
+                    return redirect('data_sks')
+            
+            # Buat objek kegiatan baru
+            kegiatan = Kegiatan_PA(
+                nama_kegiatan=nama_kegiatan,
+                jenjang_pendidikan_id=jenjang_id,
+                tahun_ajaran_id=tahun_ajaran_id,
+                jumlah_sks=jumlah_sks,
+                total_jam_minggu=total_jam_minggu,
+                target_jam=target_jam
+            )
+            kegiatan.save()
+            
+            messages.success(request, 'Kegiatan SKS berhasil ditambahkan')
+            return redirect('data_sks')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+            return redirect('data_sks')
+    
+    return redirect('data_sks')
+
+@login_required
+def edit_kegiatan_sks(request, kegiatan_id):
+    """View untuk mengedit kegiatan SKS"""
+    if request.method == 'POST':
+        try:
+            kegiatan = get_object_or_404(Kegiatan_PA, id=kegiatan_id)
+            
+            # Update data
+            kegiatan.nama_kegiatan = request.POST.get('nama_kegiatan', kegiatan.nama_kegiatan)
+            kegiatan.jenjang_pendidikan_id = request.POST.get('jenjang_pendidikan', kegiatan.jenjang_pendidikan_id)
+            kegiatan.tahun_ajaran_id = request.POST.get('tahun_ajaran', kegiatan.tahun_ajaran_id)
+            kegiatan.jumlah_sks = request.POST.get('jumlah_sks', kegiatan.jumlah_sks)
+            kegiatan.total_jam_minggu = request.POST.get('total_jam_minggu', kegiatan.total_jam_minggu)
+            kegiatan.target_jam = request.POST.get('target_jam', kegiatan.target_jam)
+            
+            kegiatan.save()
+            messages.success(request, 'Kegiatan SKS berhasil diperbarui')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+    
+    return redirect('data_sks')
+
+@login_required
+def hapus_kegiatan_sks(request, kegiatan_id):
+    """View untuk menghapus kegiatan SKS"""
+    if request.method == 'POST':
+        try:
+            kegiatan = get_object_or_404(Kegiatan_PA, id=kegiatan_id)
+            
+            # Cek apakah kegiatan sudah digunakan
+            from .models import Status_Pemenuhan_SKS
+            if Status_Pemenuhan_SKS.objects.filter(kegiatan_pa=kegiatan).exists():
+                messages.error(request, 'Tidak dapat menghapus kegiatan yang sudah digunakan')
+                return redirect('data_sks')
+            
+            kegiatan.delete()
+            messages.success(request, 'Kegiatan SKS berhasil dihapus')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+    
+    return redirect('data_sks')
+
+@login_required
+def get_detail_kegiatan(request, kegiatan_id):
+    """API untuk mendapatkan detail kegiatan (JSON response)"""
+    try:
+        kegiatan = get_object_or_404(
+            Kegiatan_PA.objects.select_related('jenjang_pendidikan', 'tahun_ajaran'),
+            id=kegiatan_id
+        )
+        
+        response_data = {
+            'success': True,
+            'kegiatan': {
+                'id': kegiatan.id,
+                'nama_kegiatan': kegiatan.nama_kegiatan,
+                'jenjang_pendidikan': {
+                    'id': kegiatan.jenjang_pendidikan.id,
+                    'nama': kegiatan.jenjang_pendidikan.nama_jenjang
+                },
+                'tahun_ajaran': {
+                    'id': kegiatan.tahun_ajaran.id if kegiatan.tahun_ajaran else None,
+                    'nama': kegiatan.tahun_ajaran.nama_tahun_ajaran if kegiatan.tahun_ajaran else None
+                },
+                'jumlah_sks': kegiatan.jumlah_sks,
+                'total_jam_minggu': kegiatan.total_jam_minggu,
+                'target_jam': kegiatan.target_jam
+            }
+        }
+        
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+@login_required
+def tambah_tahun_ajaran(request):
+    """View untuk menambah tahun ajaran baru"""
+    if request.method == 'POST':
+        try:
+            nama_tahun_ajaran = request.POST.get('nama_tahun_ajaran')
+            tanggal_mulai = request.POST.get('tanggal_mulai')
+            tanggal_selesai = request.POST.get('tanggal_selesai')
+            
+            if not nama_tahun_ajaran or not tanggal_mulai or not tanggal_selesai:
+                messages.error(request, 'Semua field harus diisi')
+                return redirect('data_sks')
+            
+            tahun_ajaran = Tahun_Ajaran(
+                nama_tahun_ajaran=nama_tahun_ajaran,
+                tanggal_mulai=tanggal_mulai,
+                tanggal_selesai=tanggal_selesai,
+                status_aktif='nonaktif'
+            )
+            tahun_ajaran.save()
+            
+            messages.success(request, 'Tahun ajaran berhasil ditambahkan')
+            return redirect('data_sks')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+    
+    return redirect('data_sks')
+
+@login_required
+def edit_tahun_ajaran(request, tahun_id):
+    """View untuk mengedit tahun ajaran"""
+    if request.method == 'POST':
+        try:
+            tahun_ajaran = get_object_or_404(Tahun_Ajaran, id=tahun_id)
+            
+            tahun_ajaran.nama_tahun_ajaran = request.POST.get('nama_tahun_ajaran', tahun_ajaran.nama_tahun_ajaran)
+            tahun_ajaran.tanggal_mulai = request.POST.get('tanggal_mulai', tahun_ajaran.tanggal_mulai)
+            tahun_ajaran.tanggal_selesai = request.POST.get('tanggal_selesai', tahun_ajaran.tanggal_selesai)
+            
+            tahun_ajaran.save()
+            messages.success(request, 'Tahun ajaran berhasil diperbarui')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+    
+    return redirect('data_sks')
+
+@login_required
+def hapus_tahun_ajaran(request, tahun_id):
+    """View untuk menghapus tahun ajaran"""
+    if request.method == 'POST':
+        try:
+            tahun_ajaran = get_object_or_404(Tahun_Ajaran, id=tahun_id)
+            
+            # Cek apakah tahun ajaran digunakan di kegiatan
+            if Kegiatan_PA.objects.filter(tahun_ajaran=tahun_ajaran).exists():
+                messages.error(request, 'Tidak dapat menghapus tahun ajaran yang sudah digunakan')
+                return redirect('data_sks')
+            
+            tahun_ajaran.delete()
+            messages.success(request, 'Tahun ajaran berhasil dihapus')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+    
+    return redirect('data_sks')
+
+@login_required
+def get_detail_tahun_ajaran(request, tahun_id):
+    """API untuk mendapatkan detail tahun ajaran"""
+    try:
+        tahun_ajaran = get_object_or_404(Tahun_Ajaran, id=tahun_id)
+        
+        response_data = {
+            'success': True,
+            'tahun_ajaran': {
+                'id': tahun_ajaran.id,
+                'nama_tahun_ajaran': tahun_ajaran.nama_tahun_ajaran,
+                'tanggal_mulai': tahun_ajaran.tanggal_mulai.strftime('%Y-%m-%d'),
+                'tanggal_selesai': tahun_ajaran.tanggal_selesai.strftime('%Y-%m-%d'),
+                'status_aktif': tahun_ajaran.status_aktif
+            }
+        }
+        
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+@login_required
+def aktifkan_tahun_ajaran(request):
+    """View untuk mengaktifkan tahun ajaran"""
+    if request.method == 'POST':
+        try:
+            tahun_id = request.POST.get('tahun_id')
+            
+            # Nonaktifkan semua tahun ajaran terlebih dahulu
+            Tahun_Ajaran.objects.update(status_aktif='nonaktif')
+            
+            # Aktifkan tahun ajaran yang dipilih
+            tahun_ajaran = get_object_or_404(Tahun_Ajaran, id=tahun_id)
+            tahun_ajaran.status_aktif = 'aktif'
+            tahun_ajaran.save()
+            
+            return JsonResponse({'success': True})
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
 
 @login_required
 def rekap_presensi(request):

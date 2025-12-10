@@ -4,7 +4,7 @@
 {% block page_title %}Data Mahasiswa{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container-fluid">
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
         <!-- Card untuk setiap jenjang -->
@@ -45,7 +45,13 @@
                                name="search" 
                                id="searchInput"
                                placeholder="Cari berdasarkan nama, NRP, email, jurusan, atau kelas..."
-                               value="{{ search_query }}">
+                               value="{{ search_query }}"
+                               autocomplete="off">
+                    {% if search_query %}
+                    <button type="button" class="btn btn-link text-muted clear-search" id="clearSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    {% endif %}
                     </div>
                 </div>
 
@@ -324,8 +330,7 @@
 }
 
 .table th {
-    font-weight: 600;
-    color: #6c757d;
+    font-weight: 700;
     border-bottom: 2px solid #dee2e6;
     white-space: nowrap;
 }
@@ -414,10 +419,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto submit form saat filter berubah
     const jenjangFilter = document.getElementById('jenjangFilter');
     const searchInput = document.getElementById('searchInput');
     const searchForm = document.querySelector('form[method="get"]');
+    const clearSearch = document.getElementById('clearSearch');
     
     let searchTimeout;
     
@@ -428,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Auto search dengan debounce
+    // Search dengan delay
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
@@ -436,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (this.value.length >= 2 || this.value.length === 0) {
                     searchForm.submit();
                 }
-            }, 500);
+            }, 800);
         });
         
         // Enter untuk search langsung
@@ -446,6 +451,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearTimeout(searchTimeout);
                 searchForm.submit();
             }
+        });
+    }
+    
+    // Clear search
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            searchForm.submit();
         });
     }
     

@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from datetime import date
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 
 # --- 1. Master Data (Jenjang, Tahun Ajaran) ---
 
@@ -316,8 +317,15 @@ class Pengajuan_Pendaftaran(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True) 
     
+    def save(self, *args, **kwargs):
+        """Override save method"""
+        if not self.pk:
+            self.created_at = timezone.now()
+        self.updated_at = timezone.now()
+        super().save(*args, **kwargs)
+    
     def __str__(self):
-        return f"Pengajuan {self.mahasiswa.nama}: {self.get_status_pengajuan_display()}"
+        return f"Pengajuan {self.mahasiswa.user.nama_lengkap}: {self.get_status_pengajuan_display()}"
     
     class Meta:
         verbose_name = "Pengajuan Pendaftaran"

@@ -387,8 +387,7 @@
     }
     
     .table th {
-        font-weight: 600;
-        color: #6c757d;
+        font-weight: 700;
         border-bottom: 2px solid #dee2e6;
         white-space: nowrap;
     }
@@ -465,13 +464,6 @@
         .modal-xl .modal-body {
             padding: 1rem;
         }
-    }
-
-    /* Gaya untuk modal detail */
-    #detailModal .modal-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 12px 12px 0 0;
     }
 
     #detailModal .modal-title {
@@ -636,6 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Handle modal detail
+    // Handle modal detail
     const detailModal = document.getElementById('detailModal');
     if (detailModal) {
         detailModal.addEventListener('show.bs.modal', function(event) {
@@ -650,28 +643,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.text();
+                // Cek jika response adalah HTML (bukan JSON)
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("text/html") !== -1) {
+                    return response.text();
+                } else {
+                    throw new Error("Response bukan HTML");
+                }
             })
             .then(html => {
                 modalBody.innerHTML = html;
-                
-                // Pasang event listener untuk download di modal
-                const downloadModalBtn = modalBody.querySelector('.btn-download-modal');
-                if (downloadModalBtn) {
-                    downloadModalBtn.addEventListener('click', function() {
-                        const mahasiswaId = this.getAttribute('data-mahasiswa-id');
-                        const nama = this.getAttribute('data-nama');
-                        const nrp = this.getAttribute('data-nrp');
-                        downloadFotoWajah(mahasiswaId, nama, nrp, this);
-                    });
-                }
             })
             .catch(error => {
+                console.error('Error loading detail:', error);
                 modalBody.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Gagal memuat data. Silakan coba lagi.
+                        Gagal memuat data. Silakan coba lagi.<br>
+                        Error: ${error.message}
                     </div>
                 `;
             });

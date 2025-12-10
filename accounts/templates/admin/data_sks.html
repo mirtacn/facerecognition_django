@@ -1,0 +1,1025 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Data SKS/Kegiatan{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Tab Navigation - Diperbaiki dengan background penuh -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="nav-tabs-container">
+                        <ul class="nav nav-tabs nav-fill m-0" id="sksTabs" role="tablist">
+                            <li class="nav-item m-0" role="presentation">
+                                <button class="nav-link active w-100 h-100" id="kegiatan-tab" data-bs-toggle="tab" data-bs-target="#kegiatan" type="button" role="tab">
+                                    <div class="tab-content-wrapper d-flex align-items-center justify-content-center py-3">
+                                        <i class="fas fa-tasks me-2"></i>
+                                        <span>Kegiatan SKS</span>
+                                    </div>
+                                </button>
+                            </li>
+                            <li class="nav-item m-0" role="presentation">
+                                <button class="nav-link w-100 h-100" id="semester-tab" data-bs-toggle="tab" data-bs-target="#semester" type="button" role="tab">
+                                    <div class="tab-content-wrapper d-flex align-items-center justify-content-center py-3">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        <span>Pengaturan Semester</span>
+                                    </div>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="sksTabsContent">
+        <!-- Tab 1: Kegiatan SKS -->
+        <div class="tab-pane fade show active" id="kegiatan" role="tabpanel">
+            <!-- Search and Add Button -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="w-100 me-3">
+                                    <form method="get" action="" class="search-form" id="searchForm">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-transparent border-0">
+                                                <i class="fas fa-search text-muted"></i>
+                                            </span>
+                                            <input type="text" 
+                                                    class="form-control border-0 ps-0" 
+                                                    name="search" 
+                                                    id="searchInput"
+                                                    placeholder="Cari berdasarkan nama kegiatan..."
+                                                    value="{{ search_query }}"
+                                                    autocomplete="off">
+                                            {% if search_query %}
+                                            <button type="button" class="btn btn-link text-muted clear-search" id="clearSearch">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahKegiatanModal">
+                                    <i class="fas fa-plus me-2"></i>Tambah Kegiatan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Data Kegiatan -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="py-3 ps-4" style="width: 25%;">Nama Kegiatan</th>
+                                            <th class="py-3" style="width: 15%;">Tingkatan</th>
+                                            <th class="py-3" style="width: 10%;">SKS</th>
+                                            <th class="py-3" style="width: 15%;">Jam/Minggu</th>
+                                            <th class="py-3" style="width: 15%;">Total Jam</th>
+                                            <th class="py-3 pe-4" style="width: 20%;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for kegiatan in kegiatan_list %}
+                                        <tr class="align-middle">
+                                            <!-- Nama Kegiatan -->
+                                            <td class="ps-4">
+                                                <div class="d-flex flex-column">
+                                                    <strong class="mb-1">{{ kegiatan.nama_kegiatan }}</strong>
+                                                    <small class="text-muted">
+                                                        Tahun Ajaran: {{ kegiatan.tahun_ajaran.nama_tahun_ajaran|default:"-" }}
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            
+                                            <!-- Tingkatan -->
+                                            <td>
+                                                <span class="badge bg-info text-white">
+                                                    {{ kegiatan.jenjang_pendidikan.nama_jenjang }}
+                                                </span>
+                                            </td>
+                                            
+                                            <!-- SKS -->
+                                            <td>
+                                                <small>{{ kegiatan.jumlah_sks }} SKS</small>
+                                            </td>
+                                            
+                                            <!-- Jam/Minggu -->
+                                            <td>
+                                                <small>{{ kegiatan.total_jam_minggu }} jam</small> 
+                                            </td>
+                                            
+                                            <!-- Total Jam -->
+                                            <td>
+                                                <small>{{ kegiatan.target_jam }} jam</small> 
+                                            </td>
+                                            
+                                            <!-- Aksi -->
+                                            <td class="pe-4">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <!-- Tombol Edit -->
+                                                    <button type="button" 
+                                                            class="btn btn-outline-primary btn-edit-kegiatan"
+                                                            data-kegiatan-id="{{ kegiatan.id }}"
+                                                            title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    
+                                                    <!-- Tombol Hapus -->
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger btn-hapus-kegiatan"
+                                                            data-kegiatan-id="{{ kegiatan.id }}"
+                                                            data-kegiatan-nama="{{ kegiatan.nama_kegiatan }}"
+                                                            title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center py-5">
+                                                <div class="text-muted">
+                                                    <i class="fas fa-tasks fa-3x mb-3 opacity-25"></i>
+                                                    <h5 class="mb-2">Belum ada data kegiatan</h5>
+                                                    <p>Tambahkan kegiatan baru dengan tombol di atas</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Pengaturan Semester -->
+        <div class="tab-pane fade" id="semester" role="tabpanel">
+            <!-- Search and Add Button untuk Semester -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="w-100 me-3">
+                                    <div class="input-group">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               name="search_semester" 
+                                               id="searchSemesterInput"
+                                               placeholder="Cari berdasarkan nama semester atau tahun ajaran..."
+                                               value="">
+                                        <button class="btn btn-outline-secondary" type="button" id="searchSemesterBtn">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahSemesterModal">
+                                    <i class="fas fa-plus me-2"></i>Tambah Semester
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Data Semester -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="py-3 ps-4" style="width: 25%;">Nama</th>
+                                            <th class="py-3" style="width: 15%;">Tanggal Mulai</th>
+                                            <th class="py-3" style="width: 15%;">Tanggal Selesai</th>
+                                            <th class="py-3" style="width: 15%;">Status</th>
+                                            <th class="py-3 pe-4" style="width: 30%;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for tahun in tahun_ajaran_list %}
+                                        <tr class="align-middle">
+                                            <!-- Nama Tahun Ajaran -->
+                                            <td class="ps-4">
+                                                <strong>{{ tahun.nama_tahun_ajaran }}</strong>
+                                            </td>
+                                            
+                                            <!-- Tanggal Mulai -->
+                                            <td>
+                                                {{ tahun.tanggal_mulai|date:"d/m/Y" }}
+                                            </td>
+                                            
+                                            <!-- Tanggal Selesai -->
+                                            <td>
+                                                {{ tahun.tanggal_selesai|date:"d/m/Y" }}
+                                            </td>
+                                            
+                                            <!-- Status -->
+                                            <td>
+                                                {% if tahun.status_aktif == 'aktif' %}
+                                                <span class="badge bg-success text-white">
+                                                    <i class="fas fa-check me-1"></i> Aktif
+                                                </span>
+                                                {% else %}
+                                                <span class="badge bg-secondary text-white">
+                                                    Nonaktif
+                                                </span>
+                                                {% endif %}
+                                            </td>
+                                            
+                                            <!-- Aksi -->
+                                            <td class="pe-4">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    {% if tahun.status_aktif == 'nonaktif' %}
+                                                    <button type="button" 
+                                                            class="btn btn-success btn-aktifkan-semester"
+                                                            data-tahun-id="{{ tahun.id }}"
+                                                            data-tahun-nama="{{ tahun.nama_tahun_ajaran }}"
+                                                            title="Aktifkan">
+                                                        <i class="fas fa-power-off me-1"></i>Aktifkan
+                                                    </button>
+                                                    {% endif %}
+                                                    
+                                                    <!-- Tombol Edit -->
+                                                    <button type="button" 
+                                                            class="btn btn-outline-primary btn-edit-semester"
+                                                            data-tahun-id="{{ tahun.id }}"
+                                                            title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    
+                                                    <!-- Tombol Hapus -->
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger btn-hapus-semester"
+                                                            data-tahun-id="{{ tahun.id }}"
+                                                            data-tahun-nama="{{ tahun.nama_tahun_ajaran }}"
+                                                            title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="text-muted">
+                                                    <i class="fas fa-calendar fa-3x mb-3 opacity-25"></i>
+                                                    <h5 class="mb-2">Belum ada data semester</h5>
+                                                    <p>Tambahkan semester baru dengan tombol di atas</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Kegiatan -->
+<div class="modal fade" id="tambahKegiatanModal" tabindex="-1" aria-labelledby="tambahKegiatanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="tambahKegiatanModalLabel">Tambah Kegiatan SKS</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'tambah_kegiatan_sks' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nama_kegiatan" class="form-label">Nama Kegiatan</label>
+                        <input type="text" class="form-control" id="nama_kegiatan" name="nama_kegiatan" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="jenjang_pendidikan" class="form-label">Jenjang Pendidikan</label>
+                        <select class="form-select" id="jenjang_pendidikan" name="jenjang_pendidikan" required>
+                            <option value="">Pilih Jenjang</option>
+                            {% for jenjang in jenjang_list %}
+                            <option value="{{ jenjang.id }}">{{ jenjang.nama_jenjang }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="jumlah_sks" class="form-label">Jumlah SKS</label>
+                            <input type="number" class="form-control" id="jumlah_sks" name="jumlah_sks" min="0" step="0.5" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="total_jam_minggu" class="form-label">Jam/Minggu</label>
+                            <input type="number" class="form-control" id="total_jam_minggu" name="total_jam_minggu" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="target_jam" class="form-label">Total Jam</label>
+                        <input type="number" class="form-control" id="target_jam" name="target_jam" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Kegiatan -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="editModalLabel">Edit Kegiatan SKS</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="" id="editForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_nama_kegiatan" class="form-label">Nama Kegiatan</label>
+                        <input type="text" class="form-control" id="edit_nama_kegiatan" name="nama_kegiatan" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_jenjang_pendidikan" class="form-label">Jenjang Pendidikan</label>
+                        <select class="form-select" id="edit_jenjang_pendidikan" name="jenjang_pendidikan" required>
+                            {% for jenjang in jenjang_list %}
+                            <option value="{{ jenjang.id }}">{{ jenjang.nama_jenjang }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_jumlah_sks" class="form-label">Jumlah SKS</label>
+                            <input type="number" class="form-control" id="edit_jumlah_sks" name="jumlah_sks" min="0" step="0.5" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_total_jam_minggu" class="form-label">Jam/Minggu</label>
+                            <input type="number" class="form-control" id="edit_total_jam_minggu" name="total_jam_minggu" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_target_jam" class="form-label">Total Jam</label>
+                        <input type="number" class="form-control" id="edit_target_jam" name="target_jam" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus Kegiatan -->
+<div class="modal fade" id="hapusModal" tabindex="-1" aria-labelledby="hapusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger" id="hapusModalLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus kegiatan <strong id="namaKegiatanHapus">-</strong>?</p>
+                <p class="text-danger small">Data yang dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form method="post" action="" id="hapusForm" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Semester -->
+<div class="modal fade" id="tambahSemesterModal" tabindex="-1" aria-labelledby="tambahSemesterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="tambahSemesterModalLabel">Tambah Semester</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'tambah_tahun_ajaran' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nama_tahun_ajaran" class="form-label">Nama Tahun Ajaran</label>
+                        <input type="text" class="form-control" id="nama_tahun_ajaran" name="nama_tahun_ajaran" required>
+                        <small class="text-muted">Contoh: Ganjil 2024/2025</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
+                            <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggal_selesai" class="form-label">Tanggal Selesai</label>
+                            <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Semester -->
+<div class="modal fade" id="editSemesterModal" tabindex="-1" aria-labelledby="editSemesterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="editSemesterModalLabel">Edit Semester</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="" id="editSemesterForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_nama_tahun_ajaran" class="form-label">Nama Tahun Ajaran</label>
+                        <input type="text" class="form-control" id="edit_nama_tahun_ajaran" name="nama_tahun_ajaran" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_tanggal_mulai" class="form-label">Tanggal Mulai</label>
+                            <input type="date" class="form-control" id="edit_tanggal_mulai" name="tanggal_mulai" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_tanggal_selesai" class="form-label">Tanggal Selesai</label>
+                            <input type="date" class="form-control" id="edit_tanggal_selesai" name="tanggal_selesai" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus Semester -->
+<div class="modal fade" id="hapusSemesterModal" tabindex="-1" aria-labelledby="hapusSemesterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger" id="hapusSemesterModalLabel">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus tahun ajaran <strong id="namaTahunHapus">-</strong>?</p>
+                <p class="text-danger small">Data yang dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form method="post" action="" id="hapusSemesterForm" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+/* Container untuk tab navigation */
+.nav-tabs-container {
+    display: flex;
+    width: 100%;
+}
+
+/* Reset gaya Bootstrap untuk tabs */
+.nav-tabs {
+    border-bottom: none;
+    display: flex;
+    width: 100%;
+    margin: 0;
+}
+
+.nav-tabs .nav-item {
+    flex: 1;
+    margin: 0;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-radius: 12px 12px 0 0;
+    color: #6c757d;
+    font-weight: 600;
+    padding: 0;
+    margin: 0;
+    transition: all 0.3s ease;
+    height: 100%;
+    background-color: transparent;
+    position: relative;
+}
+
+/* Gaya untuk tab aktif - background biru penuh */
+.nav-tabs .nav-link.active {
+    color: #ffffff;
+    background-color: #0d6efd !important;
+    border: none;
+    box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+}
+
+/* Gaya untuk tab tidak aktif */
+.nav-tabs .nav-link:not(.active) {
+    background-color: #f8f9fa;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+/* Wrapper untuk konten tab */
+.tab-content-wrapper {
+    width: 100%;
+    height: 100%;
+    padding: 1rem 0;
+}
+
+/* Border pemisah antara tab */
+.nav-item:first-child {
+    border-top-left-radius: 12px;
+}
+
+.nav-item:last-child {
+    border-top-right-radius: 12px;
+}
+
+/* Efek hover dan fokus */
+.nav-tabs .nav-link:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Indicator line untuk tab aktif */
+.nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #0a58ca;
+}
+
+.table th {
+    font-weight: 700;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.table td {
+    vertical-align: middle;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.btn-group .btn {
+    border-radius: 6px !important;
+    margin-right: 2px;
+}
+
+.modal-content {
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.modal-body {
+    padding: 0.5rem 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+}
+
+.input-group .btn-outline-secondary {
+    border-left: none;
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    padding: 0.5rem 1.5rem;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+}
+
+.btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Responsif untuk tabel */
+@media (max-width: 992px) {
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .table th, .table td {
+        white-space: nowrap;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+    }
+    
+    .modal-xl .modal-body {
+        padding: 1rem;
+    }
+    
+    /* Untuk tab di mobile */
+    .tab-content-wrapper {
+        padding: 0.75rem 0;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.9rem;
+    }
+    
+    .nav-tabs .nav-link i {
+        font-size: 0.8rem;
+        margin-right: 0.25rem !important;
+    }
+    
+    /* Untuk button di mobile */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .w-100.me-3 {
+        margin-right: 0 !important;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-primary {
+        width: 100%;
+    }
+}
+
+/* Responsif untuk mobile */
+@media (max-width: 576px) {
+    .table-responsive {
+        border: 0;
+    }
+    
+    .table thead {
+        display: none;
+    }
+    
+    .table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .table td {
+        display: block;
+        text-align: right;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .table td::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .btn-group {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .btn-group .btn {
+        padding: 0.5rem;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    /* Tab navigation di mobile */
+    .nav-tabs {
+        flex-direction: column;
+    }
+    
+    .nav-tabs .nav-item {
+        width: 100%;
+    }
+    
+    .nav-tabs .nav-link {
+        border-radius: 0;
+    }
+    
+    .nav-item:first-child {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .nav-item:last-child {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Clear search button untuk kegiatan
+    const clearSearchBtn = document.getElementById('clearSearch');
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchForm').submit();
+        });
+    }
+    
+    // Search button untuk semester
+    const searchSemesterBtn = document.getElementById('searchSemesterBtn');
+    if (searchSemesterBtn) {
+        searchSemesterBtn.addEventListener('click', function() {
+            const searchValue = document.getElementById('searchSemesterInput').value;
+            // Implement search functionality for semester here
+            console.log('Search semester:', searchValue);
+            // You can add AJAX call or form submission here
+        });
+    }
+    
+    // CSRF Token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    
+    // Handle edit button untuk kegiatan
+    const editButtons = document.querySelectorAll('.btn-edit-kegiatan');
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+    const editForm = document.getElementById('editForm');
+    
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const kegiatanId = this.getAttribute('data-kegiatan-id');
+            loadKegiatanDetail(kegiatanId);
+        });
+    });
+    
+    function loadKegiatanDetail(kegiatanId) {
+        fetch(`{% url 'get_detail_kegiatan' 0 %}`.replace('0', kegiatanId))
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const kegiatan = data.kegiatan;
+                    
+                    // Populate form
+                    document.getElementById('edit_nama_kegiatan').value = kegiatan.nama_kegiatan;
+                    document.getElementById('edit_jenjang_pendidikan').value = kegiatan.jenjang_pendidikan.id;
+                    document.getElementById('edit_jumlah_sks').value = kegiatan.jumlah_sks;
+                    document.getElementById('edit_total_jam_minggu').value = kegiatan.total_jam_minggu;
+                    document.getElementById('edit_target_jam').value = kegiatan.target_jam;
+                    
+                    // Update form action
+                    editForm.action = `{% url 'edit_kegiatan_sks' 0 %}`.replace('0', kegiatanId);
+                    
+                    // Show modal
+                    editModal.show();
+                } else {
+                    alert('Gagal memuat data kegiatan');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat memuat data');
+            });
+    }
+    
+    // Handle delete button untuk kegiatan
+    const hapusButtons = document.querySelectorAll('.btn-hapus-kegiatan');
+    const hapusModal = new bootstrap.Modal(document.getElementById('hapusModal'));
+    const hapusForm = document.getElementById('hapusForm');
+    const namaKegiatanHapus = document.getElementById('namaKegiatanHapus');
+    
+    hapusButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const kegiatanId = this.getAttribute('data-kegiatan-id');
+            const kegiatanNama = this.getAttribute('data-kegiatan-nama');
+            
+            namaKegiatanHapus.textContent = kegiatanNama;
+            hapusForm.action = `{% url 'hapus_kegiatan_sks' 0 %}`.replace('0', kegiatanId);
+            
+            hapusModal.show();
+        });
+    });
+    
+    // Handle edit button untuk semester
+    const editSemesterButtons = document.querySelectorAll('.btn-edit-semester');
+    const editSemesterModal = new bootstrap.Modal(document.getElementById('editSemesterModal'));
+    const editSemesterForm = document.getElementById('editSemesterForm');
+    
+    editSemesterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tahunId = this.getAttribute('data-tahun-id');
+            loadSemesterDetail(tahunId);
+        });
+    });
+    
+    function loadSemesterDetail(tahunId) {
+        fetch(`{% url 'get_detail_tahun_ajaran' 0 %}`.replace('0', tahunId))
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const tahun = data.tahun_ajaran;
+                    
+                    // Populate form
+                    document.getElementById('edit_nama_tahun_ajaran').value = tahun.nama_tahun_ajaran;
+                    document.getElementById('edit_tanggal_mulai').value = tahun.tanggal_mulai;
+                    document.getElementById('edit_tanggal_selesai').value = tahun.tanggal_selesai;
+                    
+                    // Update form action
+                    editSemesterForm.action = `{% url 'edit_tahun_ajaran' 0 %}`.replace('0', tahunId);
+                    
+                    // Show modal
+                    editSemesterModal.show();
+                } else {
+                    alert('Gagal memuat data semester');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat memuat data');
+            });
+    }
+    
+    // Handle delete button untuk semester
+    const hapusSemesterButtons = document.querySelectorAll('.btn-hapus-semester');
+    const hapusSemesterModal = new bootstrap.Modal(document.getElementById('hapusSemesterModal'));
+    const hapusSemesterForm = document.getElementById('hapusSemesterForm');
+    const namaTahunHapus = document.getElementById('namaTahunHapus');
+    
+    hapusSemesterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tahunId = this.getAttribute('data-tahun-id');
+            const tahunNama = this.getAttribute('data-tahun-nama');
+            
+            namaTahunHapus.textContent = tahunNama;
+            hapusSemesterForm.action = `{% url 'hapus_tahun_ajaran' 0 %}`.replace('0', tahunId);
+            
+            hapusSemesterModal.show();
+        });
+    });
+    
+    // Handle aktifkan button untuk semester
+    const aktifkanButtons = document.querySelectorAll('.btn-aktifkan-semester');
+    
+    aktifkanButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tahunId = this.getAttribute('data-tahun-id');
+            const tahunNama = this.getAttribute('data-tahun-nama');
+            
+            if (confirm(`Apakah Anda yakin ingin mengaktifkan tahun ajaran ${tahunNama}?`)) {
+                aktifkanTahunAjaran(tahunId);
+            }
+        });
+    });
+    
+    function aktifkanTahunAjaran(tahunId) {
+        const formData = new FormData();
+        formData.append('tahun_id', tahunId);
+        formData.append('csrfmiddlewaretoken', csrftoken);
+        
+        fetch(`{% url 'aktifkan_tahun_ajaran' %}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Tahun ajaran berhasil diaktifkan');
+                location.reload();
+            } else {
+                alert(data.error || 'Terjadi kesalahan');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan');
+        });
+    }
+    
+    // Initialize Bootstrap modals
+    const tambahKegiatanModal = new bootstrap.Modal(document.getElementById('tambahKegiatanModal'));
+    const tambahSemesterModal = new bootstrap.Modal(document.getElementById('tambahSemesterModal'));
+    
+    // Make table responsive on mobile
+    function makeTableResponsive() {
+        if (window.innerWidth < 768) {
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const headers = [];
+                const thElements = table.querySelectorAll('thead th');
+                thElements.forEach(th => {
+                    headers.push(th.textContent.trim());
+                });
+                
+                const tableCells = table.querySelectorAll('tbody td');
+                tableCells.forEach((cell, index) => {
+                    const headerIndex = index % headers.length;
+                    cell.setAttribute('data-label', headers[headerIndex]);
+                });
+            });
+        }
+    }
+    
+    makeTableResponsive();
+    window.addEventListener('resize', makeTableResponsive);
+    
+    // Debug info untuk memastikan modal bekerja
+    console.log('Modal Tambah Kegiatan:', document.getElementById('tambahKegiatanModal'));
+    console.log('Modal Tambah Semester:', document.getElementById('tambahSemesterModal'));
+});
+</script>
+{% endblock %}

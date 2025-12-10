@@ -1,0 +1,641 @@
+<!-- accounts/templates/admin/status_pemenuhan_sks.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Status Pemenuhan SKS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="text-muted text-uppercase small">TOTAL MAHASISWA</h6>
+                            <h3 class="fw-bold mb-0">{{ total_mahasiswa }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon-circle bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-users fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="text-muted text-uppercase small">TOTAL SKS</h6>
+                            <h3 class="fw-bold mb-0">{{ total_sks_all }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon-circle bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-graduation-cap fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="text-muted text-uppercase small">STATUS MEMENUHI</h6>
+                            <h3 class="fw-bold mb-0">{{ total_memenuhi }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon-circle bg-info bg-opacity-10 text-info">
+                                <i class="fas fa-check-circle fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="text-muted text-uppercase small">BELUM MEMENUHI</h6>
+                            <h3 class="fw-bold mb-0">{{ total_belum_memenuhi }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon-circle bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-x fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search -->
+    <div class="card border-0 shadow-sm mb-4 rounded-3">
+        <div class="card-body p-3">
+            <div class="row g-3 align-items-center">
+                <!-- Search -->
+                <div class="col-md-5">
+                    <label for="searchInput" class="form-label small fw-semibold text-muted">Cari Mahasiswa</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-0 ps-0" 
+                               id="searchInput"
+                               placeholder="Cari berdasarkan nama, NRP, atau kelas..."
+                               autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="jenjangFilter" class="form-label small fw-semibold text-muted">Filter Jenjang</label>
+                    <select class="form-select" id="jenjangFilter">
+                        <option value="">Semua Jenjang</option>
+                        {% for jenjang in jenjang_list %}
+                        <option value="{{ jenjang.nama_jenjang }}">
+                            {{ jenjang.nama_jenjang }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-3 text-end">
+                    <button type="button" class="btn btn-success me-2" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Export Excel
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="printPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Print PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Status Pemenuhan SKS -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white border-0 rounded-top-3 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    Status Pemenuhan SKS
+                    {% if jenjang_filter %}
+                    <span class="text-muted">({{ jenjang_filter }})</span>
+                    {% endif %}
+                </h5>
+                <span class="badge bg-primary rounded-pill fs-6" id="mahasiswaCounter">
+                    {{ total_mahasiswa }} mahasiswa ditemukan
+                </span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0" id="statusTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3 text-center" style="width: 12%;">Nama Mahasiswa</th>
+                            <th class="py-3 text-center" style="width: 18%;">Kegiatan</th>
+                            <th class="py-3 text-center" style="width: 10%;">Tingkatan</th>
+                            <th class="py-3 text-center" style="width: 8%;">SKS</th>
+                            <th class="py-3 text-center" style="width: 10%;">Jam/Minggu</th>
+                            <th class="py-3 text-center" style="width: 12%;">Jam/semester</th>
+                            <th class="py-3 text-center" style="width: 15%;">Progress</th>
+                            <th class="py-3 text-center" style="width: 10%;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in data_mahasiswa %}
+                            <!-- Baris pertama untuk setiap mahasiswa -->
+                            {% with first_kegiatan=data.kegiatan_list|first %}
+                            <tr class="align-middle mahasiswa-row" data-jenjang="{{ data.jenjang|default:'-' }}">
+                                <!-- Nama Mahasiswa (rowspan untuk semua baris kegiatan) -->
+                                <td class="text-center fw-bold" rowspan="{{ data.kegiatan_list|length }}">
+                                    {{ data.nama }}
+                                </td>
+                                
+                                <!-- Kegiatan pertama -->
+                                <td class="text-center">{{ first_kegiatan.nama_kegiatan }}</td>
+                                
+                                <!-- Tingkatan dari database (rowspan untuk semua baris kegiatan) -->
+                                <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
+                                    <span class="badge bg-secondary">
+                                        {{ data.jenjang|default:"-" }}
+                                    </span>
+                                </td>
+                                
+                                <!-- SKS kegiatan pertama -->
+                                <td class="text-center">
+                                    {{ first_kegiatan.sks|default:0 }} SKS
+                                </td>
+                                
+                                <!-- Jam/Minggu kegiatan pertama -->
+                                <td class="text-center">{{ first_kegiatan.jam_per_minggu|default:0 }} Jam</td>
+                                
+                                <!-- Jam/semester kegiatan pertama -->
+                                <td class="text-center">{{ first_kegiatan.jam_target|default:0 }} Jam</td>
+                                
+                                <!-- Progress TOTAL (rowspan untuk semua baris kegiatan) -->
+                                <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
+                                    {{ data.total_jam_ditempuh }}/{{ data.total_jam_target }} jam
+                                </td>
+                                
+                                <!-- Status TOTAL (rowspan untuk semua baris kegiatan) -->
+                                <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
+                                    <span class="badge {% if data.status_overall == 'Memenuhi' %}bg-sukses{% else %}bg-kurang{% endif %}">
+                                        {{ data.status_overall }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                            
+                            <!-- Baris untuk kegiatan selanjutnya (jika ada lebih dari 1 kegiatan) -->
+                            {% for kegiatan in data.kegiatan_list|slice:"1:" %}
+                            <tr class="align-middle mahasiswa-row" data-jenjang="{{ data.jenjang|default:'-' }}">
+                                <!-- Kegiatan -->
+                                <td class="text-center">{{ kegiatan.nama_kegiatan }}</td>
+                                
+                                <!-- SKS -->
+                                <td class="text-center">
+                                    {{ kegiatan.sks|default:0 }} SKS
+                                </td>
+                                
+                                <!-- Jam/Minggu -->
+                                <td class="text-center">{{ kegiatan.jam_per_minggu|default:0 }} Jam</td>
+                                
+                                <!-- Jam/semester -->
+                                <td class="text-center">{{ kegiatan.jam_target|default:0 }} Jam</td>
+                                
+                                <!-- Progress dan Status sudah di-merge di baris pertama -->
+                            </tr>
+                            {% endfor %}
+                            
+                            <!-- Baris kosong sebagai pemisah antar mahasiswa -->
+                            <tr class="separator-row">
+                                <td colspan="8" style="height: 10px; background-color: #fff; border: none;"></td>
+                            </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                                    <h5 class="mb-2">Tidak ada data mahasiswa dengan status disetujui</h5>
+                                    <p>Belum ada mahasiswa yang pengajuannya disetujui</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+.icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.table th {
+    font-weight: 700;
+    border: 1px solid #dee2e6 !important;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 12px 8px !important;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 12px 8px !important;
+    border: 1px solid #dee2e6 !important;
+    word-wrap: break-word;
+}
+
+/* Semua kolom align center */
+.table td,
+.table th {
+    text-align: center !important;
+}
+
+/* Lebar kolom yang lebih proporsional */
+.table th:nth-child(1) { width: 12%; } /* Nama Mahasiswa */
+.table th:nth-child(2) { width: 18%; } /* Kegiatan */
+.table th:nth-child(3) { width: 10%; } /* Tingkatan */
+.table th:nth-child(4) { width: 8%; }  /* SKS */
+.table th:nth-child(5) { width: 10%; } /* Jam/Minggu */
+.table th:nth-child(6) { width: 12%; } /* Jam/semester */
+.table th:nth-child(7) { width: 15%; } /* Progress */
+.table th:nth-child(8) { width: 10%; } /* Status */
+
+/* Style untuk badge */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    font-size: 0.85em;
+}
+
+.bg-sukses {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.bg-kurang {
+    background-color: #ff0000ff !important;
+    color: #ffffffff !important;
+}
+
+/* Responsif untuk tabel */
+@media (max-width: 768px) {
+    .table-responsive {
+        margin: 0 -1rem;
+        width: calc(100% + 2rem);
+    }
+    
+    .table {
+        min-width: 800px; /* Minimum width untuk horizontal scroll */
+    }
+    
+    .table th,
+    .table td {
+        padding: 8px 6px !important;
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.8em;
+        padding: 0.3em 0.5em;
+    }
+}
+
+/* Hover effect untuk baris */
+.table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Baris pemisah antar mahasiswa */
+.separator-row td {
+    height: 10px !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Tambahan untuk tabel yang rapi */
+.table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #dee2e6;
+}
+
+/* Memastikan tabel tidak memiliki margin luar */
+.card-body.p-0 {
+    padding: 0 !important;
+}
+
+.table-responsive {
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+/* Border radius untuk sudut tabel */
+.table {
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+/* Style khusus untuk kolom Kegiatan */
+#statusTable td:nth-child(2) {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (min-width: 1200px) {
+    #statusTable td:nth-child(2) {
+        max-width: 250px;
+        white-space: normal;
+    }
+}
+
+
+/* Pastikan rowspan bekerja dengan benar */
+.table td[rowspan] {
+    vertical-align: middle !important;
+}
+
+/* Style untuk baris pertama mahasiswa */
+.mahasiswa-row:first-of-type td {
+    border-top: 2px solid #dee2e6 !important;
+}
+
+/* Tambahan untuk memastikan baris terlihat sebagai grup */
+.mahasiswa-row td:first-child {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+/* Hilangkan border top untuk baris selain pertama dalam grup */
+.mahasiswa-row:not(:first-of-type) td {
+    border-top: 1px solid #dee2e6 !important;
+}
+
+/* Style untuk separator yang lebih jelas */
+.separator-row {
+    background: linear-gradient(90deg, transparent 0%, #e9ecef 50%, transparent 100%);
+}
+
+.separator-row td {
+    height: 4px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const jenjangFilter = document.getElementById('jenjangFilter');
+    const mahasiswaCounter = document.getElementById('mahasiswaCounter');
+    
+    // Fungsi untuk menghitung jumlah mahasiswa yang terlihat
+    function countVisibleMahasiswa() {
+        const allRows = document.querySelectorAll('#statusTable tbody tr');
+        let visibleMahasiswa = new Set();
+        let currentMahasiswaName = '';
+        let isMahasiswaVisible = false;
+        
+        allRows.forEach(row => {
+            if (row.classList.contains('separator-row')) {
+                // Jika separator, reset untuk mahasiswa berikutnya
+                if (isMahasiswaVisible && currentMahasiswaName) {
+                    visibleMahasiswa.add(currentMahasiswaName);
+                }
+                currentMahasiswaName = '';
+                isMahasiswaVisible = false;
+            } else if (row.classList.contains('mahasiswa-row')) {
+                // Jika baris mahasiswa
+                if (row.style.display !== 'none') {
+                    // Cek apakah ini baris pertama mahasiswa (yang memiliki rowspan di kolom nama)
+                    const namaCell = row.querySelector('td:first-child');
+                    if (namaCell && namaCell.hasAttribute('rowspan')) {
+                        currentMahasiswaName = namaCell.textContent.trim();
+                        isMahasiswaVisible = true;
+                    } else if (currentMahasiswaName) {
+                        // Jika bukan baris pertama, gunakan nama yang sudah ada
+                        isMahasiswaVisible = true;
+                    }
+                }
+            }
+        });
+        
+        // Tambahkan mahasiswa terakhir jika terlihat
+        if (isMahasiswaVisible && currentMahasiswaName) {
+            visibleMahasiswa.add(currentMahasiswaName);
+        }
+        
+        return visibleMahasiswa.size;
+    }
+    
+    // Fungsi untuk update counter
+    function updateCounter() {
+        const totalVisible = countVisibleMahasiswa();
+        mahasiswaCounter.textContent = totalVisible + ' mahasiswa ditemukan';
+    }
+    
+    // Fungsi untuk apply filter
+    function applyFilters() {
+        const searchValue = searchInput.value.toLowerCase();
+        const jenjangValue = jenjangFilter.value;
+        
+        const rows = document.querySelectorAll('#statusTable tbody tr');
+        let currentMahasiswaRows = [];
+        let showMahasiswa = false;
+        let mahasiswaIndex = 0;
+        let currentJenjang = '';
+        let currentMahasiswaName = '';
+        
+        rows.forEach(row => {
+            const isSeparator = row.classList.contains('separator-row');
+            const isMahasiswaRow = row.classList.contains('mahasiswa-row');
+            
+            if (isSeparator) {
+                // Proses separator: tampilkan atau sembunyikan grup mahasiswa
+                if (showMahasiswa) {
+                    currentMahasiswaRows.forEach(r => r.style.display = 'table-row');
+                    row.style.display = 'table-row';
+                } else {
+                    currentMahasiswaRows.forEach(r => r.style.display = 'none');
+                    row.style.display = 'none';
+                }
+                
+                // Reset untuk mahasiswa berikutnya
+                currentMahasiswaRows = [];
+                showMahasiswa = false;
+                mahasiswaIndex = 0;
+                currentJenjang = '';
+                currentMahasiswaName = '';
+            } else if (isMahasiswaRow) {
+                currentMahasiswaRows.push(row);
+                
+                // Cek apakah ini baris pertama mahasiswa
+                if (mahasiswaIndex === 0) {
+                    // Ambil nama mahasiswa
+                    const firstCell = row.querySelector('td:first-child');
+                    if (firstCell && firstCell.hasAttribute('rowspan')) {
+                        currentMahasiswaName = firstCell.textContent.trim();
+                    }
+                    
+                    // Ambil jenjang dari atribut data
+                    currentJenjang = row.getAttribute('data-jenjang') || '';
+                    
+                    let matchesSearch = true;
+                    let matchesJenjang = true;
+                    
+                    // Cek filter pencarian
+                    if (searchValue) {
+                        // Cari di semua teks baris
+                        const rowText = row.textContent.toLowerCase();
+                        matchesSearch = rowText.includes(searchValue);
+                    }
+                    
+                    // Cek filter jenjang
+                    if (jenjangValue) {
+                        matchesJenjang = currentJenjang === jenjangValue;
+                    }
+                    
+                    // Jika memenuhi kedua filter
+                    showMahasiswa = matchesSearch && matchesJenjang;
+                }
+                
+                mahasiswaIndex++;
+            }
+        });
+        
+        // Update counter
+        updateCounter();
+    }
+    
+    // Event listeners
+    if (searchInput) {
+        searchInput.addEventListener('keyup', applyFilters);
+    }
+    
+    if (jenjangFilter) {
+        jenjangFilter.addEventListener('change', applyFilters);
+    }
+    
+    // Tambahkan checkbox untuk filter "Belum Memenuhi"
+    const filterContainer = document.querySelector('.col-md-4');
+    if (filterContainer) {
+        const incompleteCheckbox = document.createElement('div');
+        incompleteCheckbox.className = 'form-check mt-2';
+        incompleteCheckbox.innerHTML = `
+            <input class="form-check-input" type="checkbox" id="showOnlyIncomplete">
+            <label class="form-check-label small" for="showOnlyIncomplete">
+                Tampilkan hanya yang belum memenuhi
+            </label>
+        `;
+        filterContainer.appendChild(incompleteCheckbox);
+        
+        document.getElementById('showOnlyIncomplete').addEventListener('change', function() {
+            const showIncomplete = this.checked;
+            const rows = document.querySelectorAll('#statusTable tbody tr');
+            let currentMahasiswaRows = [];
+            let showMahasiswa = false;
+            let mahasiswaIndex = 0;
+            
+            rows.forEach(row => {
+                const isSeparator = row.classList.contains('separator-row');
+                const isMahasiswaRow = row.classList.contains('mahasiswa-row');
+                
+                if (isSeparator) {
+                    // Proses separator
+                    if (showMahasiswa) {
+                        currentMahasiswaRows.forEach(r => r.style.display = 'table-row');
+                        row.style.display = 'table-row';
+                    } else {
+                        currentMahasiswaRows.forEach(r => r.style.display = 'none');
+                        row.style.display = 'none';
+                    }
+                    
+                    currentMahasiswaRows = [];
+                    showMahasiswa = false;
+                    mahasiswaIndex = 0;
+                } else if (isMahasiswaRow) {
+                    currentMahasiswaRows.push(row);
+                    
+                    // Cek apakah ini baris pertama mahasiswa
+                    if (mahasiswaIndex === 0) {
+                        const statusBadge = row.querySelector('td:nth-child(8) .badge');
+                        if (statusBadge) {
+                            const statusText = statusBadge.textContent.trim().toLowerCase();
+                            if (showIncomplete) {
+                                showMahasiswa = statusText.includes('belum');
+                            } else {
+                                showMahasiswa = true;
+                            }
+                        }
+                    }
+                    
+                    mahasiswaIndex++;
+                }
+            });
+            
+            // Update counter
+            updateCounter();
+        });
+    }
+    
+    // Fungsi export Excel
+    window.exportToExcel = function() {
+        alert('Fitur export Excel akan diimplementasi');
+    };
+    
+    // Fungsi print PDF
+    window.printPDF = function() {
+        window.print();
+    };
+    
+    // Inisialisasi awal
+    updateCounter();
+});
+</script>
+{% endblock %}

@@ -93,14 +93,14 @@
                 <span class="fw-medium">Monitoring Presensi</span>
                 <i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <div class="collapse {% if 'monitoring_presensi' in request.resolver_match.url_name or 'rekap_presensi' in request.resolver_match.url_name %}show{% endif %}" 
+            <div class="collapse {% if 'monitoring_presensi' in request.resolver_match.url_name or 'status_pemenuhan_sks' in request.resolver_match.url_name %}show{% endif %}" 
                  id="monitoringPresensiCollapse">
                 <ul class="nav nav-pills flex-column ms-4 mt-2">
                     <li class="nav-item mb-1">
-                        <a href="{% url 'monitoring_presensi' %}" 
+                        <a href="{% url 'status_pemenuhan_sks' %}" 
                            class="nav-link text-white d-flex align-items-center py-2 px-3 rounded {% if request.resolver_match.url_name == 'monitoring_presensi' %}active bg-primary{% else %}hover-bg{% endif %}">
                             <i class="bi bi-eye me-2 fs-6"></i>
-                            <span>Monitoring Presensi</span>
+                            <span>Status Pemenuhan SKS</span>
                         </a>
                     </li>
                     <li class="nav-item mb-1">
