@@ -1,4 +1,6 @@
 {% load static %}
+{% load i18n %}
+
 <div class="container-fluid">
     <form id="editMahasiswaForm" method="post" action="{% url 'edit_mahasiswa' mahasiswa.id %}">
         {% csrf_token %}
@@ -7,12 +9,12 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h6 class="text-primary mb-3 fw-bold">
-                    <i class="fas fa-user me-2"></i>Data Pribadi
+                    <i class="fas fa-user me-2"></i>{% trans "Personal Data" %}
                 </h6>
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="nama_lengkap" class="form-label fw-semibold">Nama Lengkap *</label>
+                <label for="nama_lengkap" class="form-label fw-semibold">{% trans "Full Name" %} *</label>
                 <input type="text" 
                        class="form-control" 
                        id="nama_lengkap" 
@@ -22,18 +24,18 @@
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="nrp" class="form-label fw-semibold">NRP *</label>
+                <label for="nrp" class="form-label fw-semibold">{% trans "Student ID" %} *</label>
                 <input type="text" 
                        class="form-control" 
                        id="nrp" 
                        name="nrp" 
                        value="{{ mahasiswa.user.nrp }}"
                        required>
-                <small class="text-muted">Nomor Registrasi Pokok (unik)</small>
+                <small class="text-muted">{% trans "Unique Registration Number" %}</small>
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="email" class="form-label fw-semibold">Email *</label>
+                <label for="email" class="form-label fw-semibold">{% trans "Email" %} *</label>
                 <input type="email" 
                        class="form-control" 
                        id="email" 
@@ -43,10 +45,10 @@
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="status_akun" class="form-label fw-semibold">Status Akun</label>
+                <label for="status_akun" class="form-label fw-semibold">{% trans "Account Status" %}</label>
                 <select class="form-select" id="status_akun" name="status_akun">
-                    <option value="aktif" {% if mahasiswa.user.is_active %}selected{% endif %}>Aktif</option>
-                    <option value="nonaktif" {% if not mahasiswa.user.is_active %}selected{% endif %}>Nonaktif</option>
+                    <option value="aktif" {% if mahasiswa.user.is_active %}selected{% endif %}>{% trans "Active" %}</option>
+                    <option value="nonaktif" {% if not mahasiswa.user.is_active %}selected{% endif %}>{% trans "Inactive" %}</option>
                 </select>
             </div>
         </div>
@@ -55,14 +57,14 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h6 class="text-primary mb-3 fw-bold">
-                    <i class="fas fa-graduation-cap me-2"></i>Data Akademik
+                    <i class="fas fa-graduation-cap me-2"></i>{% trans "Academic Data" %}
                 </h6>
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="jenjang_pendidikan" class="form-label fw-semibold">Jenjang Pendidikan</label>
+                <label for="jenjang_pendidikan" class="form-label fw-semibold">{% trans "Education Level" %}</label>
                 <select class="form-select" id="jenjang_pendidikan" name="jenjang_pendidikan">
-                    <option value="">Pilih Jenjang</option>
+                    <option value="">{% trans "Select Level" %}</option>
                     {% for jenjang in jenjang_pendidikan_list %}
                     <option value="{{ jenjang.id }}" 
                             {% if mahasiswa.jenjang_pendidikan.id == jenjang.id %}selected{% endif %}>
@@ -73,9 +75,9 @@
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="semester" class="form-label fw-semibold">Semester</label>
+                <label for="semester" class="form-label fw-semibold">{% trans "Semester" %}</label>
                 <select class="form-select" id="semester" name="semester">
-                    <option value="">Pilih Semester</option>
+                    <option value="">{% trans "Select Semester" %}</option>
                     {% for sem in semester_list %}
                     <option value="{{ sem.id }}" 
                             {% if mahasiswa.semester.id == sem.id %}selected{% endif %}>
@@ -86,7 +88,7 @@
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="kelas" class="form-label fw-semibold">Kelas</label>
+                <label for="kelas" class="form-label fw-semibold">{% trans "Class" %}</label>
                 <input type="text" 
                        class="form-control" 
                        id="kelas" 
@@ -95,7 +97,7 @@
             </div>
             
             <div class="col-md-6 mb-3">
-                <label for="angkatan" class="form-label fw-semibold">Angkatan</label>
+                <label for="angkatan" class="form-label fw-semibold">{% trans "Year of Entry" %}</label>
                 <input type="number" 
                        class="form-control" 
                        id="angkatan" 
@@ -105,7 +107,7 @@
             </div>
             
             <div class="col-12 mb-3">
-                <label for="jurusan" class="form-label fw-semibold">Jurusan/Prodi</label>
+                <label for="jurusan" class="form-label fw-semibold">{% trans "Major/Study Program" %}</label>
                 <input type="text" 
                        class="form-control" 
                        id="jurusan" 
@@ -119,10 +121,10 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h6 class="text-primary mb-3 fw-bold">
-                    <i class="fas fa-book me-2"></i>Kegiatan SKS
+                    <i class="fas fa-book me-2"></i>{% trans "Credit Activities" %}
                 </h6>
                 <div class="form-group">
-                    <label class="form-label fw-semibold">Pilih Kegiatan</label>
+                    <label class="form-label fw-semibold">{% trans "Select Activities" %}</label>
                     <div class="row">
                         {% for kegiatan in kegiatan_pa_list %}
                         <div class="col-md-6 mb-2">
@@ -135,7 +137,7 @@
                                        {% if kegiatan in mahasiswa.kegiatan_pa.all %}checked{% endif %}>
                                 <label class="form-check-label" for="kegiatan{{ kegiatan.id }}">
                                     {{ kegiatan.nama_kegiatan }}
-                                    <span class="badge bg-primary ms-2">{{ kegiatan.jumlah_sks }} SKS</span>
+                                    <span class="badge bg-primary ms-2">{{ kegiatan.jumlah_sks }} {% trans "Credits" %}</span>
                                 </label>
                             </div>
                         </div>
@@ -151,10 +153,10 @@
             <div class="col-12">
                 <div class="d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Batal
+                        {% trans "Cancel" %}
                     </button>
                     <button type="submit" class="btn btn-primary" id="submitEdit">
-                        <i class="fas fa-save me-2"></i>Simpan Perubahan
+                        <i class="fas fa-save me-2"></i>{% trans "Save Changes" %}
                     </button>
                 </div>
             </div>
@@ -174,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalText = submitButton.innerHTML;
         
         // Show loading
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Saving..." %}';
         submitButton.disabled = true;
         
         fetch(form.action, {
@@ -188,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 // Show success message
-                showAlert('Data mahasiswa berhasil diperbarui!', 'success');
+                showAlert('{% trans "Student data successfully updated!" %}', 'success');
                 
                 // Close modal after 1.5 seconds
                 setTimeout(() => {
@@ -201,13 +203,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 500);
                 }, 1500);
             } else {
-                showAlert(data.message || 'Terjadi kesalahan', 'error');
+                showAlert(data.message || '{% trans "An error occurred" %}', 'error');
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
             }
         })
         .catch(error => {
-            showAlert('Terjadi kesalahan jaringan', 'error');
+            showAlert('{% trans "Network error occurred" %}', 'error');
             submitButton.innerHTML = originalText;
             submitButton.disabled = false;
         });

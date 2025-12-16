@@ -6,6 +6,7 @@ from django.db import transaction
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
+from django import forms
 from datetime import datetime, date, timedelta 
 from .forms import Step1Form, Step2Form, Step3Form
 from .models import (
@@ -13,6 +14,7 @@ from .models import (
     Tahun_Ajaran, Dosen, Mahasiswa_Dosen, Pengajuan_Pendaftaran,
     Status_Pemenuhan_SKS, Semester, FotoWajah, Mahasiswa_Dosen, Presensi,Durasi
 )
+from .forms import FilterRekapPresensiForm
 from django.db.models import Sum, F, Case, When, Value
 from django.db.models.functions import Coalesce
 from django.views.decorators.csrf import csrf_exempt
@@ -626,6 +628,105 @@ def checkin_presensi(request):
     
     return JsonResponse({'success': False, 'message': 'Method not allowed'})
 
+@login_required
+def update_jam_tercapai_from_durasi(request):
+    """
+    Fungsi untuk mengupdate jam_tercapai di Status_Pemenuhan_SKS 
+    berdasarkan total durasi dari tabel Durasi
+    """
+    try:
+        # 1. Ambil semua data durasi yang terkait dengan presensi
+        durasi_list = Durasi.objects.select_related(
+            'presensi__mahasiswa',
+            'presensi__kegiatan_pa'
+        ).all()
+        
+        # 2. Kelompokkan durasi berdasarkan mahasiswa dan kegiatan PA
+        durasi_by_mahasiswa_kegiatan = {}
+        
+        for durasi in durasi_list:
+            mahasiswa_id = durasi.presensi.mahasiswa.id
+            kegiatan_pa_id = durasi.presensi.kegiatan_pa.id
+            key = f"{mahasiswa_id}_{kegiatan_pa_id}"
+            
+            if key not in durasi_by_mahasiswa_kegiatan:
+                durasi_by_mahasiswa_kegiatan[key] = {
+                    'mahasiswa_id': mahasiswa_id,
+                    'kegiatan_pa_id': kegiatan_pa_id,
+                    'total_durasi_seconds': 0
+                }
+            
+            # Hitung total durasi dalam detik
+            durasi_by_mahasiswa_kegiatan[key]['total_durasi_seconds'] += durasi.waktu_durasi.total_seconds()
+        
+        # 3. Update Status_Pemenuhan_SKS berdasarkan total durasi
+        updated_count = 0
+        for key, data in durasi_by_mahasiswa_kegiatan.items():
+            # Konversi detik ke jam (dibulatkan ke bawah)
+            total_jam = int(data['total_durasi_seconds'] // 3600)
+            
+            # Update atau buat Status_Pemenuhan_SKS
+            status_sks, created = Status_Pemenuhan_SKS.objects.update_or_create(
+                mahasiswa_id=data['mahasiswa_id'],
+                kegiatan_pa_id=data['kegiatan_pa_id'],
+                defaults={
+                    'jam_tercapai': total_jam
+                }
+            )
+            
+            # Update status pemenuhan berdasarkan jam_tercapai vs jam_target
+            if status_sks.jam_tercapai >= status_sks.jam_target:
+                status_sks.status_pemenuhan = 'memenuhi'
+            else:
+                status_sks.status_pemenuhan = 'belum memenuhi'
+            
+            status_sks.save()
+            updated_count += 1
+        
+        # 4. Untuk mahasiswa yang tidak memiliki durasi, set jam_tercapai = 0
+        # (Opsional, tergantung kebutuhan)
+        all_status_sks = Status_Pemenuhan_SKS.objects.filter(jam_tercapai__gt=0)
+        for status in all_status_sks:
+            if not Durasi.objects.filter(
+                presensi__mahasiswa=status.mahasiswa,
+                presensi__kegiatan_pa=status.kegiatan_pa
+            ).exists():
+                status.jam_tercapai = 0
+                status.status_pemenuhan = 'belum memenuhi'
+                status.save()
+                updated_count += 1
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Berhasil mengupdate {updated_count} data Status_Pemenuhan_SKS',
+            'updated_count': updated_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
+
+# Fungsi untuk menghitung total durasi per mahasiswa per kegiatan
+def calculate_total_duration(mahasiswa_id, kegiatan_pa_id):
+    """
+    Menghitung total durasi dalam jam untuk mahasiswa dan kegiatan PA tertentu
+    """
+    total_seconds = Durasi.objects.filter(
+        presensi__mahasiswa_id=mahasiswa_id,
+        presensi__kegiatan_pa_id=kegiatan_pa_id
+    ).aggregate(total=Sum('waktu_durasi'))['total'] or 0
+    
+    # Jika total_seconds adalah timedelta, konversi ke total detik
+    if hasattr(total_seconds, 'total_seconds'):
+        total_seconds = total_seconds.total_seconds()
+    
+    # Konversi detik ke jam
+    total_hours = int(total_seconds // 3600)
+    return total_hours
+
+# Modifikasi fungsi checkout_presensi untuk langsung update jam_tercapai
 @csrf_exempt
 @login_required
 def checkout_presensi(request):
@@ -684,19 +785,30 @@ def checkout_presensi(request):
                     waktu_durasi=durasi
                 )
                 
-                # Update status pemenuhan SKS
+                # PERBAIKAN: Update Status_Pemenuhan_SKS berdasarkan TOTAL durasi
+                # 1. Hitung total durasi untuk mahasiswa ini di kegiatan PA ini
+                total_hours = calculate_total_duration(mahasiswa.id, presensi.kegiatan_pa.id)
+                
+                # 2. Update atau buat Status_Pemenuhan_SKS
                 status_sks, created = Status_Pemenuhan_SKS.objects.get_or_create(
                     mahasiswa=mahasiswa,
-                    kegiatan_pa=presensi.kegiatan_pa
+                    kegiatan_pa=presensi.kegiatan_pa,
+                    defaults={
+                        'jam_target': presensi.kegiatan_pa.target_jam,
+                        'jumlah_sks': presensi.kegiatan_pa.jumlah_sks,
+                        'jam_tercapai': total_hours
+                    }
                 )
                 
-                # Tambahkan jam yang dicapai
-                jam_tercapai = durasi.seconds // 3600  # Konversi detik ke jam
-                status_sks.jam_tercapai += jam_tercapai
+                # 3. Jika sudah ada, update jam_tercapai
+                if not created:
+                    status_sks.jam_tercapai = total_hours
                 
-                # Cek apakah sudah memenuhi target
+                # 4. Cek apakah sudah memenuhi target
                 if status_sks.jam_tercapai >= status_sks.jam_target:
                     status_sks.status_pemenuhan = 'memenuhi'
+                else:
+                    status_sks.status_pemenuhan = 'belum memenuhi'
                 
                 status_sks.save()
             
@@ -713,7 +825,8 @@ def checkout_presensi(request):
                 'message': 'Check-out berhasil',
                 'data': {
                     'jam_checkout': presensi.jam_checkout.strftime('%H:%M'),
-                    'presensi_id': presensi.id
+                    'presensi_id': presensi.id,
+                    'total_durasi_jam': total_hours if 'total_hours' in locals() else 0
                 }
             })
             
@@ -726,6 +839,138 @@ def checkout_presensi(request):
             })
     
     return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+# Fungsi untuk sinkronisasi manual (bisa dipanggil dari admin)
+@login_required
+def sync_all_durasi_to_status_sks(request):
+    """
+    Sinkronisasi semua data durasi ke Status_Pemenuhan_SKS
+    Hanya bisa diakses oleh admin
+    """
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    try:
+        # 1. Ambil semua mahasiswa yang memiliki presensi
+        mahasiswa_list = Mahasiswa.objects.filter(
+            presensi__isnull=False
+        ).distinct()
+        
+        updated_count = 0
+        
+        for mahasiswa in mahasiswa_list:
+            # 2. Ambil semua kegiatan PA yang diikuti mahasiswa ini
+            kegiatan_pa_list = Kegiatan_PA.objects.filter(
+                presensi__mahasiswa=mahasiswa
+            ).distinct()
+            
+            for kegiatan_pa in kegiatan_pa_list:
+                # 3. Hitung total durasi untuk pasangan (mahasiswa, kegiatan_pa)
+                total_hours = calculate_total_duration(mahasiswa.id, kegiatan_pa.id)
+                
+                # 4. Update atau buat Status_Pemenuhan_SKS
+                status_sks, created = Status_Pemenuhan_SKS.objects.update_or_create(
+                    mahasiswa=mahasiswa,
+                    kegiatan_pa=kegiatan_pa,
+                    defaults={
+                        'jam_target': kegiatan_pa.target_jam,
+                        'jumlah_sks': kegiatan_pa.jumlah_sks,
+                        'jam_tercapai': total_hours
+                    }
+                )
+                
+                # 5. Update status pemenuhan
+                if status_sks.jam_tercapai >= status_sks.jam_target:
+                    status_sks.status_pemenuhan = 'memenuhi'
+                else:
+                    status_sks.status_pemenuhan = 'belum memenuhi'
+                
+                status_sks.save()
+                updated_count += 1
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Berhasil sinkronisasi {updated_count} data Status_Pemenuhan_SKS',
+            'updated_count': updated_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
+    
+@login_required
+def get_progress_sks_api(request):
+    """API untuk mendapatkan progress SKS berdasarkan durasi"""
+    try:
+        user = request.user
+        mahasiswa = Mahasiswa.objects.get(user=user)
+        
+        # Ambil semua status pemenuhan SKS untuk mahasiswa ini
+        status_list = Status_Pemenuhan_SKS.objects.filter(
+            mahasiswa=mahasiswa
+        ).select_related('kegiatan_pa')
+        
+        progress_data = []
+        total_jam_tercapai = 0
+        total_jam_target = 0
+        
+        for status in status_list:
+            # Hitung total durasi untuk kegiatan ini
+            total_hours = calculate_total_duration(mahasiswa.id, status.kegiatan_pa.id)
+            
+            # Update dengan data terbaru
+            status.jam_tercapai = total_hours
+            if status.jam_tercapai >= status.jam_target:
+                status.status_pemenuhan = 'memenuhi'
+            else:
+                status.status_pemenuhan = 'belum memenuhi'
+            status.save()
+            
+            progress_data.append({
+                'kegiatan': status.kegiatan_pa.nama_kegiatan,
+                'sks': status.jumlah_sks,
+                'jam_target': status.jam_target,
+                'jam_tercapai': status.jam_tercapai,
+                'progress_percentage': min(100, int((status.jam_tercapai / status.jam_target) * 100)) if status.jam_target > 0 else 0,
+                'status': status.status_pemenuhan
+            })
+            
+            total_jam_tercapai += status.jam_tercapai
+            total_jam_target += status.jam_target
+        
+        # Hitung progress keseluruhan
+        overall_progress = min(100, int((total_jam_tercapai / total_jam_target) * 100)) if total_jam_target > 0 else 0
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'mahasiswa': {
+                    'nama': mahasiswa.user.nama_lengkap,
+                    'nim': mahasiswa.nim,
+                    'kelas': mahasiswa.kelas
+                },
+                'progress_per_kegiatan': progress_data,
+                'summary': {
+                    'total_jam_tercapai': total_jam_tercapai,
+                    'total_jam_target': total_jam_target,
+                    'overall_progress_percentage': overall_progress,
+                    'sisa_jam': max(0, total_jam_target - total_jam_tercapai)
+                }
+            }
+        })
+        
+    except Mahasiswa.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Data mahasiswa tidak ditemukan'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        }, status=500)
 
 @login_required
 def get_presensi_today(request):
@@ -749,12 +994,13 @@ def get_presensi_today(request):
                 'foto_checkout_url': presensi.foto_checkout.url if presensi.foto_checkout else ''
             })
         
+       
         # Status check-in aktif
         is_checked_in = any(p.jam_checkin is not None and p.jam_checkout is None for p in presensi_today)
         
         presensi_list.append({
             'id': mahasiswa.id,
-            'nama': mahasiswa.user.nama_lengkap or mahasiswa.user.username,
+            'nama': mahasiswa.user.nama_lengkap,
             'nrp': mahasiswa.user.nrp,
             'kelas': mahasiswa.kelas,
             'is_checked_in': is_checked_in,
@@ -2014,15 +2260,123 @@ def aktifkan_tahun_ajaran(request):
 
 @login_required
 def rekap_presensi(request):
-    """View untuk rekap presensi admin"""
-    return render(request, 'admin/rekap_presensi.html')
+    """View untuk rekap presensi admin dengan filter"""
+    
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        messages.error(request, 'Akses ditolak. Halaman untuk admin saja.')
+        return redirect('login')
+    
+    try:
+        tahun_ajaran_aktif = Tahun_Ajaran.objects.get(status_aktif='aktif')
+        semester_aktif_info = f"{tahun_ajaran_aktif.nama_tahun_ajaran} (Aktif)"
+    except Tahun_Ajaran.DoesNotExist:
+        semester_aktif_info = "Tidak ada Tahun Ajaran Aktif"
+    
+    # 2. Gunakan form yang sudah ada di forms.py
+    form = FilterRekapPresensiForm(request.GET or None)
+    
+    # 3. Query awal dengan semua relasi yang dibutuhkan
+    presensi_list = Presensi.objects.select_related(
+        'mahasiswa__user',
+        'mahasiswa__jenjang_pendidikan',
+        'kegiatan_pa'  # PASTIKAN INI DIPILIH
+    ).all().order_by('-tanggal_presensi', '-jam_checkin')
+    
+    # 4. Terapkan filter jika form valid
+    if form.is_valid():
+        tanggal_mulai = form.cleaned_data.get('tanggal_mulai')
+        tanggal_selesai = form.cleaned_data.get('tanggal_selesai')
+        tingkatan = form.cleaned_data.get('tingkatan')
+        kegiatan = form.cleaned_data.get('kegiatan')
+        
+        # Filter tanggal
+        if tanggal_mulai:
+            presensi_list = presensi_list.filter(tanggal_presensi__gte=tanggal_mulai)
+        if tanggal_selesai:
+            presensi_list = presensi_list.filter(tanggal_presensi__lte=tanggal_selesai)
+        
+        # Filter tingkatan - PERBAIKAN INI
+        if tingkatan:  
+        # Jika menggunakan ModelChoiceField, tingkatan adalah objek
+            presensi_list = presensi_list.filter(
+                mahasiswa__jenjang_pendidikan=tingkatan  # Langsung bandingkan dengan objek
+            )
+        
+        # Filter kegiatan
+        if kegiatan:
+            presensi_list = presensi_list.filter(kegiatan_pa=kegiatan)
 
-@login_required
-def status_pemenuhan(request):
-    """View untuk status pemenuhan SKS admin"""
-    return render(request, 'admin/status_pemenuhan.html')
-
-@login_required
-def pengaturan_sistem(request):
-    """View untuk pengaturan sistem admin"""
-    return render(request, 'admin/pengaturan_sistem.html')
+    # 5. Default: 7 hari terakhir jika tidak ada filter tanggal
+    if not request.GET.get('tanggal_mulai') and not request.GET.get('tanggal_selesai'):
+        default_end = datetime.now().date()
+        default_start = default_end - timedelta(days=7)
+        presensi_list = presensi_list.filter(
+            tanggal_presensi__gte=default_start,
+            tanggal_presensi__lte=default_end
+        )
+        # Set initial form values
+        form.initial = {
+            'tanggal_mulai': default_start,
+            'tanggal_selesai': default_end
+        }
+    
+    # 6. Siapkan data untuk template
+    data_presensi = []
+    
+    for presensi in presensi_list:
+        # Hitung durasi
+        durasi_str = "-"
+        if presensi.jam_checkin and presensi.jam_checkout:
+            try:
+                checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+                checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
+                
+                if checkout_dt < checkin_dt:
+                    checkout_dt += timedelta(days=1)
+                
+                delta = checkout_dt - checkin_dt
+                total_seconds = delta.total_seconds()
+                
+                hours = int(total_seconds // 3600)
+                minutes = int((total_seconds % 3600) // 60)
+                
+                if hours > 0:
+                    durasi_str = f"{hours}j {minutes}m" if minutes > 0 else f"{hours}j"
+                elif minutes > 0:
+                    durasi_str = f"{minutes}m"
+                else:
+                    durasi_str = "0m"
+                    
+            except Exception as e:
+                durasi_str = "Error"
+        
+        # PERBAIKAN 1: Ambil tingkatan dari jenjang pendidikan
+        tingkatan_value = "-"
+        if presensi.mahasiswa.jenjang_pendidikan:
+            tingkatan_value = presensi.mahasiswa.jenjang_pendidikan.nama_jenjang
+        
+        # PERBAIKAN 2: Ambil kegiatan PA dari presensi, bukan dari semua kegiatan mahasiswa
+        kegiatan_pa_value = "-"
+        if presensi.kegiatan_pa:
+            kegiatan_pa_value = presensi.kegiatan_pa.nama_kegiatan
+        
+        data_presensi.append({
+            'tanggal': presensi.tanggal_presensi,
+            'nrp': presensi.mahasiswa.nim,
+            'nama': presensi.mahasiswa.user.nama_lengkap,
+            'tingkatan': tingkatan_value,  # Sekarang harus muncul
+            'kegiatan_pa': kegiatan_pa_value,  # Sekarang hanya 1 kegiatan sesuai presensi
+            'check_in': presensi.jam_checkin,
+            'check_out': presensi.jam_checkout,
+            'durasi': durasi_str,
+        })
+    
+    # 7. Konteks untuk template
+    context = {
+        'form': form,
+        'data_presensi': data_presensi,
+        'semester': semester_aktif_info,
+        'total_presensi': len(data_presensi),
+    }
+    
+    return render(request, 'admin/rekap_presensi.html', context)

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from django.utils.translation import gettext_lazy as _
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,9 +43,25 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
+LANGUAGE_CODE = 'id'
+
+LANGUAGES = [
+    ('id', _('Indonesian')),
+    ('en', _('English')),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',  # Path untuk file terjemahan
+]
+
+# Untuk mendukung sesi bahasa
+USE_I18N = True
+USE_L10N = True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # <-- TAMBAHKAN KOMA DI SINI
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -56,34 +74,41 @@ ROOT_URLCONF = 'pa_app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'pa_app.wsgi.application'
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'id'
+MODELTRANSLATION_LANGUAGES = ('id', 'en')
+MODELTRANSLATION_FALLBACK_LANGUAGES = {
+    'default': ('id', 'en'),
+    'id': ('en',),
+    'en': ('id',),
+}
 
+WSGI_APPLICATION = 'pa_app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# settings.py
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'db_presensi',  # Sesuaikan dengan nama DB yang Anda buat di phpMyAdmin
-        'USER': 'root',         # Default user XAMPP biasanya 'root'
-        'PASSWORD': '',         # Default password XAMPP biasanya kosong
-        'HOST': '127.0.0.1',    # Atau 'localhost'
-        'PORT': '3306',         # Port default MySQL
+        'NAME': 'db_presensi',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
@@ -109,11 +134,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
+# HAPUS BARIS INI (SUDAH ADA DI ATAS):
+# USE_I18N = True
 
 USE_TZ = True
 
@@ -133,8 +157,8 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-AUTH_USER_MODEL = 'accounts.Akun'  # <--- Huruf 'A' harus BESARy
+AUTH_USER_MODEL = 'accounts.Akun'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_SECURE = False  # Set True untuk production dengan HTTPS
-CSRF_COOKIE_SECURE = False 
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False

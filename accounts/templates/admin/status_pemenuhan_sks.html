@@ -1,8 +1,9 @@
 <!-- accounts/templates/admin/status_pemenuhan_sks.html -->
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block page_title %}Status Pemenuhan SKS{% endblock %}
+{% block page_title %}{% trans "Credit Fulfillment Status" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -13,7 +14,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">TOTAL MAHASISWA</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "TOTAL STUDENTS" %}</h6>
                             <h3 class="fw-bold mb-0">{{ total_mahasiswa }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -31,7 +32,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">TOTAL SKS</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "TOTAL CREDITS" %}</h6>
                             <h3 class="fw-bold mb-0">{{ total_sks_all }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -49,7 +50,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">STATUS MEMENUHI</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "FULFILLED STATUS" %}</h6>
                             <h3 class="fw-bold mb-0">{{ total_memenuhi }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -67,7 +68,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">BELUM MEMENUHI</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "NOT FULFILLED" %}</h6>
                             <h3 class="fw-bold mb-0">{{ total_belum_memenuhi }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -87,7 +88,7 @@
             <div class="row g-3 align-items-center">
                 <!-- Search -->
                 <div class="col-md-5">
-                    <label for="searchInput" class="form-label small fw-semibold text-muted">Cari Mahasiswa</label>
+                    <label for="searchInput" class="form-label small fw-semibold text-muted">{% trans "Search Student" %}</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-0">
                             <i class="fas fa-search text-muted"></i>
@@ -95,15 +96,15 @@
                         <input type="text" 
                                class="form-control border-0 ps-0" 
                                id="searchInput"
-                               placeholder="Cari berdasarkan nama, NRP, atau kelas..."
+                               placeholder="{% trans 'Search by name, ID, or class...' %}"
                                autocomplete="off">
                     </div>
                 </div>
 
                 <div class="col-md-4">
-                    <label for="jenjangFilter" class="form-label small fw-semibold text-muted">Filter Jenjang</label>
+                    <label for="jenjangFilter" class="form-label small fw-semibold text-muted">{% trans "Filter Education Level" %}</label>
                     <select class="form-select" id="jenjangFilter">
-                        <option value="">Semua Jenjang</option>
+                        <option value="">{% trans "All Levels" %}</option>
                         {% for jenjang in jenjang_list %}
                         <option value="{{ jenjang.nama_jenjang }}">
                             {{ jenjang.nama_jenjang }}
@@ -115,28 +116,28 @@
                 <!-- Buttons -->
                 <div class="col-md-3 text-end">
                     <button type="button" class="btn btn-success me-2" onclick="exportToExcel()">
-                        <i class="fas fa-file-excel me-2"></i>Export Excel
+                        <i class="fas fa-file-excel me-2"></i>{% trans "Export Excel" %}
                     </button>
                     <button type="button" class="btn btn-danger" onclick="printPDF()">
-                        <i class="fas fa-file-pdf me-2"></i>Print PDF
+                        <i class="fas fa-file-pdf me-2"></i>{% trans "Print PDF" %}
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Data Status Pemenuhan SKS -->
+    <!-- Credit Fulfillment Status Data -->
     <div class="card border-0 shadow-sm rounded-3">
         <div class="card-header bg-white border-0 rounded-top-3 py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold">
-                    Status Pemenuhan SKS
+                    {% trans "Credit Fulfillment Status" %}
                     {% if jenjang_filter %}
                     <span class="text-muted">({{ jenjang_filter }})</span>
                     {% endif %}
                 </h5>
                 <span class="badge bg-primary rounded-pill fs-6" id="mahasiswaCounter">
-                    {{ total_mahasiswa }} mahasiswa ditemukan
+                    {{ total_mahasiswa }} {% trans "students found" %}
                 </span>
             </div>
         </div>
@@ -145,83 +146,87 @@
                 <table class="table table-bordered mb-0" id="statusTable">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-3 text-center" style="width: 12%;">Nama Mahasiswa</th>
-                            <th class="py-3 text-center" style="width: 18%;">Kegiatan</th>
-                            <th class="py-3 text-center" style="width: 10%;">Tingkatan</th>
-                            <th class="py-3 text-center" style="width: 8%;">SKS</th>
-                            <th class="py-3 text-center" style="width: 10%;">Jam/Minggu</th>
-                            <th class="py-3 text-center" style="width: 12%;">Jam/semester</th>
-                            <th class="py-3 text-center" style="width: 15%;">Progress</th>
-                            <th class="py-3 text-center" style="width: 10%;">Status</th>
+                            <th class="py-3 text-center" style="width: 12%;">{% trans "Student Name" %}</th>
+                            <th class="py-3 text-center" style="width: 18%;">{% trans "Activity" %}</th>
+                            <th class="py-3 text-center" style="width: 10%;">{% trans "Level" %}</th>
+                            <th class="py-3 text-center" style="width: 8%;">{% trans "Credits" %}</th>
+                            <th class="py-3 text-center" style="width: 10%;">{% trans "Hours/Week" %}</th>
+                            <th class="py-3 text-center" style="width: 12%;">{% trans "Hours/Semester" %}</th>
+                            <th class="py-3 text-center" style="width: 15%;">{% trans "Progress" %}</th>
+                            <th class="py-3 text-center" style="width: 10%;">{% trans "Status" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for data in data_mahasiswa %}
-                            <!-- Baris pertama untuk setiap mahasiswa -->
+                            <!-- First row for each student -->
                             {% with first_kegiatan=data.kegiatan_list|first %}
                             <tr class="align-middle mahasiswa-row" data-jenjang="{{ data.jenjang|default:'-' }}">
-                                <!-- Nama Mahasiswa (rowspan untuk semua baris kegiatan) -->
+                                <!-- Student Name (rowspan for all activity rows) -->
                                 <td class="text-center fw-bold" rowspan="{{ data.kegiatan_list|length }}">
                                     {{ data.nama }}
                                 </td>
                                 
-                                <!-- Kegiatan pertama -->
+                                <!-- First activity -->
                                 <td class="text-center">{{ first_kegiatan.nama_kegiatan }}</td>
                                 
-                                <!-- Tingkatan dari database (rowspan untuk semua baris kegiatan) -->
+                                <!-- Level from database (rowspan for all activity rows) -->
                                 <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
                                     <span class="badge bg-secondary">
                                         {{ data.jenjang|default:"-" }}
                                     </span>
                                 </td>
                                 
-                                <!-- SKS kegiatan pertama -->
+                                <!-- Credits for first activity -->
                                 <td class="text-center">
-                                    {{ first_kegiatan.sks|default:0 }} SKS
+                                    {{ first_kegiatan.sks|default:0 }} {% trans "Credits" %}
                                 </td>
                                 
-                                <!-- Jam/Minggu kegiatan pertama -->
-                                <td class="text-center">{{ first_kegiatan.jam_per_minggu|default:0 }} Jam</td>
+                                <!-- Hours/Week for first activity -->
+                                <td class="text-center">{{ first_kegiatan.jam_per_minggu|default:0 }} {% trans "Hours" %}</td>
                                 
-                                <!-- Jam/semester kegiatan pertama -->
-                                <td class="text-center">{{ first_kegiatan.jam_target|default:0 }} Jam</td>
+                                <!-- Hours/Semester for first activity -->
+                                <td class="text-center">{{ first_kegiatan.jam_target|default:0 }} {% trans "Hours" %}</td>
                                 
-                                <!-- Progress TOTAL (rowspan untuk semua baris kegiatan) -->
+                                <!-- TOTAL Progress (rowspan for all activity rows) -->
                                 <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
-                                    {{ data.total_jam_ditempuh }}/{{ data.total_jam_target }} jam
+                                    {{ data.total_jam_ditempuh }}/{{ data.total_jam_target }} {% trans "hours" %}
                                 </td>
                                 
-                                <!-- Status TOTAL (rowspan untuk semua baris kegiatan) -->
+                                <!-- TOTAL Status (rowspan for all activity rows) -->
                                 <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
                                     <span class="badge {% if data.status_overall == 'Memenuhi' %}bg-sukses{% else %}bg-kurang{% endif %}">
-                                        {{ data.status_overall }}
+                                        {% if data.status_overall == 'Memenuhi' %}
+                                            {% trans "Fulfilled" %}
+                                        {% else %}
+                                            {% trans "Not Fulfilled" %}
+                                        {% endif %}
                                     </span>
                                 </td>
                             </tr>
                             {% endwith %}
                             
-                            <!-- Baris untuk kegiatan selanjutnya (jika ada lebih dari 1 kegiatan) -->
+                            <!-- Rows for subsequent activities (if more than 1 activity) -->
                             {% for kegiatan in data.kegiatan_list|slice:"1:" %}
                             <tr class="align-middle mahasiswa-row" data-jenjang="{{ data.jenjang|default:'-' }}">
-                                <!-- Kegiatan -->
+                                <!-- Activity -->
                                 <td class="text-center">{{ kegiatan.nama_kegiatan }}</td>
                                 
-                                <!-- SKS -->
+                                <!-- Credits -->
                                 <td class="text-center">
-                                    {{ kegiatan.sks|default:0 }} SKS
+                                    {{ kegiatan.sks|default:0 }} {% trans "Credits" %}
                                 </td>
                                 
-                                <!-- Jam/Minggu -->
-                                <td class="text-center">{{ kegiatan.jam_per_minggu|default:0 }} Jam</td>
+                                <!-- Hours/Week -->
+                                <td class="text-center">{{ kegiatan.jam_per_minggu|default:0 }} {% trans "Hours" %}</td>
                                 
-                                <!-- Jam/semester -->
-                                <td class="text-center">{{ kegiatan.jam_target|default:0 }} Jam</td>
+                                <!-- Hours/Semester -->
+                                <td class="text-center">{{ kegiatan.jam_target|default:0 }} {% trans "Hours" %}</td>
                                 
-                                <!-- Progress dan Status sudah di-merge di baris pertama -->
+                                <!-- Progress and Status already merged in first row -->
                             </tr>
                             {% endfor %}
                             
-                            <!-- Baris kosong sebagai pemisah antar mahasiswa -->
+                            <!-- Empty row as separator between students -->
                             <tr class="separator-row">
                                 <td colspan="8" style="height: 10px; background-color: #fff; border: none;"></td>
                             </tr>
@@ -230,8 +235,8 @@
                             <td colspan="8" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                                    <h5 class="mb-2">Tidak ada data mahasiswa dengan status disetujui</h5>
-                                    <p>Belum ada mahasiswa yang pengajuannya disetujui</p>
+                                    <h5 class="mb-2">{% trans "No data for students with approved status" %}</h5>
+                                    <p>{% trans "No students have been approved yet" %}</p>
                                 </div>
                             </td>
                         </tr>
@@ -284,23 +289,23 @@
     word-wrap: break-word;
 }
 
-/* Semua kolom align center */
+/* All columns align center */
 .table td,
 .table th {
     text-align: center !important;
 }
 
-/* Lebar kolom yang lebih proporsional */
-.table th:nth-child(1) { width: 12%; } /* Nama Mahasiswa */
-.table th:nth-child(2) { width: 18%; } /* Kegiatan */
-.table th:nth-child(3) { width: 10%; } /* Tingkatan */
-.table th:nth-child(4) { width: 8%; }  /* SKS */
-.table th:nth-child(5) { width: 10%; } /* Jam/Minggu */
-.table th:nth-child(6) { width: 12%; } /* Jam/semester */
+/* Column widths */
+.table th:nth-child(1) { width: 12%; } /* Student Name */
+.table th:nth-child(2) { width: 18%; } /* Activity */
+.table th:nth-child(3) { width: 10%; } /* Level */
+.table th:nth-child(4) { width: 8%; }  /* Credits */
+.table th:nth-child(5) { width: 10%; } /* Hours/Week */
+.table th:nth-child(6) { width: 12%; } /* Hours/Semester */
 .table th:nth-child(7) { width: 15%; } /* Progress */
 .table th:nth-child(8) { width: 10%; } /* Status */
 
-/* Style untuk badge */
+/* Style for badge */
 .badge {
     font-weight: 500;
     padding: 0.35em 0.65em;
@@ -317,7 +322,7 @@
     color: #ffffffff !important;
 }
 
-/* Responsif untuk tabel */
+/* Responsive for table */
 @media (max-width: 768px) {
     .table-responsive {
         margin: 0 -1rem;
@@ -325,7 +330,7 @@
     }
     
     .table {
-        min-width: 800px; /* Minimum width untuk horizontal scroll */
+        min-width: 800px; /* Minimum width for horizontal scroll */
     }
     
     .table th,
@@ -340,12 +345,12 @@
     }
 }
 
-/* Hover effect untuk baris */
+/* Hover effect for rows */
 .table tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.02);
 }
 
-/* Baris pemisah antar mahasiswa */
+/* Separator row between students */
 .separator-row td {
     height: 10px !important;
     background-color: transparent !important;
@@ -353,7 +358,7 @@
     padding: 0 !important;
 }
 
-/* Tambahan untuk tabel yang rapi */
+/* Additional styling for neat table */
 .table-bordered {
     border: 1px solid #dee2e6;
 }
@@ -363,7 +368,7 @@
     border: 1px solid #dee2e6;
 }
 
-/* Memastikan tabel tidak memiliki margin luar */
+/* Ensure table has no outer margin */
 .card-body.p-0 {
     padding: 0 !important;
 }
@@ -373,13 +378,13 @@
     overflow: hidden;
 }
 
-/* Border radius untuk sudut tabel */
+/* Border radius for table corners */
 .table {
     border-radius: 0 0 12px 12px;
     overflow: hidden;
 }
 
-/* Style khusus untuk kolom Kegiatan */
+/* Specific style for Activity column */
 #statusTable td:nth-child(2) {
     max-width: 200px;
     overflow: hidden;
@@ -393,29 +398,28 @@
     }
 }
 
-
-/* Pastikan rowspan bekerja dengan benar */
+/* Ensure rowspan works correctly */
 .table td[rowspan] {
     vertical-align: middle !important;
 }
 
-/* Style untuk baris pertama mahasiswa */
+/* Style for first row of student */
 .mahasiswa-row:first-of-type td {
     border-top: 2px solid #dee2e6 !important;
 }
 
-/* Tambahan untuk memastikan baris terlihat sebagai grup */
+/* Additional to make rows look like a group */
 .mahasiswa-row td:first-child {
     font-weight: 600;
     background-color: #f8f9fa;
 }
 
-/* Hilangkan border top untuk baris selain pertama dalam grup */
+/* Remove top border for rows other than first in group */
 .mahasiswa-row:not(:first-of-type) td {
     border-top: 1px solid #dee2e6 !important;
 }
 
-/* Style untuk separator yang lebih jelas */
+/* Style for clearer separator */
 .separator-row {
     background: linear-gradient(90deg, transparent 0%, #e9ecef 50%, transparent 100%);
 }
@@ -435,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const jenjangFilter = document.getElementById('jenjangFilter');
     const mahasiswaCounter = document.getElementById('mahasiswaCounter');
     
-    // Fungsi untuk menghitung jumlah mahasiswa yang terlihat
+    // Function to count visible students
     function countVisibleMahasiswa() {
         const allRows = document.querySelectorAll('#statusTable tbody tr');
         let visibleMahasiswa = new Set();
@@ -444,29 +448,29 @@ document.addEventListener('DOMContentLoaded', function() {
         
         allRows.forEach(row => {
             if (row.classList.contains('separator-row')) {
-                // Jika separator, reset untuk mahasiswa berikutnya
+                // If separator, reset for next student
                 if (isMahasiswaVisible && currentMahasiswaName) {
                     visibleMahasiswa.add(currentMahasiswaName);
                 }
                 currentMahasiswaName = '';
                 isMahasiswaVisible = false;
             } else if (row.classList.contains('mahasiswa-row')) {
-                // Jika baris mahasiswa
+                // If student row
                 if (row.style.display !== 'none') {
-                    // Cek apakah ini baris pertama mahasiswa (yang memiliki rowspan di kolom nama)
+                    // Check if this is first row of student (has rowspan in name column)
                     const namaCell = row.querySelector('td:first-child');
                     if (namaCell && namaCell.hasAttribute('rowspan')) {
                         currentMahasiswaName = namaCell.textContent.trim();
                         isMahasiswaVisible = true;
                     } else if (currentMahasiswaName) {
-                        // Jika bukan baris pertama, gunakan nama yang sudah ada
+                        // If not first row, use existing name
                         isMahasiswaVisible = true;
                     }
                 }
             }
         });
         
-        // Tambahkan mahasiswa terakhir jika terlihat
+        // Add last student if visible
         if (isMahasiswaVisible && currentMahasiswaName) {
             visibleMahasiswa.add(currentMahasiswaName);
         }
@@ -474,13 +478,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return visibleMahasiswa.size;
     }
     
-    // Fungsi untuk update counter
+    // Function to update counter
     function updateCounter() {
         const totalVisible = countVisibleMahasiswa();
-        mahasiswaCounter.textContent = totalVisible + ' mahasiswa ditemukan';
+        mahasiswaCounter.textContent = totalVisible + ' {% trans "students found" %}';
     }
     
-    // Fungsi untuk apply filter
+    // Function to apply filters
     function applyFilters() {
         const searchValue = searchInput.value.toLowerCase();
         const jenjangValue = jenjangFilter.value;
@@ -497,7 +501,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const isMahasiswaRow = row.classList.contains('mahasiswa-row');
             
             if (isSeparator) {
-                // Proses separator: tampilkan atau sembunyikan grup mahasiswa
+                // Process separator: show or hide student group
                 if (showMahasiswa) {
                     currentMahasiswaRows.forEach(r => r.style.display = 'table-row');
                     row.style.display = 'table-row';
@@ -506,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     row.style.display = 'none';
                 }
                 
-                // Reset untuk mahasiswa berikutnya
+                // Reset for next student
                 currentMahasiswaRows = [];
                 showMahasiswa = false;
                 mahasiswaIndex = 0;
@@ -515,33 +519,33 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (isMahasiswaRow) {
                 currentMahasiswaRows.push(row);
                 
-                // Cek apakah ini baris pertama mahasiswa
+                // Check if this is first row of student
                 if (mahasiswaIndex === 0) {
-                    // Ambil nama mahasiswa
+                    // Get student name
                     const firstCell = row.querySelector('td:first-child');
                     if (firstCell && firstCell.hasAttribute('rowspan')) {
                         currentMahasiswaName = firstCell.textContent.trim();
                     }
                     
-                    // Ambil jenjang dari atribut data
+                    // Get level from data attribute
                     currentJenjang = row.getAttribute('data-jenjang') || '';
                     
                     let matchesSearch = true;
                     let matchesJenjang = true;
                     
-                    // Cek filter pencarian
+                    // Check search filter
                     if (searchValue) {
-                        // Cari di semua teks baris
+                        // Search in all row text
                         const rowText = row.textContent.toLowerCase();
                         matchesSearch = rowText.includes(searchValue);
                     }
                     
-                    // Cek filter jenjang
+                    // Check level filter
                     if (jenjangValue) {
                         matchesJenjang = currentJenjang === jenjangValue;
                     }
                     
-                    // Jika memenuhi kedua filter
+                    // If meets both filters
                     showMahasiswa = matchesSearch && matchesJenjang;
                 }
                 
@@ -562,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
         jenjangFilter.addEventListener('change', applyFilters);
     }
     
-    // Tambahkan checkbox untuk filter "Belum Memenuhi"
+    // Add checkbox for "Not Fulfilled" filter
     const filterContainer = document.querySelector('.col-md-4');
     if (filterContainer) {
         const incompleteCheckbox = document.createElement('div');
@@ -570,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
         incompleteCheckbox.innerHTML = `
             <input class="form-check-input" type="checkbox" id="showOnlyIncomplete">
             <label class="form-check-label small" for="showOnlyIncomplete">
-                Tampilkan hanya yang belum memenuhi
+                {% trans "Show only not fulfilled" %}
             </label>
         `;
         filterContainer.appendChild(incompleteCheckbox);
@@ -587,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const isMahasiswaRow = row.classList.contains('mahasiswa-row');
                 
                 if (isSeparator) {
-                    // Proses separator
+                    // Process separator
                     if (showMahasiswa) {
                         currentMahasiswaRows.forEach(r => r.style.display = 'table-row');
                         row.style.display = 'table-row';
@@ -602,13 +606,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (isMahasiswaRow) {
                     currentMahasiswaRows.push(row);
                     
-                    // Cek apakah ini baris pertama mahasiswa
+                    // Check if this is first row of student
                     if (mahasiswaIndex === 0) {
                         const statusBadge = row.querySelector('td:nth-child(8) .badge');
                         if (statusBadge) {
                             const statusText = statusBadge.textContent.trim().toLowerCase();
                             if (showIncomplete) {
-                                showMahasiswa = statusText.includes('belum');
+                                showMahasiswa = statusText.includes('{% trans "not fulfilled" %}'.toLowerCase());
                             } else {
                                 showMahasiswa = true;
                             }
@@ -624,17 +628,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Fungsi export Excel
+    // Function export Excel
     window.exportToExcel = function() {
-        alert('Fitur export Excel akan diimplementasi');
+        alert("{% trans 'Excel export feature will be implemented' %}");
     };
     
-    // Fungsi print PDF
+    // Function print PDF
     window.printPDF = function() {
         window.print();
     };
     
-    // Inisialisasi awal
+    // Initial setup
     updateCounter();
 });
 </script>

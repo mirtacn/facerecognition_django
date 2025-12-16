@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran - Langkah 1</title>
+    <title>{% trans "Registration - Step 1" %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #eef2f6; font-family: 'Segoe UI', sans-serif; }
@@ -21,13 +21,13 @@
         <div class="col-lg-8 col-md-10">
             
             <div class="text-center mb-4">
-                <h3 class="fw-bold">Pendaftaran Akun Mahasiswa</h3>
-                <p class="text-muted">Sistem Manajemen Presensi & SKS - Face Recognition</p>
+                <h3 class="fw-bold">{% trans "Student Account Registration" %}</h3>
+                <p class="text-muted">{% trans "Attendance & Credit Management System - Face Recognition" %}</p>
             </div>
 
             <div class="mb-4">
                 <div class="d-flex justify-content-between mb-1">
-                    <small class="fw-bold text-dark">Langkah 1 dari 3</small>
+                    <small class="fw-bold text-dark">{% trans "Step 1 of 3" %}</small>
                     <small class="fw-bold text-dark">33%</small>
                 </div>
                 <div class="progress mb-4" style="height: 8px;">
@@ -37,23 +37,23 @@
                 <div class="d-flex justify-content-between px-2">
                     <div class="d-flex align-items-center">
                         <div class="step-circle step-active">1</div>
-                        <span class="fw-bold text-primary">Akun</span>
+                        <span class="fw-bold text-primary">{% trans "Account" %}</span>
                     </div>
                     <div class="d-flex align-items-center">
                         <div class="step-circle step-inactive">2</div>
-                        <span class="text-muted">Akademik</span>
+                        <span class="text-muted">{% trans "Academic" %}</span>
                     </div>
                     <div class="d-flex align-items-center">
                         <div class="step-circle step-inactive">3</div>
-                        <span class="text-muted">Foto</span>
+                        <span class="text-muted">{% trans "Photos" %}</span>
                     </div>
                 </div>
             </div>
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4 p-md-5">
                     
-                    <h5 class="fw-bold mb-1">Data Akun & Identitas</h5>
-                    <p class="text-muted small mb-4">Silakan masukkan data akun untuk login dan identitas dasar Anda.</p>
+                    <h5 class="fw-bold mb-1">{% trans "Account & Identity Data" %}</h5>
+                    <p class="text-muted small mb-4">{% trans "Please enter your login account data and basic identity information." %}</p>
 
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger">
@@ -67,62 +67,62 @@
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Lengkap :</label>
+                            <label class="form-label fw-bold">{% trans "Full Name" %} :</label>
                             {{ form.nama_lengkap }}
                             {% if form.nama_lengkap.errors %}<div class="text-danger small">{{ form.nama_lengkap.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nomor Induk Mahasiswa (NRP) :</label>
+                            <label class="form-label fw-bold">{% trans "Student ID Number (NRP)" %} :</label>
                             {{ form.nim }}
-                            <div class="form-hint">Contoh: 2345678901 (10-12 digit angka)</div>
+                            <div class="form-hint">{% trans "Example: 2345678901 (10-12 digits)" %}</div>
                             {% if form.nim.errors %}<div class="text-danger small">{{ form.nim.errors }}</div>{% endif %}
                         </div>
 
-                        <!-- Field Jurusan -->
+                        <!-- Department Field -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Jurusan :</label>
+                            <label class="form-label fw-bold">{% trans "Department" %} :</label>
                             {{ form.jurusan }}
                             {% if form.jurusan.errors %}<div class="text-danger small">{{ form.jurusan.errors }}</div>{% endif %}
                         </div>
 
-                        <!-- Field Kelas (akan diupdate oleh JavaScript) -->
+                        <!-- Class Field (will be updated by JavaScript) -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Kelas :</label>
+                            <label class="form-label fw-bold">{% trans "Class" %} :</label>
                             {{ form.kelas }}
                             {% if form.kelas.errors %}<div class="text-danger small">{{ form.kelas.errors }}</div>{% endif %}
                         </div>
 
-                        <!-- Field Angkatan Baru -->
+                        <!-- New Admission Year Field -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Tahun Angkatan :</label>
+                            <label class="form-label fw-bold">{% trans "Admission Year" %} :</label>
                             {{ form.angkatan }}
-                            <div class="form-hint">Pilih tahun masuk kuliah Anda</div>
+                            <div class="form-hint">{% trans "Select your year of admission" %}</div>
                             {% if form.angkatan.errors %}<div class="text-danger small">{{ form.angkatan.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Email :</label>
+                            <label class="form-label fw-bold">{% trans "Email" %} :</label>
                             {{ form.email }}
                             {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Password :</label>
+                            <label class="form-label fw-bold">{% trans "Password" %} :</label>
                             {{ form.password }}
-                            <div class="form-hint">Minimal 8 karakter, kombinasi huruf dan angka</div>
+                            <div class="form-hint">{% trans "Minimum 8 characters, combination of letters and numbers" %}</div>
                             {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Konfirmasi Password :</label>
+                            <label class="form-label fw-bold">{% trans "Confirm Password" %} :</label>
                             {{ form.confirm_password }}
                             {% if form.confirm_password.errors %}<div class="text-danger small">{{ form.confirm_password.errors }}</div>{% endif %}
                         </div>
 
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-dark-custom fw-bold text-white px-4">
-                                Lanjut ke Data Akademik &nbsp; &rarr;
+                                {% trans "Continue to Academic Data" %} &nbsp; &rarr;
                             </button>
                         </div>
                     </form>
@@ -136,10 +136,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Data kelas berdasarkan jurusan
+    // Class data by department
     const kelasOptions = {
         'Teknik Informatika': [
-            ['', 'Pilih Kelas'],
+            ['', "{% trans 'Select Class' %}"],
             ['1 D4 IT A', '1 D4 IT A'],
             ['1 D4 IT B', '1 D4 IT B'],
             ['2 D4 IT A', '2 D4 IT A'],
@@ -156,7 +156,7 @@
             ['3 D3 IT B', '3 D3 IT B']
         ],
         'Sains Data Terapan': [
-            ['', 'Pilih Kelas'],
+            ['', "{% trans 'Select Class' %}"],
             ['1 D4 SDT A', '1 D4 SDT A'],
             ['1 D4 SDT B', '1 D4 SDT B'],
             ['2 D4 SDT A', '2 D4 SDT A'],
@@ -174,16 +174,16 @@
     const angkatanSelect = document.querySelector('#id_angkatan');
     const nimInput = document.querySelector('#id_nim');
 
-    // Fungsi untuk mengupdate pilihan kelas
+    // Function to update class options
     function updateKelasOptions() {
         const selectedJurusan = jurusanSelect.value;
         
-        // Reset dan enable/disable kelas select
+        // Reset and enable/disable class select
         kelasSelect.innerHTML = '';
         if (selectedJurusan && kelasOptions[selectedJurusan]) {
             kelasSelect.disabled = false;
             
-            // Tambahkan opsi berdasarkan jurusan
+            // Add options based on department
             kelasOptions[selectedJurusan].forEach(([value, text]) => {
                 const option = document.createElement('option');
                 option.value = value;
@@ -194,40 +194,40 @@
             kelasSelect.disabled = true;
             const option = document.createElement('option');
             option.value = '';
-            option.textContent = 'Pilih Jurusan Terlebih Dahulu';
+            option.textContent = "{% trans 'Select Department First' %}";
             kelasSelect.appendChild(option);
         }
     }
 
-    // Event listener untuk perubahan jurusan
+    // Event listener for department change
     jurusanSelect.addEventListener('change', updateKelasOptions);
     
-    // Event listener untuk perubahan angkatan
+    // Event listener for admission year change
     angkatanSelect.addEventListener('change', suggestNIM);
     
-    // Event listener untuk input NIM
+    // Event listener for NIM input
     nimInput.addEventListener('input', function() {
-        // Validasi input NIM hanya angka
+        // Validate NIM input only numbers
         this.value = this.value.replace(/\D/g, '');
         
-        // Batasi panjang NIM
+        // Limit NIM length
         if (this.value.length > 12) {
             this.value = this.value.substring(0, 12);
         }
     });
 
-    // Inisialisasi awal
+    // Initial initialization
     document.addEventListener('DOMContentLoaded', function() {
         updateKelasOptions();
         
-        // Set placeholder untuk angkatan select
+        // Set placeholder for admission year select
         if (angkatanSelect.value === '') {
             const currentYear = new Date().getFullYear();
-            angkatanSelect.querySelector('option[value=""]').textContent = `Pilih Tahun Angkatan (misal: ${currentYear})`;
+            angkatanSelect.querySelector('option[value=""]').textContent = "{% trans 'Select Admission Year (e.g.: ' %}" + currentYear + ")";
         }
     });
 
-    // Validasi form sebelum submit
+    // Form validation before submit
     document.getElementById('registrationForm').addEventListener('submit', function(e) {
         let hasError = false;
         
@@ -251,9 +251,9 @@
         
         if (hasError) {
             e.preventDefault();
-            alert('Silakan lengkapi semua data yang diperlukan sebelum melanjutkan.');
+            alert("{% trans 'Please complete all required data before continuing.' %}");
             
-            // Scroll ke field pertama yang error
+            // Scroll to first error field
             const firstError = document.querySelector('.is-invalid');
             if (firstError) {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });

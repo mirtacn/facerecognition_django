@@ -1,0 +1,4001 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-14 02:12+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: id\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: .\accounts\admin.py:37
+msgid "Personal info"
+msgstr "Info Pribadi"
+
+#: .\accounts\admin.py:38
+msgid "Permissions"
+msgstr "Izin"
+
+#: .\accounts\admin.py:39
+msgid "Important dates"
+msgstr "Tanggal Penting"
+
+#: .\accounts\admin.py:40
+msgid "Custom fields"
+msgstr "Bidang Kustom"
+
+#: .\accounts\admin.py:52
+msgid "Nama"
+msgstr "Nama"
+
+#: .\accounts\models.py:16 .\accounts\models.py:22
+#: .\accounts\templates\admin\data_sks.html:321
+#: .\accounts\templates\admin\data_sks.html:372
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:93
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:65
+#: .\accounts\templates\admin\rekap_presensi.html:29
+#: .\accounts\templates\admin\rekap_presensi.html:64
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:52
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:170
+#: .\accounts\templates\mahasiswa\register_step2.html:102
+msgid "Education Level"
+msgstr "Jenjang Pendidikan"
+
+#: .\accounts\models.py:23
+msgid "Education Levels"
+msgstr "Jenjang Pendidikan"
+
+#: .\accounts\models.py:26 .\accounts\templates\admin\data_sks.html:440
+#: .\accounts\templates\admin\data_sks.html:477
+msgid "Academic Year Name"
+msgstr "Nama Tahun Akademik"
+
+#: .\accounts\models.py:27 .\accounts\templates\admin\data_sks.html:213
+#: .\accounts\templates\admin\data_sks.html:447
+#: .\accounts\templates\admin\data_sks.html:483
+#: .\accounts\templates\admin\rekap_presensi.html:21
+msgid "Start Date"
+msgstr "Tanggal Mulai"
+
+#: .\accounts\models.py:28 .\accounts\templates\admin\data_sks.html:214
+#: .\accounts\templates\admin\data_sks.html:451
+#: .\accounts\templates\admin\data_sks.html:487
+#: .\accounts\templates\admin\rekap_presensi.html:25
+msgid "End Date"
+msgstr "Tanggal Selesai"
+
+#: .\accounts\models.py:30 .\accounts\models.py:64
+#: .\accounts\templates\admin\data_mahasiswa.html:185
+#: .\accounts\templates\admin\data_sks.html:241
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:50
+#: .\accounts\templates\mahasiswa\progress_sks.html:131
+msgid "Active"
+msgstr "Aktif"
+
+#: .\accounts\models.py:31 .\accounts\models.py:65
+#: .\accounts\templates\admin\data_mahasiswa.html:189
+#: .\accounts\templates\admin\data_sks.html:245
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:51
+msgid "Inactive"
+msgstr "Nonaktif"
+
+#: .\accounts\models.py:33 .\accounts\templates\admin\master_data_wajah.html:34
+msgid "Active Status"
+msgstr "Status Aktif"
+
+#: .\accounts\models.py:39
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:195
+msgid "Academic Year"
+msgstr "Tahun Akademik"
+
+#: .\accounts\models.py:40
+msgid "Academic Years"
+msgstr "Tahun Akademik"
+
+#: .\accounts\models.py:43
+msgid "Semester Name"
+msgstr "Nama Semester"
+
+#: .\accounts\models.py:49 .\accounts\templates\admin\admin_dashboard.html:60
+#: .\accounts\templates\admin\data_mahasiswa.html:108
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\master_data_wajah.html:133
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:103
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:78
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:70
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:186
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:129
+msgid "Semester"
+msgstr "Semester"
+
+#: .\accounts\models.py:50
+msgid "Semesters"
+msgstr "Semester"
+
+#: .\accounts\models.py:55 .\accounts\templates\login.html:277
+msgid "NRP"
+msgstr "NRP"
+
+#: .\accounts\models.py:58
+msgid "Admin"
+msgstr "Admin"
+
+#: .\accounts\models.py:59 .\accounts\models.py:101
+#: .\accounts\templates\admin\partials\approve_modal_content.html:3
+msgid "Student"
+msgstr "Mahasiswa"
+
+#: .\accounts\models.py:61
+msgid "Role"
+msgstr "Peran"
+
+#: .\accounts\models.py:67
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:48
+msgid "Account Status"
+msgstr "Status Akun"
+
+#: .\accounts\models.py:69
+#: .\accounts\templates\admin\master_data_wajah.html:299
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:68
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:17
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:155
+#: .\accounts\templates\mahasiswa\register_step1.html:70
+msgid "Full Name"
+msgstr "Nama Lengkap"
+
+#: .\accounts\models.py:75
+#: .\accounts\templates\mahasiswa\register_step1.html:40
+#: .\accounts\templates\mahasiswa\register_step2.html:70
+#: .\accounts\templates\mahasiswa\register_step3.html:172
+msgid "Account"
+msgstr "Akun"
+
+#: .\accounts\models.py:76
+msgid "Accounts"
+msgstr "Akun"
+
+#: .\accounts\models.py:81
+#: .\accounts\templates\admin\approval_pendaftaran.html:126
+#: .\accounts\templates\admin\approval_pendaftaran.html:939
+#: .\accounts\templates\admin\data_mahasiswa.html:104
+#: .\accounts\templates\admin\data_mahasiswa.html:288
+#: .\accounts\templates\admin\data_mahasiswa.html:478
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:27
+#: .\accounts\templates\admin\master_data_wajah.html:130
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:72
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:27
+#: .\accounts\templates\admin\partials\reject_modal_content.html:13
+#: .\accounts\templates\admin\rekap_presensi.html:62
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:36
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:159
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:55
+msgid "Student ID"
+msgstr "ID Mahasiswa"
+
+#: .\accounts\models.py:83 .\accounts\templates\admin\data_mahasiswa.html:107
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:28
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:117
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:91
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:62
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:182
+#: .\accounts\templates\mahasiswa\register_step1.html:91
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:57
+msgid "Class"
+msgstr "Kelas"
+
+#: .\accounts\models.py:84
+msgid "Total Credits Taken"
+msgstr "Total SKS Diambil"
+
+#: .\accounts\models.py:86
+msgid "Batch Year"
+msgstr "Tahun Angkatan"
+
+#: .\accounts\models.py:94
+msgid "Major"
+msgstr "Jurusan"
+
+#: .\accounts\models.py:102
+msgid "Students"
+msgstr "Mahasiswa"
+
+#: .\accounts\models.py:105
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:126
+msgid "NIP"
+msgstr "NIP"
+
+#: .\accounts\models.py:106
+msgid "Lecturer Name"
+msgstr "Nama Dosen"
+
+#: .\accounts\models.py:107
+msgid "Study Program"
+msgstr "Program Studi"
+
+#: .\accounts\models.py:113
+msgid "Lecturer"
+msgstr "Dosen"
+
+#: .\accounts\models.py:114
+msgid "Lecturers"
+msgstr "Dosen"
+
+#: .\accounts\models.py:121
+msgid "Supervisor 1"
+msgstr "Pembimbing 1"
+
+#: .\accounts\models.py:122
+msgid "Supervisor 2"
+msgstr "Pembimbing 2"
+
+#: .\accounts\models.py:123
+msgid "Supervisor 3"
+msgstr "Pembimbing 3"
+
+#: .\accounts\models.py:125
+msgid "Supervisor Type"
+msgstr "Jenis Pembimbing"
+
+#: .\accounts\models.py:128
+msgid "Student Lecturer"
+msgstr "Mahasiswa Dosen"
+
+#: .\accounts\models.py:129
+msgid "Student Lecturers"
+msgstr "Mahasiswa Dosen"
+
+#: .\accounts\models.py:140 .\accounts\templates\admin\data_sks.html:316
+#: .\accounts\templates\admin\data_sks.html:367
+msgid "Activity Name"
+msgstr "Nama Kegiatan"
+
+#: .\accounts\models.py:141 .\accounts\templates\admin\data_sks.html:90
+#: .\accounts\templates\admin\data_sks.html:118
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:182
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:140
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:152
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:181
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:216
+#: .\accounts\templates\mahasiswa\progress_sks.html:22
+#: .\accounts\templates\mahasiswa\progress_sks.html:33
+#: .\accounts\templates\mahasiswa\progress_sks.html:128
+#: .\accounts\templates\mahasiswa\progress_sks.html:316
+#: .\accounts\templates\mahasiswa\register_step2.html:286
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:22
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:44
+msgid "Credits"
+msgstr "SKS"
+
+#: .\accounts\models.py:142
+msgid "Total Hours per Week"
+msgstr "Total Jam per Minggu"
+
+#: .\accounts\models.py:143 .\accounts\models.py:156
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:186
+#: .\accounts\templates\mahasiswa\progress_sks.html:60
+msgid "Target Hours"
+msgstr "Target Jam"
+
+#: .\accounts\models.py:149
+msgid "PA Activity"
+msgstr "Kegiatan PA"
+
+#: .\accounts\models.py:150
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:78
+msgid "PA Activities"
+msgstr "Kegiatan PA"
+
+#: .\accounts\models.py:155
+msgid "Credits Earned"
+msgstr "SKS Diperoleh"
+
+#: .\accounts\models.py:157
+msgid "Achieved Hours"
+msgstr "Jam Tercapai"
+
+#: .\accounts\models.py:160
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:201
+msgid "Not Fulfilled"
+msgstr "Belum Terpenuhi"
+
+#: .\accounts\models.py:161
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:199
+msgid "Fulfilled"
+msgstr "Terpenuhi"
+
+#: .\accounts\models.py:163
+msgid "Fulfillment Status"
+msgstr "Status Pemenuhan"
+
+#: .\accounts\models.py:166
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:6
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:134
+msgid "Credit Fulfillment Status"
+msgstr "Status Pemenuhan SKS"
+
+#: .\accounts\models.py:167
+msgid "Credit Fulfillment Statuses"
+msgstr "Status Pemenuhan SKS"
+
+#: .\accounts\models.py:178
+msgid "Attendance Date"
+msgstr "Tanggal Presensi"
+
+#: .\accounts\models.py:179
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:30
+msgid "Check-in Time"
+msgstr "Waktu Check-in"
+
+#: .\accounts\models.py:180
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:31
+msgid "Check-out Time"
+msgstr "Waktu Check-out"
+
+#: .\accounts\models.py:181
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:43
+msgid "Check-in Photo"
+msgstr "Foto Check-in"
+
+#: .\accounts\models.py:182
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:55
+msgid "Check-out Photo"
+msgstr "Foto Check-out"
+
+#: .\accounts\models.py:188
+msgid "Attendance"
+msgstr "Presensi"
+
+#: .\accounts\models.py:189
+msgid "Attendances"
+msgstr "Presensi"
+
+#: .\accounts\models.py:193 .\accounts\templates\admin\rekap_presensi.html:68
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:61
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1868
+msgid "Duration"
+msgstr "Durasi"
+
+#: .\accounts\models.py:199
+msgid "Attendance Duration"
+msgstr "Durasi Presensi"
+
+#: .\accounts\models.py:200
+msgid "Attendance Durations"
+msgstr "Durasi Presensi"
+
+#: .\accounts\models.py:204
+msgid "File Path"
+msgstr "Lokasi File"
+
+#: .\accounts\models.py:205
+#: .\accounts\templates\mahasiswa\progress_sks.html:116
+msgid "Description"
+msgstr "Deskripsi"
+
+#: .\accounts\models.py:206 .\accounts\models.py:228
+msgid "Created At"
+msgstr "Dibuat Pada"
+
+#: .\accounts\models.py:212
+#: .\accounts\templates\admin\approval_pendaftaran.html:124
+#: .\accounts\templates\admin\approval_pendaftaran.html:937
+#: .\accounts\templates\mahasiswa\data_wajah.html:106
+msgid "Face Photo"
+msgstr "Foto Wajah"
+
+#: .\accounts\models.py:213
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:10
+msgid "Face Photos"
+msgstr "Foto Wajah"
+
+#: .\accounts\models.py:222
+#: .\accounts\templates\admin\approval_pendaftaran.html:218
+msgid "Pending"
+msgstr "Menunggu"
+
+#: .\accounts\models.py:223
+#: .\accounts\templates\admin\approval_pendaftaran.html:52
+#: .\accounts\templates\admin\approval_pendaftaran.html:222
+#: .\accounts\templates\admin\master_data_wajah.html:229
+msgid "Approved"
+msgstr "Disetujui"
+
+#: .\accounts\models.py:224
+#: .\accounts\templates\admin\approval_pendaftaran.html:70
+#: .\accounts\templates\admin\approval_pendaftaran.html:226
+msgid "Rejected"
+msgstr "Ditolak"
+
+#: .\accounts\models.py:226
+msgid "Submission Status"
+msgstr "Status Pengajuan"
+
+#: .\accounts\models.py:227
+#: .\accounts\templates\admin\partials\reject_modal_content.html:19
+msgid "Rejection Reason"
+msgstr "Alasan Penolakan"
+
+#: .\accounts\models.py:229
+msgid "Updated At"
+msgstr "Diperbarui Pada"
+
+#: .\accounts\models.py:235
+msgid "Registration Submission"
+msgstr "Pengajuan Pendaftaran"
+
+#: .\accounts\models.py:236
+msgid "Registration Submissions"
+msgstr "Pengajuan Pendaftaran"
+
+#: .\accounts\templates\admin\admin_dashboard.html:4
+#: .\accounts\templates\admin\sidebar_admin.html:10
+msgid "Admin Dashboard"
+msgstr "Dashboard Admin"
+
+#: .\accounts\templates\admin\admin_dashboard.html:19
+msgid "Today's Attendance"
+msgstr "Presensi Hari Ini"
+
+#: .\accounts\templates\admin\admin_dashboard.html:21
+msgid "From 45 students"
+msgstr "Dari 45 mahasiswa"
+
+#: .\accounts\templates\admin\admin_dashboard.html:37
+msgid "Average Attendance"
+msgstr "Rata-rata Presensi"
+
+#: .\accounts\templates\admin\admin_dashboard.html:43
+msgid "This week"
+msgstr "Minggu ini"
+
+#: .\accounts\templates\admin\admin_dashboard.html:61
+msgid "Odd 2025/2026"
+msgstr "Ganjil 2025/2026"
+
+#: .\accounts\templates\admin\admin_dashboard.html:65
+msgid "8 weeks remaining"
+msgstr "8 minggu tersisa"
+
+#: .\accounts\templates\admin\admin_dashboard.html:79
+msgid "Weekly Attendance per Program:"
+msgstr "Presensi Mingguan per Program:"
+
+#: .\accounts\templates\admin\admin_dashboard.html:90
+#: .\accounts\templates\admin\admin_dashboard.html:135
+#: .\accounts\templates\admin\admin_dashboard.html:153
+msgid "12 present"
+msgstr "12 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:93
+msgid "16 present"
+msgstr "16 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:96
+msgid "8 present"
+msgstr "8 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:99
+#: .\accounts\templates\admin\admin_dashboard.html:111
+#: .\accounts\templates\admin\admin_dashboard.html:167
+msgid "14 present"
+msgstr "14 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:102
+#: .\accounts\templates\admin\admin_dashboard.html:534
+#: .\venv\Lib\site-packages\django\utils\dates.py:7
+msgid "Monday"
+msgstr "Senin"
+
+#: .\accounts\templates\admin\admin_dashboard.html:103
+#: .\accounts\templates\admin\admin_dashboard.html:121
+#: .\accounts\templates\admin\admin_dashboard.html:139
+#: .\accounts\templates\admin\admin_dashboard.html:157
+#: .\accounts\templates\admin\admin_dashboard.html:175
+msgid "Total:"
+msgstr "Total:"
+
+#: .\accounts\templates\admin\admin_dashboard.html:113
+msgid "17 present"
+msgstr "17 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:115
+msgid "9 present"
+msgstr "9 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:117
+#: .\accounts\templates\admin\admin_dashboard.html:129
+msgid "13 present"
+msgstr "13 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:120
+#: .\accounts\templates\admin\admin_dashboard.html:540
+#: .\venv\Lib\site-packages\django\utils\dates.py:8
+msgid "Tuesday"
+msgstr "Selasa"
+
+#: .\accounts\templates\admin\admin_dashboard.html:131
+msgid "18 present"
+msgstr "18 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:133
+#: .\accounts\templates\admin\admin_dashboard.html:151
+#: .\accounts\templates\admin\admin_dashboard.html:171
+msgid "10 present"
+msgstr "10 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:138
+#: .\accounts\templates\admin\admin_dashboard.html:546
+#: .\venv\Lib\site-packages\django\utils\dates.py:9
+msgid "Wednesday"
+msgstr "Rabu"
+
+#: .\accounts\templates\admin\admin_dashboard.html:147
+#: .\accounts\templates\admin\admin_dashboard.html:149
+msgid "15 present"
+msgstr "15 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:156
+#: .\accounts\templates\admin\admin_dashboard.html:552
+#: .\venv\Lib\site-packages\django\utils\dates.py:10
+msgid "Thursday"
+msgstr "Kamis"
+
+#: .\accounts\templates\admin\admin_dashboard.html:165
+msgid "11 present"
+msgstr "11 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:169
+msgid "7 present"
+msgstr "7 hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:174
+#: .\accounts\templates\admin\admin_dashboard.html:558
+#: .\venv\Lib\site-packages\django\utils\dates.py:11
+msgid "Friday"
+msgstr "Jumat"
+
+#: .\accounts\templates\admin\admin_dashboard.html:204
+msgid "This Week's Attendance Details:"
+msgstr "Detail Presensi Minggu Ini:"
+
+#: .\accounts\templates\admin\admin_dashboard.html:209
+#: .\accounts\templates\admin\admin_dashboard.html:397
+#: .\accounts\templates\admin\data_mahasiswa.html:106
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\data_sks.html:89
+#: .\accounts\templates\admin\master_data_wajah.html:132
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:151
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:58
+msgid "Level"
+msgstr "Jenjang"
+
+#: .\accounts\templates\admin\admin_dashboard.html:210
+#: .\accounts\templates\admin\admin_dashboard.html:398
+msgid "Present Count"
+msgstr "Jumlah Hadir"
+
+#: .\accounts\templates\admin\admin_dashboard.html:211
+#: .\accounts\templates\admin\admin_dashboard.html:399
+#: .\accounts\templates\admin\master_data_wajah.html:16
+msgid "Total Students"
+msgstr "Total Mahasiswa"
+
+#: .\accounts\templates\admin\admin_dashboard.html:212
+#: .\accounts\templates\admin\admin_dashboard.html:400
+msgid "Percentage"
+msgstr "Persentase"
+
+#: .\accounts\templates\admin\admin_dashboard.html:243
+#: .\accounts\templates\admin\admin_dashboard.html:610
+#: .\accounts\templates\admin\approval_pendaftaran.html:114
+#: .\accounts\templates\admin\data_mahasiswa.html:95
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:14
+#: .\accounts\templates\admin\master_data_wajah.html:120
+#: .\accounts\templates\mahasiswa\register_step2.html:140
+msgid "Total"
+msgstr "Total"
+
+#: .\accounts\templates\admin\admin_dashboard.html:261
+msgid "Recent Activity"
+msgstr "Aktivitas Terkini"
+
+#: .\accounts\templates\admin\admin_dashboard.html:262
+msgid "Real-time updates of student activities"
+msgstr "Pembaruan real-time aktivitas mahasiswa"
+
+#: .\accounts\templates\admin\admin_dashboard.html:272
+#: .\accounts\templates\admin\admin_dashboard.html:288
+#: .\accounts\templates\admin\admin_dashboard.html:304
+#: .\accounts\templates\admin\admin_dashboard.html:320
+#: .\accounts\templates\admin\admin_dashboard.html:336
+#: .\accounts\templates\admin\partials\approve_modal_content.html:13
+msgid "Student ID:"
+msgstr "ID Mahasiswa:"
+
+#: .\accounts\templates\admin\admin_dashboard.html:273
+msgid "Final Project D4 - Check-in"
+msgstr "Proyek Akhir D4 - Check-in"
+
+#: .\accounts\templates\admin\admin_dashboard.html:289
+msgid "Tridi Project 52 - Check-out"
+msgstr "Proyek Tridi 52 - Check-out"
+
+#: .\accounts\templates\admin\admin_dashboard.html:305
+msgid "Final Project 2 D4 - File upload"
+msgstr "Proyek Akhir 2 D4 - Unggah file"
+
+#: .\accounts\templates\admin\admin_dashboard.html:321
+msgid "Final Project 03 - Check-in"
+msgstr "Proyek Akhir 03 - Check-in"
+
+#: .\accounts\templates\admin\admin_dashboard.html:337
+msgid "Tridi Project 123 - Report submission"
+msgstr "Proyek Tridi 123 - Pengumpulan laporan"
+
+#: .\accounts\templates\admin\admin_dashboard.html:351
+msgid "Quick Actions:"
+msgstr "Aksi Cepat:"
+
+#: .\accounts\templates\admin\admin_dashboard.html:356
+msgid "Registration Approval"
+msgstr "Persetujuan Pendaftaran"
+
+#: .\accounts\templates\admin\admin_dashboard.html:362
+#: .\accounts\templates\admin\data_mahasiswa.html:5
+#: .\accounts\templates\admin\sidebar_admin.html:66
+msgid "Student Data"
+msgstr "Data Mahasiswa"
+
+#: .\accounts\templates\admin\admin_dashboard.html:368
+#: .\accounts\templates\admin\monitor_durasi.html:4
+msgid "Duration Monitor"
+msgstr "Monitor Durasi"
+
+#: .\accounts\templates\admin\admin_dashboard.html:374
+msgid "Attendance Camera"
+msgstr "Kamera Presensi"
+
+#: .\accounts\templates\admin\admin_dashboard.html:389
+msgid "Attendance Details - "
+msgstr "Detail Presensi - "
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:5
+msgid "Student Account Registration Approval"
+msgstr "Persetujuan Pendaftaran Akun Mahasiswa"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:16
+msgid "Total Registrations"
+msgstr "Total Pendaftaran"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:34
+msgid "Waiting Approval"
+msgstr "Menunggu Persetujuan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:96
+msgid "Search by name, student ID, or email..."
+msgstr "Cari berdasarkan nama, ID mahasiswa, atau email..."
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:113
+msgid "List of Student Account Submissions:"
+msgstr "Daftar Pengajuan Akun Mahasiswa:"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:114
+msgid "registrations found"
+msgstr "pendaftaran ditemukan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:122
+msgid "Submission Date"
+msgstr "Tanggal Pengajuan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:123
+msgid "Approval/Rejection Date"
+msgstr "Tanggal Persetujuan/Penolakan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:125
+#: .\accounts\templates\admin\approval_pendaftaran.html:938
+#: .\accounts\templates\admin\data_mahasiswa.html:105
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\master_data_wajah.html:129
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:149
+msgid "Student Name"
+msgstr "Nama Mahasiswa"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:127
+#: .\accounts\templates\admin\approval_pendaftaran.html:940
+#: .\accounts\templates\admin\master_data_wajah.html:131
+#: .\accounts\templates\admin\master_data_wajah.html:313
+msgid "Program"
+msgstr "Program"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:128
+#: .\accounts\templates\admin\approval_pendaftaran.html:941
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:76
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:38
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:44
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:165
+#: .\accounts\templates\mahasiswa\register_step1.html:105
+msgid "Email"
+msgstr "Email"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:129
+#: .\accounts\templates\admin\approval_pendaftaran.html:942
+#: .\accounts\templates\admin\data_mahasiswa.html:110
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\data_sks.html:215
+#: .\accounts\templates\admin\master_data_wajah.html:135
+#: .\accounts\templates\admin\master_data_wajah.html:330
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:156
+#: .\accounts\templates\mahasiswa\progress_sks.html:118
+#: .\accounts\templates\mahasiswa\progress_sks.html:321
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:62
+msgid "Status"
+msgstr "Status"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:130
+#: .\accounts\templates\admin\approval_pendaftaran.html:943
+#: .\accounts\templates\admin\data_mahasiswa.html:111
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\data_sks.html:93
+#: .\accounts\templates\admin\data_sks.html:216
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:32
+#: .\accounts\templates\admin\master_data_wajah.html:136
+msgid "Action"
+msgstr "Aksi"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:158
+#: .\accounts\templates\admin\master_data_wajah.html:150
+#: .\accounts\templates\admin\master_data_wajah.html:581
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:30
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:40
+msgid "Photo"
+msgstr "Foto"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:204
+#: .\accounts\templates\admin\master_data_wajah.html:196
+msgid "Not filled"
+msgstr "Tidak diisi"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:240
+#: .\accounts\templates\admin\master_data_wajah.html:241
+msgid "Detail"
+msgstr "Detail"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:251
+msgid "Approve"
+msgstr "Setujui"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:261
+msgid "Reject"
+msgstr "Tolak"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:272
+#: .\accounts\templates\admin\master_data_wajah.html:248
+msgid "Download Photos"
+msgstr "Unduh Foto"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:283
+msgid "No registration data"
+msgstr "Tidak ada data pendaftaran"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:285
+#: .\accounts\templates\admin\master_data_wajah.html:261
+msgid "Try with different keywords"
+msgstr "Coba dengan kata kunci lain"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:303
+msgid "Student Registration Detail"
+msgstr "Detail Pendaftaran Mahasiswa"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:310
+#: .\accounts\templates\admin\approval_pendaftaran.html:330
+#: .\accounts\templates\admin\approval_pendaftaran.html:354
+#: .\accounts\templates\admin\approval_pendaftaran.html:675
+#: .\accounts\templates\admin\data_mahasiswa.html:253
+#: .\accounts\templates\admin\master_data_wajah.html:286
+msgid "Loading"
+msgstr "Memuat"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:323
+msgid "Approval Confirmation"
+msgstr "Konfirmasi Persetujuan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:335
+#: .\accounts\templates\admin\approval_pendaftaran.html:359
+#: .\accounts\templates\admin\data_mahasiswa.html:299
+#: .\accounts\templates\admin\data_sks.html:347
+#: .\accounts\templates\admin\data_sks.html:397
+#: .\accounts\templates\admin\data_sks.html:418
+#: .\accounts\templates\admin\data_sks.html:457
+#: .\accounts\templates\admin\data_sks.html:493
+#: .\accounts\templates\admin\data_sks.html:514
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:207
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:156
+#: .\accounts\templates\mahasiswa\data_wajah.html:176
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:233
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:292
+msgid "Cancel"
+msgstr "Batal"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:336
+msgid "Yes, Approve"
+msgstr "Ya, Setujui"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:347
+msgid "Rejection Confirmation"
+msgstr "Konfirmasi Penolakan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:360
+msgid "Reject Registration"
+msgstr "Tolak Pendaftaran"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:662
+#: .\accounts\templates\admin\approval_pendaftaran.html:706
+#: .\accounts\templates\admin\approval_pendaftaran.html:784
+#: .\accounts\templates\admin\data_mahasiswa.html:555
+#: .\accounts\templates\admin\master_data_wajah.html:615
+msgid "Failed to load data. Please try again."
+msgstr "Gagal memuat data. Silakan coba lagi."
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:663
+msgid "Error"
+msgstr "Error"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:723
+#: .\accounts\templates\admin\approval_pendaftaran.html:814
+msgid "Processing"
+msgstr "Memproses"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:740
+msgid "Registration successfully approved!"
+msgstr "Pendaftaran berhasil disetujui!"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:747
+#: .\accounts\templates\admin\approval_pendaftaran.html:838
+#: .\accounts\templates\admin\data_mahasiswa.html:514
+#: .\accounts\templates\admin\data_sks.html:985
+#: .\accounts\templates\admin\data_sks.html:990
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:206
+msgid "An error occurred"
+msgstr "Terjadi kesalahan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:753
+#: .\accounts\templates\admin\approval_pendaftaran.html:844
+#: .\accounts\templates\admin\data_mahasiswa.html:520
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:212
+msgid "Network error occurred"
+msgstr "Terjadi kesalahan jaringan"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:796
+#: .\accounts\templates\admin\partials\reject_modal_content.html:23
+msgid "Rejection reason must be filled"
+msgstr "Alasan penolakan harus diisi"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:831
+msgid "Registration successfully rejected!"
+msgstr "Pendaftaran berhasil ditolak!"
+
+#: .\accounts\templates\admin\approval_pendaftaran.html:888
+msgid "Photo download started successfully"
+msgstr "Unduh foto berhasil dimulai"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:39
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:91
+msgid "Search Student"
+msgstr "Cari Mahasiswa"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:48
+msgid "Search by name, ID, email, major, or class..."
+msgstr "Cari berdasarkan nama, ID, email, jurusan, atau kelas..."
+
+#: .\accounts\templates\admin\data_mahasiswa.html:61
+msgid "Filter by Level"
+msgstr "Filter berdasarkan Jenjang"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:63
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:107
+msgid "All Levels"
+msgstr "Semua Jenjang"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:77
+msgid "Excel"
+msgstr "Excel"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:89
+msgid "Student List"
+msgstr "Daftar Mahasiswa"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:95
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:140
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:484
+msgid "students found"
+msgstr "mahasiswa ditemukan"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:109
+#: .\accounts\templates\admin\data_mahasiswa.html:567
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:124
+msgid "Credit Activities"
+msgstr "Kegiatan SKS"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:172
+msgid "more"
+msgstr "lainnya"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:177
+msgid "No activities yet"
+msgstr "Belum ada kegiatan"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:203
+#: .\accounts\templates\admin\data_sks.html:138
+#: .\accounts\templates\admin\data_sks.html:267
+msgid "Edit"
+msgstr "Edit"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:215
+#: .\accounts\templates\admin\data_sks.html:147
+#: .\accounts\templates\admin\data_sks.html:276
+#: .\accounts\templates\admin\data_sks.html:421
+#: .\accounts\templates\admin\data_sks.html:517
+#: .\venv\Lib\site-packages\django\forms\formsets.py:499
+msgid "Delete"
+msgstr "Hapus"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:226
+msgid "No student data found"
+msgstr "Tidak ada data mahasiswa ditemukan"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:228
+msgid "Try with other filters or keywords"
+msgstr "Coba dengan filter atau kata kunci lain"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:246
+msgid "Edit Student Data"
+msgstr "Edit Data Mahasiswa"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:266
+msgid "Confirm Delete"
+msgstr "Konfirmasi Hapus"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:275
+msgid "Delete Student Data?"
+msgstr "Hapus Data Mahasiswa?"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:277
+msgid "Are you sure you want to delete this student's data?"
+msgstr "Apakah Anda yakin ingin menghapus data mahasiswa ini?"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:295
+#: .\accounts\templates\admin\data_sks.html:415
+#: .\accounts\templates\admin\data_sks.html:511
+msgid "Deleted data cannot be recovered."
+msgstr "Data yang dihapus tidak dapat dipulihkan."
+
+#: .\accounts\templates\admin\data_mahasiswa.html:300
+msgid "Yes, Delete Data"
+msgstr "Ya, Hapus Data"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:489
+msgid "Deleting..."
+msgstr "Menghapus..."
+
+#: .\accounts\templates\admin\data_mahasiswa.html:507
+msgid "Student data successfully deleted!"
+msgstr "Data mahasiswa berhasil dihapus!"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:544
+msgid "Network response was not ok"
+msgstr "Respons jaringan tidak baik"
+
+#: .\accounts\templates\admin\data_mahasiswa.html:556
+msgid "Error:"
+msgstr "Error:"
+
+#: .\accounts\templates\admin\data_sks.html:5
+#: .\accounts\templates\admin\data_sks.html:20
+msgid "PA Credit Data"
+msgstr "Data SKS PA"
+
+#: .\accounts\templates\admin\data_sks.html:28
+msgid "Academic Year Settings"
+msgstr "Pengaturan Tahun Akademik"
+
+#: .\accounts\templates\admin\data_sks.html:59
+msgid "Search by activity name..."
+msgstr "Cari berdasarkan nama kegiatan..."
+
+#: .\accounts\templates\admin\data_sks.html:71
+msgid "Add PA Course"
+msgstr "Tambah Mata Kuliah PA"
+
+#: .\accounts\templates\admin\data_sks.html:88
+msgid "Course"
+msgstr "Mata Kuliah"
+
+#: .\accounts\templates\admin\data_sks.html:91
+#: .\accounts\templates\admin\data_sks.html:336
+#: .\accounts\templates\admin\data_sks.html:386
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:190
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:153
+msgid "Hours/Week"
+msgstr "Jam/Minggu"
+
+#: .\accounts\templates\admin\data_sks.html:92
+#: .\accounts\templates\admin\data_sks.html:342
+#: .\accounts\templates\admin\data_sks.html:392
+msgid "Total Hours"
+msgstr "Total Jam"
+
+#: .\accounts\templates\admin\data_sks.html:104
+msgid "Academic Year:"
+msgstr "Tahun Akademik:"
+
+#: .\accounts\templates\admin\data_sks.html:123
+#: .\accounts\templates\admin\data_sks.html:128
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:187
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:191
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:192
+#: .\accounts\templates\mahasiswa\progress_sks.html:59
+#: .\accounts\templates\mahasiswa\progress_sks.html:60
+#: .\accounts\templates\mahasiswa\progress_sks.html:141
+#: .\accounts\templates\mahasiswa\progress_sks.html:154
+#: .\accounts\templates\mahasiswa\progress_sks.html:167
+#: .\accounts\templates\mahasiswa\progress_sks.html:212
+#: .\accounts\templates\mahasiswa\progress_sks.html:301
+#: .\accounts\templates\mahasiswa\progress_sks.html:302
+#: .\accounts\templates\mahasiswa\progress_sks.html:317
+#: .\accounts\templates\mahasiswa\progress_sks.html:318
+#: .\accounts\templates\mahasiswa\progress_sks.html:319
+#: .\accounts\templates\mahasiswa\register_step2.html:286
+msgid "hours"
+msgstr "jam"
+
+#: .\accounts\templates\admin\data_sks.html:158
+msgid "No activity data yet"
+msgstr "Belum ada data kegiatan"
+
+#: .\accounts\templates\admin\data_sks.html:159
+msgid "Add new activity with the button above"
+msgstr "Tambahkan kegiatan baru dengan tombol di atas"
+
+#: .\accounts\templates\admin\data_sks.html:187
+msgid "Search by semester name or academic year..."
+msgstr "Cari berdasarkan nama semester atau tahun akademik..."
+
+#: .\accounts\templates\admin\data_sks.html:195
+#: .\accounts\templates\admin\data_sks.html:433
+msgid "Add Academic Year"
+msgstr "Tambah Tahun Akademik"
+
+#: .\accounts\templates\admin\data_sks.html:212
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:26
+#: .\accounts\templates\admin\rekap_presensi.html:63
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:28
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:56
+msgid "Name"
+msgstr "Nama"
+
+#: .\accounts\templates\admin\data_sks.html:258
+#: .\accounts\templates\admin\data_sks.html:259
+msgid "Activate"
+msgstr "Aktifkan"
+
+#: .\accounts\templates\admin\data_sks.html:287
+msgid "No semester data yet"
+msgstr "Belum ada data semester"
+
+#: .\accounts\templates\admin\data_sks.html:288
+msgid "Add new semester with the button above"
+msgstr "Tambahkan semester baru dengan tombol di atas"
+
+#: .\accounts\templates\admin\data_sks.html:309
+msgid "Add Credit Activity"
+msgstr "Tambah Kegiatan SKS"
+
+#: .\accounts\templates\admin\data_sks.html:323
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:67
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:172
+msgid "Select Level"
+msgstr "Pilih Jenjang"
+
+#: .\accounts\templates\admin\data_sks.html:332
+#: .\accounts\templates\admin\data_sks.html:382
+msgid "Number of Credits"
+msgstr "Jumlah SKS"
+
+#: .\accounts\templates\admin\data_sks.html:348
+#: .\accounts\templates\admin\data_sks.html:458
+msgid "Save"
+msgstr "Simpan"
+
+#: .\accounts\templates\admin\data_sks.html:360
+msgid "Edit Credit Activity"
+msgstr "Edit Kegiatan SKS"
+
+#: .\accounts\templates\admin\data_sks.html:398
+#: .\accounts\templates\admin\data_sks.html:494
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:159
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:234
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:293
+msgid "Save Changes"
+msgstr "Simpan Perubahan"
+
+#: .\accounts\templates\admin\data_sks.html:410
+#: .\accounts\templates\admin\data_sks.html:506
+msgid "Delete Confirmation"
+msgstr "Konfirmasi Hapus"
+
+#: .\accounts\templates\admin\data_sks.html:414
+msgid "Are you sure you want to delete activity"
+msgstr "Apakah Anda yakin ingin menghapus kegiatan"
+
+#: .\accounts\templates\admin\data_sks.html:442
+msgid "Example: Odd 2024/2025"
+msgstr "Contoh: Ganjil 2024/2025"
+
+#: .\accounts\templates\admin\data_sks.html:470
+msgid "Edit Semester"
+msgstr "Edit Semester"
+
+#: .\accounts\templates\admin\data_sks.html:510
+msgid "Are you sure you want to delete academic year"
+msgstr "Apakah Anda yakin ingin menghapus tahun akademik"
+
+#: .\accounts\templates\admin\data_sks.html:872
+msgid "Failed to load activity data"
+msgstr "Gagal memuat data kegiatan"
+
+#: .\accounts\templates\admin\data_sks.html:877
+#: .\accounts\templates\admin\data_sks.html:934
+msgid "An error occurred while loading data"
+msgstr "Terjadi kesalahan saat memuat data"
+
+#: .\accounts\templates\admin\data_sks.html:929
+msgid "Failed to load semester data"
+msgstr "Gagal memuat data semester"
+
+#: .\accounts\templates\admin\data_sks.html:964
+msgid "Are you sure you want to activate academic year"
+msgstr "Apakah Anda yakin ingin mengaktifkan tahun akademik"
+
+#: .\accounts\templates\admin\data_sks.html:982
+msgid "Academic year successfully activated"
+msgstr "Tahun akademik berhasil diaktifkan"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:5
+#: .\accounts\templates\admin\sidebar_admin.html:29
+msgid "Student Attendance Camera"
+msgstr "Kamera Presensi Mahasiswa"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:13
+msgid "Student Attendance List"
+msgstr "Daftar Presensi Mahasiswa"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:14
+msgid "students"
+msgstr "mahasiswa"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:16
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:29
+#: .\accounts\templates\admin\rekap_presensi.html:61
+#: .\accounts\templates\mahasiswa\progress_sks.html:314
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:54
+msgid "Date"
+msgstr "Tanggal"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:23
+#: .\venv\Lib\site-packages\django\forms\widgets.py:868
+msgid "No"
+msgstr "No"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:24
+msgid "Check-in Image"
+msgstr "Gambar Check-in"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:25
+msgid "Check-out Image"
+msgstr "Gambar Check-out"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:92
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:94
+#: .\accounts\templates\admin\rekap_presensi.html:66
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:59
+msgid "Check-in"
+msgstr "Check-in"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:101
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:103
+#: .\accounts\templates\admin\rekap_presensi.html:67
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:60
+msgid "Check-out"
+msgstr "Check-out"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:113
+msgid "No approved students yet"
+msgstr "Belum ada mahasiswa yang disetujui"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:114
+msgid ""
+"All students whose registration approval status has been approved will "
+"appear here"
+msgstr ""
+"Semua mahasiswa yang status persetujuan pendaftarannya telah disetujui akan "
+"muncul di sini"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:116
+msgid "Go to Registration Approval"
+msgstr "Pergi ke Persetujuan Pendaftaran"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:129
+msgid ""
+"Only displays students whose registration approval status has been APPROVED. "
+"Multiple check-ins/outs per day are allowed, must check-out before checking "
+"in again. Data is reset every new day."
+msgstr ""
+"Hanya menampilkan mahasiswa yang status persetujuan pendaftarannya telah "
+"DISETUJUI. Beberapa check-in/out per hari diperbolehkan, harus check-out "
+"sebelum check-in kembali. Data direset setiap hari baru."
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:141
+msgid "Take Attendance Photo"
+msgstr "Ambil Foto Presensi"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:150
+msgid "Live Camera"
+msgstr "Kamera Langsung"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:157
+msgid "Make sure your face is clearly visible"
+msgstr "Pastikan wajah Anda terlihat jelas"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:166
+msgid "Take Photo"
+msgstr "Ambil Foto"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:169
+msgid "Retake"
+msgstr "Ambil Ulang"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:177
+#: .\accounts\templates\mahasiswa\register_step3.html:382
+msgid "Preview"
+msgstr "Pratinjau"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:184
+msgid "Photo will appear here"
+msgstr "Foto akan muncul di sini"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:196
+msgid "Photo will be saved as attendance evidence"
+msgstr "Foto akan disimpan sebagai bukti presensi"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:210
+msgid "Confirm & Save"
+msgstr "Konfirmasi & Simpan"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:323
+msgid "Cannot access camera. Please ensure camera permission is granted."
+msgstr "Tidak dapat mengakses kamera. Pastikan izin kamera diberikan."
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:373
+msgid "Action: CHECK-IN"
+msgstr "Aksi: CHECK-IN"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:389
+msgid "Action: CHECK-OUT"
+msgstr "Aksi: CHECK-OUT"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:443
+msgid "No photo taken!"
+msgstr "Tidak ada foto yang diambil!"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:449
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:212
+#: .\accounts\templates\login.html:356
+msgid "Processing..."
+msgstr "Memproses..."
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:477
+msgid "CHECK-IN/OUT successful for"
+msgstr "CHECK-IN/OUT berhasil untuk"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:485
+msgid "Failed:"
+msgstr "Gagal:"
+
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:490
+msgid "An error occurred while processing:"
+msgstr "Terjadi kesalahan saat memproses:"
+
+#: .\accounts\templates\admin\master_data_wajah.html:5
+msgid "Student Face Data Master"
+msgstr "Master Data Wajah Mahasiswa"
+
+#: .\accounts\templates\admin\master_data_wajah.html:52
+msgid "Total Photos Stored"
+msgstr "Total Foto Tersimpan"
+
+#: .\accounts\templates\admin\master_data_wajah.html:70
+msgid "Average Photos/Student"
+msgstr "Rata-rata Foto/Mahasiswa"
+
+#: .\accounts\templates\admin\master_data_wajah.html:102
+msgid "Search by name, student ID, or program..."
+msgstr "Cari berdasarkan nama, ID mahasiswa, atau program..."
+
+#: .\accounts\templates\admin\master_data_wajah.html:119
+msgid "List of Student Face Data:"
+msgstr "Daftar Data Wajah Mahasiswa:"
+
+#: .\accounts\templates\admin\master_data_wajah.html:120
+msgid "data found"
+msgstr "data ditemukan"
+
+#: .\accounts\templates\admin\master_data_wajah.html:128
+msgid "Profile Photo"
+msgstr "Foto Profil"
+
+#: .\accounts\templates\admin\master_data_wajah.html:134
+msgid "Number of Photos"
+msgstr "Jumlah Foto"
+
+#: .\accounts\templates\admin\master_data_wajah.html:220
+#: .\accounts\templates\admin\master_data_wajah.html:345
+#: .\accounts\templates\mahasiswa\register_step1.html:48
+#: .\accounts\templates\mahasiswa\register_step2.html:78
+#: .\accounts\templates\mahasiswa\register_step3.html:180
+msgid "Photos"
+msgstr "Foto"
+
+#: .\accounts\templates\admin\master_data_wajah.html:259
+msgid "No student data"
+msgstr "Tidak ada data mahasiswa"
+
+#: .\accounts\templates\admin\master_data_wajah.html:279
+msgid "Student Face Data Detail"
+msgstr "Detail Data Wajah Mahasiswa"
+
+#: .\accounts\templates\admin\master_data_wajah.html:288
+msgid "Loading data"
+msgstr "Memuat data"
+
+#: .\accounts\templates\admin\master_data_wajah.html:316
+msgid "Level/Semester"
+msgstr "Jenjang/Semester"
+
+#: .\accounts\templates\admin\master_data_wajah.html:326
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:80
+msgid "Registration Date"
+msgstr "Tanggal Pendaftaran"
+
+#: .\accounts\templates\admin\master_data_wajah.html:339
+msgid "Total Photos"
+msgstr "Total Foto"
+
+#: .\accounts\templates\admin\master_data_wajah.html:355
+msgid "Download All Photos"
+msgstr "Unduh Semua Foto"
+
+#: .\accounts\templates\admin\master_data_wajah.html:367
+#: .\accounts\templates\admin\master_data_wajah.html:561
+msgid "Face Photo Gallery"
+msgstr "Galeri Foto Wajah"
+
+#: .\accounts\templates\admin\master_data_wajah.html:368
+#: .\accounts\templates\admin\master_data_wajah.html:562
+msgid "photos"
+msgstr "foto"
+
+#: .\accounts\templates\admin\master_data_wajah.html:381
+msgid "No photos stored yet"
+msgstr "Belum ada foto yang disimpan"
+
+#: .\accounts\templates\admin\master_data_wajah.html:382
+msgid "This student has not uploaded any face photos"
+msgstr "Mahasiswa ini belum mengunggah foto wajah"
+
+#: .\accounts\templates\admin\master_data_wajah.html:549
+msgid "No data"
+msgstr "Tidak ada data"
+
+#: .\accounts\templates\admin\master_data_wajah.html:592
+msgid "Registration photo"
+msgstr "Foto pendaftaran"
+
+#: .\accounts\templates\admin\partials\approve_modal_content.html:1
+msgid "Are you sure you want to approve this registration?"
+msgstr "Apakah Anda yakin ingin menyetujui pendaftaran ini?"
+
+#: .\accounts\templates\admin\partials\approve_modal_content.html:18
+msgid "The student will get access to the system after approval."
+msgstr "Mahasiswa akan mendapatkan akses ke sistem setelah persetujuan."
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:17
+msgid "Download ZIP"
+msgstr "Unduh ZIP"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:49
+msgid "No face photos uploaded"
+msgstr "Tidak ada foto wajah yang diunggah"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:59
+msgid "Student Information"
+msgstr "Informasi Mahasiswa"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:66
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:12
+msgid "Personal Data"
+msgstr "Data Pribadi"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:90
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:60
+msgid "Academic Data"
+msgstr "Data Akademik"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:113
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:100
+msgid "Year of Entry"
+msgstr "Tahun Masuk"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:121
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:110
+msgid "Major/Study Program"
+msgstr "Jurusan/Program Studi"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:141
+msgid "Supervising Lecturers"
+msgstr "Dosen Pembimbing"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:172
+msgid "Laboratory Courses"
+msgstr "Mata Kuliah Laboratorium"
+
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:235
+msgid "Photo download successfully started"
+msgstr "Unduh foto berhasil dimulai"
+
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:34
+msgid "Unique Registration Number"
+msgstr "Nomor Registrasi Unik"
+
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:80
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:188
+msgid "Select Semester"
+msgstr "Pilih Semester"
+
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:127
+msgid "Select Activities"
+msgstr "Pilih Kegiatan"
+
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:179
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:468
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:539
+msgid "Saving..."
+msgstr "Menyimpan..."
+
+#: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:193
+msgid "Student data successfully updated!"
+msgstr "Data mahasiswa berhasil diperbarui!"
+
+#: .\accounts\templates\admin\partials\reject_modal_content.html:1
+msgid "Provide the reason for rejecting this registration"
+msgstr "Berikan alasan untuk menolak pendaftaran ini"
+
+#: .\accounts\templates\admin\partials\reject_modal_content.html:3
+msgid "Registration will be rejected:"
+msgstr "Pendaftaran akan ditolak:"
+
+#: .\accounts\templates\admin\partials\reject_modal_content.html:21
+msgid ""
+"Enter the reason for rejection (example: Unclear photo, Invalid data, etc.)"
+msgstr ""
+"Masukkan alasan penolakan (contoh: Foto tidak jelas, Data tidak valid, dll.)"
+
+#: .\accounts\templates\admin\partials\reject_modal_content.html:24
+msgid "The rejection reason will be sent to the student's email."
+msgstr "Alasan penolakan akan dikirim ke email mahasiswa."
+
+#: .\accounts\templates\admin\rekap_presensi.html:5
+msgid "Attendance Recap"
+msgstr "Rekap Presensi"
+
+#: .\accounts\templates\admin\rekap_presensi.html:16
+msgid "Report Filter"
+msgstr "Filter Laporan"
+
+#: .\accounts\templates\admin\rekap_presensi.html:33
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:150
+msgid "Activity"
+msgstr "Kegiatan"
+
+#: .\accounts\templates\admin\rekap_presensi.html:38
+msgid "Apply Filter"
+msgstr "Terapkan Filter"
+
+#: .\accounts\templates\admin\rekap_presensi.html:41
+msgid "Reset Filter"
+msgstr "Reset Filter"
+
+#: .\accounts\templates\admin\rekap_presensi.html:52
+msgid "Attendance Data"
+msgstr "Data Presensi"
+
+#: .\accounts\templates\admin\rekap_presensi.html:65
+msgid "Final Project Activity"
+msgstr "Kegiatan Proyek Akhir"
+
+#: .\accounts\templates\admin\rekap_presensi.html:116
+msgid "Not Checked-out Yet"
+msgstr "Belum Check-out"
+
+#: .\accounts\templates\admin\rekap_presensi.html:130
+msgid "No attendance data found"
+msgstr "Tidak ada data presensi ditemukan"
+
+#: .\accounts\templates\admin\rekap_presensi.html:140
+msgid "No attendance data"
+msgstr "Tidak ada data presensi"
+
+#: .\accounts\templates\admin\rekap_presensi.html:142
+msgid "No attendance data found for the selected filter."
+msgstr "Tidak ada data presensi ditemukan untuk filter yang dipilih."
+
+#: .\accounts\templates\admin\rekap_presensi.html:143
+msgid "Try changing the filter or date range."
+msgstr "Coba ubah filter atau rentang tanggal."
+
+#: .\accounts\templates\admin\sidebar_admin.html:9
+#: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:9
+msgid "Attendance & Credit Management System"
+msgstr "Sistem Manajemen Presensi & SKS"
+
+#: .\accounts\templates\admin\sidebar_admin.html:20
+msgid "Dashboard"
+msgstr "Dasbor"
+
+#: .\accounts\templates\admin\sidebar_admin.html:38
+#, fuzzy
+#| msgid "Attendance Duration"
+msgid "Attendance Duration Monitor"
+msgstr "Durasi Presensi"
+
+#: .\accounts\templates\admin\sidebar_admin.html:49
+#, fuzzy
+#| msgid "Management Data"
+msgid "Data Management"
+msgstr "Manajemen Data"
+
+#: .\accounts\templates\admin\sidebar_admin.html:59
+#, fuzzy
+#| msgid "Student Account Registration Approval"
+msgid "Account Registration Approval"
+msgstr "Persetujuan Pendaftaran Akun Mahasiswa"
+
+#: .\accounts\templates\admin\sidebar_admin.html:73
+#, fuzzy
+#| msgid "Student Face Data Master"
+msgid "Student Face Master Data"
+msgstr "Master Data Wajah Mahasiswa"
+
+#: .\accounts\templates\admin\sidebar_admin.html:80
+#, fuzzy
+#| msgid "Add Credit Activity"
+msgid "Credit Activity Data"
+msgstr "Tambah Kegiatan SKS"
+
+#: .\accounts\templates\admin\sidebar_admin.html:94
+#, fuzzy
+#| msgid "Attendance History"
+msgid "Attendance Monitoring"
+msgstr "Riwayat Presensi"
+
+#: .\accounts\templates\admin\sidebar_admin.html:104
+#, fuzzy
+#| msgid "Credit Fulfillment Status"
+msgid "Credit Requirement Status"
+msgstr "Status Pemenuhan SKS"
+
+#: .\accounts\templates\admin\sidebar_admin.html:111
+#, fuzzy
+#| msgid "Attendance Camera"
+msgid "Attendance Summary"
+msgstr "Kamera Presensi"
+
+#: .\accounts\templates\admin\sidebar_admin.html:124
+#: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:55
+msgid "Logout"
+msgstr "Keluar"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:17
+msgid "TOTAL STUDENTS"
+msgstr "TOTAL MAHASISWA"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:35
+msgid "TOTAL CREDITS"
+msgstr "TOTAL SKS"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:53
+msgid "FULFILLED STATUS"
+msgstr "STATUS TERPENUHI"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:71
+msgid "NOT FULFILLED"
+msgstr "BELUM TERPENUHI"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:99
+msgid "Search by name, ID, or class..."
+msgstr "Cari berdasarkan nama, ID, atau kelas..."
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:105
+msgid "Filter Education Level"
+msgstr "Filter Jenjang Pendidikan"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:119
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:133
+msgid "Export Excel"
+msgstr "Ekspor Excel"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:122
+msgid "Print PDF"
+msgstr "Cetak PDF"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:154
+msgid "Hours/Semester"
+msgstr "Jam/Semester"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:155
+msgid "Progress"
+msgstr "Progres"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:185
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:188
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:220
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:223
+msgid "Hours"
+msgstr "Jam"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:238
+msgid "No data for students with approved status"
+msgstr "Tidak ada data untuk mahasiswa dengan status disetujui"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:239
+msgid "No students have been approved yet"
+msgstr "Belum ada mahasiswa yang disetujui"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:577
+msgid "Show only not fulfilled"
+msgstr "Tampilkan hanya yang belum terpenuhi"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:615
+msgid "not fulfilled"
+msgstr "belum terpenuhi"
+
+#: .\accounts\templates\admin\status_pemenuhan_sks.html:633
+msgid "Excel export feature will be implemented"
+msgstr "Fitur ekspor Excel akan diimplementasikan"
+
+#: .\accounts\templates\base.html:10
+msgid "Attendance & SKS Management System - Face Recognition"
+msgstr "Sistem Manajemen Presensi & SKS - Pengenalan Wajah"
+
+#: .\accounts\templates\base.html:526
+msgid "Student Dashboard"
+msgstr "Dasbor Mahasiswa"
+
+#: .\accounts\templates\login.html:8
+msgid "Login - Attendance & Credit Management System"
+msgstr "Login - Sistem Manajemen Presensi & SKS"
+
+#: .\accounts\templates\login.html:242
+msgid "Attendance & Credit Management System PA Lab MSECT"
+msgstr "Sistem Manajemen Presensi & SKS PA Lab MSECT"
+
+#: .\accounts\templates\login.html:243
+#: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:10
+msgid "Face Recognition"
+msgstr "Pengenalan Wajah"
+
+#: .\accounts\templates\login.html:247
+msgid ""
+"Integrated system for attendance management, credit assessment, and final "
+"project student progress monitoring."
+msgstr ""
+"Sistem terintegrasi untuk manajemen presensi, penilaian SKS, dan monitoring "
+"progres mahasiswa proyek akhir."
+
+#: .\accounts\templates\login.html:251
+msgid "Attendance using Face Recognition"
+msgstr "Presensi menggunakan Pengenalan Wajah"
+
+#: .\accounts\templates\login.html:252
+msgid "Credit Progress Monitoring"
+msgstr "Monitoring Progres SKS"
+
+#: .\accounts\templates\login.html:253
+msgid "Final Project Activity Management"
+msgstr "Manajemen Kegiatan Proyek Akhir"
+
+#: .\accounts\templates\login.html:259
+msgid "Encrypted & secure system"
+msgstr "Sistem terenkripsi & aman"
+
+#: .\accounts\templates\login.html:269
+msgid "Welcome!"
+msgstr "Selamat Datang!"
+
+#: .\accounts\templates\login.html:270
+msgid "Please login to access your account"
+msgstr "Silakan login untuk mengakses akun Anda"
+
+#: .\accounts\templates\login.html:283
+msgid "Enter NRP"
+msgstr "Masukkan NRP"
+
+#: .\accounts\templates\login.html:290
+#: .\accounts\templates\mahasiswa\register_step1.html:111
+msgid "Password"
+msgstr "Kata Sandi"
+
+#: .\accounts\templates\login.html:296
+msgid "Enter password"
+msgstr "Masukkan kata sandi"
+
+#: .\accounts\templates\login.html:311
+msgid "Login"
+msgstr "Login"
+
+#: .\accounts\templates\login.html:318
+msgid "Don't have an account?"
+msgstr "Belum punya akun?"
+
+#: .\accounts\templates\login.html:319
+msgid "Register new account"
+msgstr "Daftar akun baru"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:5
+#: .\accounts\templates\mahasiswa\data_wajah.html:6
+#: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:28
+msgid "Face Data"
+msgstr "Data Wajah"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:17
+#, fuzzy
+#| msgid "Attendance using Face Recognition"
+msgid "Face Dataset for Face Recognition"
+msgstr "Presensi menggunakan Pengenalan Wajah"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:19
+#, fuzzy
+#| msgid "Estimated Completion"
+msgid "Dataset Complete"
+msgstr "Perkiraan Penyelesaian"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:21
+msgid "Dataset Incomplete"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:27
+msgid ""
+"Upload photos of your face from various angles and expressions to improve "
+"the accuracy of the face recognition attendance system."
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:35
+#, fuzzy
+#| msgid "Number of Photos"
+msgid "Number of Photos:"
+msgstr "Jumlah Foto"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:35
+#: .\accounts\templates\mahasiswa\register_step3.html:436
+msgid "Minimum"
+msgstr "Minimal"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:46
+msgid ""
+"You have met the minimum required photos. The face recognition system is "
+"ready for attendance."
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:55
+msgid ""
+"You have not met the minimum required photos. Upload at least 10 face photos."
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:64
+#: .\accounts\templates\mahasiswa\data_wajah.html:158
+#, fuzzy
+#| msgid "Upload Face Photos"
+msgid "Upload Face Photo"
+msgstr "Unggah Foto Wajah"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:71
+#, fuzzy
+#| msgid "Click to upload photos or drag & drop"
+msgid "Click to upload photo"
+msgstr "Klik untuk mengunggah foto atau tarik & lepas"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:72
+#, fuzzy
+#| msgid "Format: JPG, PNG, maximum 5MB per file"
+msgid "Format: JPG, PNG (Max Size: 5MB)"
+msgstr "Format: JPG, PNG, maksimal 5MB per file"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:74
+#, fuzzy
+#| msgid "Upload Face Photos"
+msgid "Upload Photo"
+msgstr "Unggah Foto Wajah"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:81
+msgid ""
+"Recommendation: Upload photos with various expressions (smile, neutral) and "
+"angles (front, left, right)"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:89
+#, fuzzy
+#| msgid "Face Photo Gallery"
+msgid "Photo Gallery"
+msgstr "Galeri Foto Wajah"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:92
+#, fuzzy
+#| msgid "Delete"
+msgid "Delete All"
+msgstr "Hapus"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:111
+#, fuzzy
+#| msgid "Check-out Photo"
+msgid "Default Photo"
+msgstr "Foto Check-out"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:130
+#, fuzzy
+#| msgid "No face photos uploaded"
+msgid "No face photos yet"
+msgstr "Tidak ada foto wajah yang diunggah"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:131
+msgid "Upload your first photo to get started"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:141
+#, fuzzy
+#| msgid "Important Note"
+msgid "Important:"
+msgstr "Catatan Penting"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:141
+msgid ""
+"Face photos are used only for the face recognition attendance system. Make "
+"sure your photos are clear and your face is clearly visible."
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:165
+#, fuzzy
+#| msgid "Check-out Photo"
+msgid "Select Photo"
+msgstr "Foto Check-out"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:167
+#, fuzzy
+#| msgid "Format: JPG, PNG, maximum 5MB per file"
+msgid "Supported formats: JPG, PNG. Maximum size: 5MB."
+msgstr "Format: JPG, PNG, maksimal 5MB per file"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:170
+#, fuzzy
+#| msgid "Description"
+msgid "Description (Optional)"
+msgstr "Deskripsi"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:171
+msgid "Example: Smiling photo, left angle photo"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:177
+msgid "Upload"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:232
+#, fuzzy
+#| msgid "Please select at least one PA activity!"
+msgid "Please select a photo first!"
+msgstr "Silakan pilih setidaknya satu kegiatan PA!"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:238
+#, fuzzy
+#| msgid "is too large. Maximum 5MB."
+msgid "Photo size maximum 5MB!"
+msgstr "terlalu besar. Maksimal 5MB."
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:245
+msgid "File format must be JPG or PNG!"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:256
+#, fuzzy
+#| msgid "Upload Face Photos"
+msgid "Uploading photo..."
+msgstr "Unggah Foto Wajah"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:284
+#, fuzzy
+#| msgid "An error occurred while loading data"
+msgid "An error occurred while uploading"
+msgstr "Terjadi kesalahan saat memuat data"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:290
+#, fuzzy
+#| msgid "Are you sure you want to delete activity"
+msgid "Are you sure you want to delete this photo?"
+msgstr "Apakah Anda yakin ingin menghapus kegiatan"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:314
+#: .\accounts\templates\mahasiswa\data_wajah.html:345
+#, fuzzy
+#| msgid "An error occurred while saving:"
+msgid "An error occurred while deleting"
+msgstr "Terjadi kesalahan saat menyimpan:"
+
+#: .\accounts\templates\mahasiswa\data_wajah.html:321
+#, fuzzy
+#| msgid "Are you sure you want to delete this student's data?"
+msgid ""
+"Are you sure you want to delete all photos? This action cannot be undone!"
+msgstr "Apakah Anda yakin ingin menghapus data mahasiswa ini?"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:7
+msgid "Account Approval - In Process"
+msgstr "Persetujuan Akun - Dalam Proses"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:267
+msgid "Your Account Approval is in Process"
+msgstr "Persetujuan Akun Anda Sedang Diproses"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:272
+msgid "Status: Awaiting Admin Verification"
+msgstr "Status: Menunggu Verifikasi Admin"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:283
+msgid "Your account has been registered!"
+msgstr "Akun Anda telah terdaftar!"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:292
+msgid "Verification Process"
+msgstr "Proses Verifikasi"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:296
+msgid "We are verifying your academic data and validating your face photos."
+msgstr ""
+"Kami sedang memverifikasi data akademik Anda dan memvalidasi foto wajah Anda."
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:301
+msgid "Please wait up to 3×24 hours"
+msgstr "Silakan tunggu hingga 3×24 jam"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:305
+msgid "You will receive an email notification after approval."
+msgstr "Anda akan menerima notifikasi email setelah persetujuan."
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:306
+msgid "Please check your email periodically for account status updates."
+msgstr "Silakan periksa email Anda secara berkala untuk pembaruan status akun."
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:312
+msgid "Notification will be sent to:"
+msgstr "Notifikasi akan dikirim ke:"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:327
+msgid "Back to Login Page"
+msgstr "Kembali ke Halaman Login"
+
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:332
+msgid "If you don't receive an email within 24 hours, contact"
+msgstr "Jika Anda tidak menerima email dalam 24 jam, hubungi"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:4
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:5
+#: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:20
+msgid "Student Profile"
+msgstr "Profil Mahasiswa"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:16
+msgid "Personal Information"
+msgstr "Informasi Pribadi"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:20
+msgid "Edit Profile"
+msgstr "Edit Profil"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:91
+msgid "No PA activities yet"
+msgstr "Belum ada kegiatan PA"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:108
+msgid "Supervisors"
+msgstr "Pembimbing"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:112
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:245
+msgid "Edit Supervisors"
+msgstr "Edit Pembimbing"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:132
+msgid "Supervisor data is not available yet."
+msgstr "Data pembimbing belum tersedia."
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:147
+msgid "Edit Student Profile"
+msgstr "Edit Profil Mahasiswa"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:162
+msgid "Student ID cannot be changed"
+msgstr "ID Mahasiswa tidak dapat diubah"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:198
+msgid "Selected PA Activities"
+msgstr "Kegiatan PA Terpilih"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:202
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:356
+msgid "Loading PA activities..."
+msgstr "Memuat kegiatan PA..."
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:206
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:351
+#: .\accounts\templates\mahasiswa\register_step2.html:262
+msgid "Select education level first"
+msgstr "Pilih jenjang pendidikan terlebih dahulu"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:215
+msgid "Change Password"
+msgstr "Ubah Kata Sandi"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:220
+msgid "New Password"
+msgstr "Kata Sandi Baru"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:222
+msgid "Enter new password"
+msgstr "Masukkan kata sandi baru"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:225
+#: .\accounts\templates\mahasiswa\register_step1.html:118
+msgid "Confirm Password"
+msgstr "Konfirmasi Kata Sandi"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:227
+msgid "Confirm new password"
+msgstr "Konfirmasi kata sandi baru"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:253
+msgid "Supervisor 1 *"
+msgstr "Pembimbing 1 *"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:255
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:267
+msgid "Select Supervisor"
+msgstr "Pilih Pembimbing"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:265
+msgid "Supervisor 2 *"
+msgstr "Pembimbing 2 *"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:277
+msgid "Supervisor 3 (Optional)"
+msgstr "Pembimbing 3 (Opsional)"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:279
+msgid "Select Supervisor (Optional)"
+msgstr "Pilih Pembimbing (Opsional)"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:391
+msgid "No PA activities for this level"
+msgstr "Tidak ada kegiatan PA untuk jenjang ini"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:396
+msgid "Failed to load PA activities. Please refresh the page."
+msgstr "Gagal memuat kegiatan PA. Silakan segarkan halaman."
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:440
+msgid "Please fill in password and confirm password!"
+msgstr "Silakan isi kata sandi dan konfirmasi kata sandi!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:445
+msgid "Password and confirmation do not match!"
+msgstr "Kata sandi dan konfirmasi tidak cocok!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:458
+msgid "Please select at least one PA activity!"
+msgstr "Silakan pilih setidaknya satu kegiatan PA!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:493
+msgid "Profile updated successfully!"
+msgstr "Profil berhasil diperbarui!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:504
+msgid "Failed to update profile!"
+msgstr "Gagal memperbarui profil!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:511
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:582
+msgid "An error occurred while saving:"
+msgstr "Terjadi kesalahan saat menyimpan:"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:527
+msgid "Supervisor 1 and 2 are required!"
+msgstr "Pembimbing 1 dan 2 wajib diisi!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:532
+msgid "Supervisor 1 and 2 cannot be the same!"
+msgstr "Pembimbing 1 dan 2 tidak boleh sama!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:564
+msgid "Supervisors updated successfully!"
+msgstr "Pembimbing berhasil diperbarui!"
+
+#: .\accounts\templates\mahasiswa\profil_mahasiswa.html:575
+msgid "Failed to update supervisors!"
+msgstr "Gagal memperbarui pembimbing!"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:5
+#: .\accounts\templates\mahasiswa\progress_sks.html:6
+#: .\accounts\templates\mahasiswa\progress_sks.html:17
+#: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:44
+msgid "Credit Progress"
+msgstr "Progres SKS"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:33
+msgid "This Semester's Credit Progress"
+msgstr "Progres SKS Semester Ini"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:33
+#: .\accounts\templates\mahasiswa\progress_sks.html:72
+#: .\accounts\templates\mahasiswa\progress_sks.html:125
+#: .\accounts\templates\mahasiswa\progress_sks.html:316
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:22
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:44
+msgid "Total Credits"
+msgstr "Total SKS"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:45
+msgid "Overall Semester Progress"
+msgstr "Progres Semester Keseluruhan"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:59
+#: .\accounts\templates\mahasiswa\progress_sks.html:83
+#: .\accounts\templates\mahasiswa\progress_sks.html:137
+#: .\accounts\templates\mahasiswa\progress_sks.html:301
+#: .\accounts\templates\mahasiswa\progress_sks.html:318
+msgid "Completed Hours"
+msgstr "Jam Terselesaikan"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:94
+#: .\accounts\templates\mahasiswa\progress_sks.html:150
+#: .\accounts\templates\mahasiswa\progress_sks.html:302
+#: .\accounts\templates\mahasiswa\progress_sks.html:319
+msgid "Remaining Hours"
+msgstr "Jam Tersisa"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:108
+msgid "Credit Progress Details"
+msgstr "Detail Progres SKS"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:117
+msgid "Amount"
+msgstr "Jumlah"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:138
+msgid "From 344 target hours"
+msgstr "Dari 344 jam target"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:151
+msgid "To reach target"
+msgstr "Untuk mencapai target"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:157
+msgid "In Progress"
+msgstr "Dalam Proses"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:163
+#: .\accounts\templates\mahasiswa\progress_sks.html:317
+msgid "Total Target Hours"
+msgstr "Total Jam Target"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:164
+msgid "This semester's target"
+msgstr "Target semester ini"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:170
+#: .\accounts\templates\mahasiswa\register_step2.html:286
+msgid "Target"
+msgstr "Target"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:186
+msgid "Progress Status"
+msgstr "Status Progres"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:187
+#: .\accounts\templates\mahasiswa\progress_sks.html:321
+msgid "Excellent"
+msgstr "Sangat Baik"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:191
+msgid "Export Report"
+msgstr "Ekspor Laporan"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:204
+msgid "Completion Estimate"
+msgstr "Perkiraan Penyelesaian"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:211
+msgid "Average per Week"
+msgstr "Rata-rata per Minggu"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:215
+#: .\accounts\templates\mahasiswa\progress_sks.html:323
+msgid "Estimated Completion"
+msgstr "Perkiraan Penyelesaian"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:221
+msgid "Time Remaining"
+msgstr "Waktu Tersisa"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:222
+msgid "days"
+msgstr "hari"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:225
+msgid "Recommendation/hour"
+msgstr "Rekomendasi/jam"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:226
+msgid "hours/day"
+msgstr "jam/hari"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:306
+msgid "Preparing credit progress report..."
+msgstr "Mempersiapkan laporan progres SKS..."
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:312
+msgid "CREDIT PROGRESS REPORT"
+msgstr "LAPORAN PROGRES SKS"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:324
+msgid "Recommendation"
+msgstr "Rekomendasi"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:324
+msgid "hours per day"
+msgstr "jam per hari"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:335
+msgid "Progress report successfully downloaded"
+msgstr "Laporan progres berhasil diunduh"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:395
+msgid "Progress bar animation started..."
+msgstr "Animasi progress bar dimulai..."
+
+#: .\accounts\templates\mahasiswa\register_step1.html:6
+msgid "Registration - Step 1"
+msgstr "Pendaftaran - Langkah 1"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:24
+#: .\accounts\templates\mahasiswa\register_step2.html:54
+#: .\accounts\templates\mahasiswa\register_step3.html:156
+msgid "Student Account Registration"
+msgstr "Pendaftaran Akun Mahasiswa"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:25
+#: .\accounts\templates\mahasiswa\register_step2.html:55
+#: .\accounts\templates\mahasiswa\register_step3.html:157
+msgid "Attendance & Credit Management System - Face Recognition"
+msgstr "Sistem Manajemen Presensi & SKS - Pengenalan Wajah"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:30
+msgid "Step 1 of 3"
+msgstr "Langkah 1 dari 3"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:44
+#: .\accounts\templates\mahasiswa\register_step2.html:74
+#: .\accounts\templates\mahasiswa\register_step3.html:176
+msgid "Academic"
+msgstr "Akademik"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:55
+msgid "Account & Identity Data"
+msgstr "Data Akun & Identitas"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:56
+msgid "Please enter your login account data and basic identity information."
+msgstr "Silakan masukkan data akun login Anda dan informasi identitas dasar."
+
+#: .\accounts\templates\mahasiswa\register_step1.html:76
+msgid "Student ID Number (NRP)"
+msgstr "Nomor ID Mahasiswa (NRP)"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:78
+msgid "Example: 2345678901 (10-12 digits)"
+msgstr "Contoh: 2345678901 (10-12 digit)"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:84
+msgid "Department"
+msgstr "Jurusan"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:98
+msgid "Admission Year"
+msgstr "Tahun Masuk"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:100
+msgid "Select your year of admission"
+msgstr "Pilih tahun masuk Anda"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:113
+msgid "Minimum 8 characters, combination of letters and numbers"
+msgstr "Minimal 8 karakter, kombinasi huruf dan angka"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:125
+msgid "Continue to Academic Data"
+msgstr "Lanjut ke Data Akademik"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:142
+#: .\accounts\templates\mahasiswa\register_step1.html:159
+msgid "Select Class"
+msgstr "Pilih Kelas"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:197
+msgid "Select Department First"
+msgstr "Pilih Jurusan Terlebih Dahulu"
+
+#: .\accounts\templates\mahasiswa\register_step1.html:226
+msgid "Select Admission Year (e.g.: "
+msgstr "Pilih Tahun Masuk (contoh: "
+
+#: .\accounts\templates\mahasiswa\register_step1.html:254
+msgid "Please complete all required data before continuing."
+msgstr "Silakan lengkapi semua data yang diperlukan sebelum melanjutkan."
+
+#: .\accounts\templates\mahasiswa\register_step2.html:8
+msgid "Registration - Academic Data"
+msgstr "Pendaftaran - Data Akademik"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:60
+msgid "Step 2 of 3"
+msgstr "Langkah 2 dari 3"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:85
+msgid "Academic Data & Final Project Activities"
+msgstr "Data Akademik & Kegiatan Proyek Akhir"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:86
+msgid "Select activities and determine your academic advisors."
+msgstr "Pilih kegiatan dan tentukan pembimbing akademik Anda."
+
+#: .\accounts\templates\mahasiswa\register_step2.html:90
+#: .\accounts\templates\mahasiswa\register_step3.html:203
+msgid "Validation Error"
+msgstr "Error Validasi"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:108
+msgid "Current Semester"
+msgstr "Semester Saat Ini"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:115
+msgid "Final Project Activities"
+msgstr "Kegiatan Proyek Akhir"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:116
+msgid ""
+"Check all activities you are currently participating in for final project "
+"credit fulfillment"
+msgstr ""
+"Centang semua kegiatan yang sedang Anda ikuti untuk pemenuhan SKS proyek "
+"akhir"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:125
+msgid "Credit Details and Target Hours"
+msgstr "Detail SKS dan Target Jam"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:140
+msgid "activities selected"
+msgstr "kegiatan terpilih"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:144
+msgid "Academic Advisors"
+msgstr "Pembimbing Akademik"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:145
+msgid "Select two mandatory advisors and one optional advisor."
+msgstr "Pilih dua pembimbing wajib dan satu pembimbing opsional."
+
+#: .\accounts\templates\mahasiswa\register_step2.html:149
+msgid "Advisor 1 (Mandatory)"
+msgstr "Pembimbing 1 (Wajib)"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:154
+msgid "Advisor 2 (Mandatory)"
+msgstr "Pembimbing 2 (Wajib)"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:159
+msgid "Advisor 3 (Optional)"
+msgstr "Pembimbing 3 (Opsional)"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:169
+#: .\accounts\templates\mahasiswa\register_step3.html:271
+msgid "Back"
+msgstr "Kembali"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:172
+msgid "Continue to Upload Photos"
+msgstr "Lanjut ke Unggah Foto"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:273
+msgid "No activities available for this level"
+msgstr "Tidak ada kegiatan tersedia untuk jenjang ini"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:298
+msgid "Error loading activity data"
+msgstr "Error memuat data kegiatan"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:8
+msgid "Registration - Upload Photos"
+msgstr "Pendaftaran - Unggah Foto"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:162
+msgid "Step 3 of 3"
+msgstr "Langkah 3 dari 3"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:188
+msgid "Upload Face Photos"
+msgstr "Unggah Foto Wajah"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:199
+msgid "Upload face photos for face recognition attendance system"
+msgstr "Unggah foto wajah untuk sistem presensi pengenalan wajah"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:214
+msgid "Photo Quality Guidelines"
+msgstr "Panduan Kualitas Foto"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:216
+msgid "Plain background (preferably white/gray)"
+msgstr "Latar belakang polos (sebaiknya putih/abu-abu)"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:217
+msgid "Good lighting, face clearly visible"
+msgstr "Pencahayaan baik, wajah terlihat jelas"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:218
+msgid "No sunglasses, hats, or masks"
+msgstr "Tidak menggunakan kacamata hitam, topi, atau masker"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:219
+msgid "Upload at least 10 photos with different angles and expressions"
+msgstr "Unggah minimal 10 foto dengan sudut dan ekspresi berbeda"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:220
+msgid "Format: JPG, PNG, maximum 5MB per file"
+msgstr "Format: JPG, PNG, maksimal 5MB per file"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:229
+msgid "Click to upload photos or drag & drop"
+msgstr "Klik untuk mengunggah foto atau tarik & lepas"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:230
+msgid "Max. 5MB per file"
+msgstr "Maks. 5MB per file"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:244
+#: .\accounts\templates\mahasiswa\register_step3.html:401
+#: .\accounts\templates\mahasiswa\register_step3.html:402
+msgid "of 10 photos uploaded"
+msgstr "dari 10 foto terunggah"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:254
+msgid "Important Note"
+msgstr "Catatan Penting"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:256
+msgid ""
+"The system requires at least 10 photos with different angles and expressions "
+"for the best accuracy in face recognition."
+msgstr ""
+"Sistem membutuhkan minimal 10 foto dengan sudut dan ekspresi berbeda untuk "
+"akurasi terbaik dalam pengenalan wajah."
+
+#: .\accounts\templates\mahasiswa\register_step3.html:274
+msgid "Submit Data & Request Approval"
+msgstr "Kirim Data & Minta Persetujuan"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:288
+msgid "Already have an account?"
+msgstr "Sudah punya akun?"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:288
+msgid "Login here"
+msgstr "Login di sini"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:352
+#: .\accounts\templates\mahasiswa\register_step3.html:358
+#: .\venv\Lib\site-packages\django\db\models\fields\files.py:244
+msgid "File"
+msgstr "Berkas"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:352
+msgid "is not an image. Only JPG, PNG are allowed."
+msgstr "bukan gambar. Hanya JPG, PNG yang diizinkan."
+
+#: .\accounts\templates\mahasiswa\register_step3.html:358
+msgid "is too large. Maximum 5MB."
+msgstr "terlalu besar. Maksimal 5MB."
+
+#: .\accounts\templates\mahasiswa\register_step3.html:436
+msgid "photos required. You have only uploaded"
+msgstr "foto diperlukan. Anda hanya mengunggah"
+
+#: .\accounts\templates\mahasiswa\register_step3.html:436
+msgid "photos."
+msgstr "foto."
+
+#: .\accounts\templates\mahasiswa\register_step3.html:447
+msgid "Sending..."
+msgstr "Mengirim..."
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:5
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:6
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:17
+#: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:36
+msgid "Attendance History"
+msgstr "Riwayat Presensi"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:26
+msgid "Filter"
+msgstr "Filter"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:29
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:247
+msgid "Odd Semester"
+msgstr "Semester Ganjil"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:30
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:247
+msgid "Even Semester"
+msgstr "Semester Genap"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:32
+msgid "Show All"
+msgstr "Tampilkan Semua"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:44
+msgid "This Semester's Credit Activities"
+msgstr "Kegiatan SKS Semester Ini"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:97
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:145
+msgid "Present"
+msgstr "Hadir"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:99
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:153
+msgid "Late"
+msgstr "Terlambat"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:101
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:161
+msgid "Permission"
+msgstr "Izin"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:103
+msgid "Sick"
+msgstr "Sakit"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:105
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:169
+msgid "Absent"
+msgstr "Absen"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:115
+msgid "No attendance data available"
+msgstr "Tidak ada data presensi tersedia"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:248
+msgid "Showing"
+msgstr "Menampilkan"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:248
+msgid "attendance data for"
+msgstr "data presensi untuk"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:257
+msgid "Showing all attendance data"
+msgstr "Menampilkan semua data presensi"
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:262
+msgid "Preparing Excel file..."
+msgstr "Mempersiapkan file Excel..."
+
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:272
+msgid "Excel file successfully downloaded"
+msgstr "File Excel berhasil diunduh"
+
+#: .\pa_app\settings.py:49
+msgid "Indonesian"
+msgstr "Bahasa Indonesia"
+
+#: .\pa_app\settings.py:50
+msgid "English"
+msgstr "Bahasa Inggris"
+
+#: .\venv\Lib\site-packages\django\contrib\messages\apps.py:16
+msgid "Messages"
+msgstr "Pesan"
+
+#: .\venv\Lib\site-packages\django\contrib\sitemaps\apps.py:8
+msgid "Site Maps"
+msgstr "Peta Situs"
+
+#: .\venv\Lib\site-packages\django\contrib\staticfiles\apps.py:9
+msgid "Static Files"
+msgstr "File Statis"
+
+#: .\venv\Lib\site-packages\django\contrib\syndication\apps.py:7
+msgid "Syndication"
+msgstr "Sindikasi"
+
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: .\venv\Lib\site-packages\django\core\paginator.py:30
+msgid "…"
+msgstr "…"
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:32
+msgid "That page number is not an integer"
+msgstr "Nomor halaman tersebut bukan bilangan bulat"
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:33
+msgid "That page number is less than 1"
+msgstr "Nomor halaman tersebut kurang dari 1"
+
+#: .\venv\Lib\site-packages\django\core\paginator.py:34
+msgid "That page contains no results"
+msgstr "Halaman tersebut tidak berisi hasil"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:22
+msgid "Enter a valid value."
+msgstr "Masukkan nilai yang valid."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:70
+msgid "Enter a valid domain name."
+msgstr "Masukkan nama domain yang valid."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:153
+#: .\venv\Lib\site-packages\django\forms\fields.py:775
+msgid "Enter a valid URL."
+msgstr "Masukkan URL yang valid."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:200
+msgid "Enter a valid integer."
+msgstr "Masukkan bilangan bulat yang valid."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:211
+msgid "Enter a valid email address."
+msgstr "Masukkan alamat email yang valid."
+
+#. Translators: "letters" means latin letters: a-z and A-Z.
+#: .\venv\Lib\site-packages\django\core\validators.py:289
+#, fuzzy
+#| msgid ""
+#| "Enter a valid \"slug\" consisting of letters, numbers, underscores or "
+#| "hyphens."
+msgid ""
+"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+"Masukkan \"slug\" yang valid yang terdiri dari huruf, angka, garis bawah "
+"atau tanda hubung."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:297
+#, fuzzy
+#| msgid ""
+#| "Enter a valid \"slug\" consisting of Unicode letters, numbers, "
+#| "underscores, or hyphens."
+msgid ""
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
+"hyphens."
+msgstr ""
+"Masukkan \"slug\" yang valid yang terdiri dari huruf Unicode, angka, garis "
+"bawah, atau tanda hubung."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:309
+#: .\venv\Lib\site-packages\django\core\validators.py:318
+#: .\venv\Lib\site-packages\django\core\validators.py:332
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2220
+#, python-format
+msgid "Enter a valid %(protocol)s address."
+msgstr "Masukkan alamat %(protocol)s yang valid."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:311
+msgid "IPv4"
+msgstr "IPv4"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:320
+#: .\venv\Lib\site-packages\django\utils\ipv6.py:43
+msgid "IPv6"
+msgstr "IPv6"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:334
+msgid "IPv4 or IPv6"
+msgstr "IPv4 atau IPv6"
+
+#: .\venv\Lib\site-packages\django\core\validators.py:375
+msgid "Enter only digits separated by commas."
+msgstr "Masukkan hanya angka yang dipisahkan dengan koma."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:381
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr "Pastikan nilai ini adalah %(limit_value)s (saat ini %(show_value)s)."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:416
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr "Pastikan nilai ini kurang dari atau sama dengan %(limit_value)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:425
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr "Pastikan nilai ini lebih besar dari atau sama dengan %(limit_value)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:434
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr ""
+"Pastikan nilai ini adalah kelipatan dari ukuran langkah %(limit_value)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:441
+#, python-format
+msgid ""
+"Ensure this value is a multiple of step size %(limit_value)s, starting from "
+"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
+msgstr ""
+"Pastikan nilai ini adalah kelipatan dari ukuran langkah %(limit_value)s, "
+"dimulai dari %(offset)s, misalnya %(offset)s, %(valid_value1)s, "
+"%(valid_value2)s, dan seterusnya."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:473
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+"Pastikan nilai ini memiliki setidaknya %(limit_value)d karakter (saat ini "
+"%(show_value)d)."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:491
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+"Pastikan nilai ini memiliki paling banyak %(limit_value)d karakter (saat ini "
+"%(show_value)d)."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:514
+#: .\venv\Lib\site-packages\django\forms\fields.py:366
+#: .\venv\Lib\site-packages\django\forms\fields.py:405
+msgid "Enter a number."
+msgstr "Masukkan angka."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:516
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] "Pastikan tidak ada lebih dari %(max)s digit secara total."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:521
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] "Pastikan tidak ada lebih dari %(max)s tempat desimal."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:526
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] "Pastikan tidak ada lebih dari %(max)s digit sebelum titik desimal."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\core\validators.py:597
+#, fuzzy, python-format
+#| msgid ""
+#| "File extension \"%(extension)s\" is not allowed. Allowed extensions are: "
+#| "%(allowed_extensions)s."
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+"Ekstensi file \"%(extension)s\" tidak diizinkan. Ekstensi yang diizinkan "
+"adalah: %(allowed_extensions)s."
+
+#: .\venv\Lib\site-packages\django\core\validators.py:659
+msgid "Null characters are not allowed."
+msgstr "Karakter null tidak diizinkan."
+
+#: .\venv\Lib\site-packages\django\db\models\base.py:1600
+#: .\venv\Lib\site-packages\django\forms\models.py:908
+msgid "and"
+msgstr "dan"
+
+#: .\venv\Lib\site-packages\django\db\models\base.py:1602
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr "%(model_name)s dengan %(field_labels)s ini sudah ada."
+
+#: .\venv\Lib\site-packages\django\db\models\constraints.py:22
+#, fuzzy, python-format
+#| msgid "Constraint \"%(name)s\" is violated."
+msgid "Constraint “%(name)s” is violated."
+msgstr "Batasan \"%(name)s\" dilanggar."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:134
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr "Nilai %(value)r bukan pilihan yang valid."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:135
+msgid "This field cannot be null."
+msgstr "Bidang ini tidak boleh null."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:136
+msgid "This field cannot be blank."
+msgstr "Bidang ini tidak boleh kosong."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:137
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr "%(model_name)s dengan %(field_label)s ini sudah ada."
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or
+#. 'month'. Eg: "Title must be unique for pub_date year"
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:141
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr "%(field_label)s harus unik untuk %(date_field_label)s %(lookup_type)s."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:180
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr "Bidang bertipe: %(field_type)s"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1162
+#, fuzzy, python-format
+#| msgid "\"%(value)s\" value must be either True or False."
+msgid "“%(value)s” value must be either True or False."
+msgstr "Nilai \"%(value)s\" harus berupa True atau False."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1163
+#, fuzzy, python-format
+#| msgid "\"%(value)s\" value must be either True, False, or None."
+msgid "“%(value)s” value must be either True, False, or None."
+msgstr "Nilai \"%(value)s\" harus berupa True, False, atau None."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1165
+msgid "Boolean (Either True or False)"
+msgstr "Boolean (True atau False)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1215
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr "String (hingga %(max_length)s)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1217
+msgid "String (unlimited)"
+msgstr "String (tak terbatas)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1326
+msgid "Comma-separated integers"
+msgstr "Bilangan bulat yang dipisahkan koma"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1427
+#, fuzzy, python-format
+#| msgid ""
+#| "\"%(value)s\" value has an invalid date format. It must be in YYYY-MM-DD "
+#| "format."
+msgid ""
+"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+"Nilai \"%(value)s\" memiliki format tanggal yang tidak valid. Harus dalam "
+"format YYYY-MM-DD."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1431
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1566
+#, fuzzy, python-format
+#| msgid ""
+#| "\"%(value)s\" value has the correct format (YYYY-MM-DD) but it is an "
+#| "invalid date."
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+"Nilai \"%(value)s\" memiliki format yang benar (YYYY-MM-DD) tetapi merupakan "
+"tanggal yang tidak valid."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1435
+msgid "Date (without time)"
+msgstr "Tanggal (tanpa waktu)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1562
+#, fuzzy, python-format
+#| msgid ""
+#| "\"%(value)s\" value has an invalid format. It must be in YYYY-MM-DD "
+#| "HH:MM[:ss[.uuuuuu]][TZ] format."
+msgid ""
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
+msgstr ""
+"Nilai \"%(value)s\" memiliki format yang tidak valid. Harus dalam format "
+"YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1570
+#, fuzzy, python-format
+#| msgid ""
+#| "\"%(value)s\" value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+#| "[TZ]) but it is an invalid date/time."
+msgid ""
+"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+"Nilai \"%(value)s\" memiliki format yang benar (YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ]) tetapi merupakan tanggal/waktu yang tidak valid."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1575
+msgid "Date (with time)"
+msgstr "Tanggal (dengan waktu)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1702
+#, fuzzy, python-format
+#| msgid "\"%(value)s\" value must be a decimal number."
+msgid "“%(value)s” value must be a decimal number."
+msgstr "Nilai \"%(value)s\" harus berupa angka desimal."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1704
+msgid "Decimal number"
+msgstr "Angka desimal"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1864
+#, fuzzy, python-format
+#| msgid ""
+#| "\"%(value)s\" value has an invalid format. It must be in [DD] "
+#| "[[HH:]MM:]ss[.uuuuuu] format."
+msgid ""
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
+msgstr ""
+"Nilai \"%(value)s\" memiliki format yang tidak valid. Harus dalam format "
+"[DD] [[HH:]MM:]ss[.uuuuuu]."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1920
+msgid "Email address"
+msgstr "Alamat email"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1945
+msgid "File path"
+msgstr "Lokasi file"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2023
+#, fuzzy, python-format
+#| msgid "\"%(value)s\" value must be a float."
+msgid "“%(value)s” value must be a float."
+msgstr "Nilai \"%(value)s\" harus berupa bilangan float."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2025
+msgid "Floating point number"
+msgstr "Bilangan floating point"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2065
+#, fuzzy, python-format
+#| msgid "\"%(value)s\" value must be an integer."
+msgid "“%(value)s” value must be an integer."
+msgstr "Nilai \"%(value)s\" harus berupa bilangan bulat."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2067
+msgid "Integer"
+msgstr "Bilangan bulat"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2163
+msgid "Big (8 byte) integer"
+msgstr "Bilangan bulat besar (8 byte)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2180
+msgid "Small integer"
+msgstr "Bilangan bulat kecil"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2188
+msgid "IPv4 address"
+msgstr "Alamat IPv4"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2219
+msgid "IP address"
+msgstr "Alamat IP"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2310
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2311
+#, fuzzy, python-format
+#| msgid "\"%(value)s\" value must be either None, True or False."
+msgid "“%(value)s” value must be either None, True or False."
+msgstr "Nilai \"%(value)s\" harus berupa None, True atau False."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2313
+msgid "Boolean (Either True, False or None)"
+msgstr "Boolean (True, False, atau None)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2364
+msgid "Positive big integer"
+msgstr "Bilangan bulat besar positif"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2379
+msgid "Positive integer"
+msgstr "Bilangan bulat positif"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2394
+msgid "Positive small integer"
+msgstr "Bilangan bulat kecil positif"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2410
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr "Slug (hingga %(max_length)s)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2446
+msgid "Text"
+msgstr "Teks"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2526
+#, fuzzy, python-format
+#| msgid ""
+#| "\"%(value)s\" value has an invalid format. It must be in "
+#| "HH:MM[:ss[.uuuuuu]] format."
+msgid ""
+"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+"Nilai \"%(value)s\" memiliki format yang tidak valid. Harus dalam format "
+"HH:MM[:ss[.uuuuuu]]."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2530
+#, fuzzy, python-format
+#| msgid ""
+#| "\"%(value)s\" value has the correct format (HH:MM[:ss[.uuuuuu]]) but it "
+#| "is an invalid time."
+msgid ""
+"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+"Nilai \"%(value)s\" memiliki format yang benar (HH:MM[:ss[.uuuuuu]]) tetapi "
+"merupakan waktu yang tidak valid."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2534
+msgid "Time"
+msgstr "Waktu"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2642
+msgid "URL"
+msgstr "URL"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2666
+msgid "Raw binary data"
+msgstr "Data biner mentah"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2731
+#, fuzzy, python-format
+#| msgid "\"%(value)s\" is not a valid UUID."
+msgid "“%(value)s” is not a valid UUID."
+msgstr "\"%(value)s\" bukan UUID yang valid."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:2733
+msgid "Universally unique identifier"
+msgstr "Pengenal unik universal"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\files.py:420
+msgid "Image"
+msgstr "Gambar"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\json.py:24
+msgid "A JSON object"
+msgstr "Objek JSON"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\json.py:26
+msgid "Value must be valid JSON."
+msgstr "Nilai harus berupa JSON yang valid."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:979
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
+msgstr ""
+"Instansi %(model)s dengan %(field)s %(value)r bukan pilihan yang valid."
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:982
+msgid "Foreign Key (type determined by related field)"
+msgstr "Kunci Asing (tipe ditentukan oleh bidang terkait)"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1276
+msgid "One-to-one relationship"
+msgstr "Hubungan satu-ke-satu"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1333
+#, python-format
+msgid "%(from)s-%(to)s relationship"
+msgstr "Hubungan %(from)s-%(to)s"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1335
+#, python-format
+msgid "%(from)s-%(to)s relationships"
+msgstr "Hubungan %(from)s-%(to)s"
+
+#: .\venv\Lib\site-packages\django\db\models\fields\related.py:1383
+msgid "Many-to-many relationship"
+msgstr "Hubungan banyak-ke-banyak"
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: .\venv\Lib\site-packages\django\forms\boundfield.py:185
+msgid ":?.!"
+msgstr ":?.!"
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:95
+msgid "This field is required."
+msgstr "Bidang ini wajib diisi."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:315
+msgid "Enter a whole number."
+msgstr "Masukkan bilangan bulat."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:486
+#: .\venv\Lib\site-packages\django\forms\fields.py:1267
+msgid "Enter a valid date."
+msgstr "Masukkan tanggal yang valid."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:509
+#: .\venv\Lib\site-packages\django\forms\fields.py:1268
+msgid "Enter a valid time."
+msgstr "Masukkan waktu yang valid."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:536
+msgid "Enter a valid date/time."
+msgstr "Masukkan tanggal/waktu yang valid."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:570
+msgid "Enter a valid duration."
+msgstr "Masukkan durasi yang valid."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:571
+#, python-brace-format
+msgid "The number of days must be between {min_days} and {max_days}."
+msgstr "Jumlah hari harus antara {min_days} dan {max_days}."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:640
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr "Tidak ada file yang dikirimkan. Periksa tipe pengkodean pada formulir."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:641
+msgid "No file was submitted."
+msgstr "Tidak ada file yang dikirimkan."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:642
+msgid "The submitted file is empty."
+msgstr "File yang dikirimkan kosong."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:644
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+"Pastikan nama file ini memiliki paling banyak %(max)d karakter (saat ini "
+"%(length)d)."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:649
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr "Harap kirimkan file atau centang kotak hapus, bukan keduanya."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:717
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+"Unggah gambar yang valid. File yang Anda unggah bukan gambar atau gambar "
+"yang rusak."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:889
+#: .\venv\Lib\site-packages\django\forms\fields.py:975
+#: .\venv\Lib\site-packages\django\forms\models.py:1592
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+"Pilih pilihan yang valid. %(value)s bukan salah satu pilihan yang tersedia."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:977
+#: .\venv\Lib\site-packages\django\forms\fields.py:1096
+#: .\venv\Lib\site-packages\django\forms\models.py:1590
+msgid "Enter a list of values."
+msgstr "Masukkan daftar nilai."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1097
+msgid "Enter a complete value."
+msgstr "Masukkan nilai lengkap."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1339
+msgid "Enter a valid UUID."
+msgstr "Masukkan UUID yang valid."
+
+#: .\venv\Lib\site-packages\django\forms\fields.py:1369
+msgid "Enter a valid JSON."
+msgstr "Masukkan JSON yang valid."
+
+#. Translators: This is the default suffix added to form field labels
+#: .\venv\Lib\site-packages\django\forms\forms.py:97
+msgid ":"
+msgstr ":"
+
+#: .\venv\Lib\site-packages\django\forms\forms.py:239
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr "(Bidang tersembunyi %(name)s) %(error)s"
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:61
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+"Data ManagementForm hilang atau telah dirusak. Bidang yang hilang: "
+"%(field_names)s. Anda mungkin perlu melaporkan bug jika masalah berlanjut."
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:65
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] "Harap kirimkan paling banyak %(num)d formulir."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:70
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] "Harap kirimkan setidaknya %(num)d formulir."
+msgstr[1] ""
+
+#: .\venv\Lib\site-packages\django\forms\formsets.py:484
+#: .\venv\Lib\site-packages\django\forms\formsets.py:491
+msgid "Order"
+msgstr "Urutan"
+
+#: .\venv\Lib\site-packages\django\forms\models.py:901
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr "Harap perbaiki data duplikat untuk %(field)s."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:906
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr "Harap perbaiki data duplikat untuk %(field)s, yang harus unik."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:913
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+"Harap perbaiki data duplikat untuk %(field_name)s yang harus unik untuk "
+"%(lookup)s dalam %(date_field)s."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:922
+msgid "Please correct the duplicate values below."
+msgstr "Harap perbaiki nilai duplikat di bawah ini."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1359
+msgid "The inline value did not match the parent instance."
+msgstr "Nilai inline tidak cocok dengan instansi induk."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1450
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+"Pilih pilihan yang valid. Pilihan tersebut bukan salah satu pilihan yang "
+"tersedia."
+
+#: .\venv\Lib\site-packages\django\forms\models.py:1594
+#, fuzzy, python-format
+#| msgid "\"%(pk)s\" is not a valid value."
+msgid "“%(pk)s” is not a valid value."
+msgstr "\"%(pk)s\" bukan nilai yang valid."
+
+#: .\venv\Lib\site-packages\django\forms\utils.py:229
+#, fuzzy, python-format
+#| msgid ""
+#| "%(datetime)s couldn't be interpreted in time zone %(current_timezone)s; "
+#| "it may be ambiguous or it may not exist."
+msgid ""
+"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+"%(datetime)s tidak dapat diinterpretasikan dalam zona waktu "
+"%(current_timezone)s; mungkin ambigu atau tidak ada."
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:527
+msgid "Clear"
+msgstr "Hapus"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:528
+msgid "Currently"
+msgstr "Saat ini"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:529
+msgid "Change"
+msgstr "Ubah"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:866
+msgid "Unknown"
+msgstr "Tidak Diketahui"
+
+#: .\venv\Lib\site-packages\django\forms\widgets.py:867
+msgid "Yes"
+msgstr "Ya"
+
+#. Translators: Please do not add spaces around commas.
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:873
+msgid "yes,no,maybe"
+msgstr "ya,tidak,mungkin"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:903
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:920
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] "%(size)d byte"
+msgstr[1] "%(size)d byte"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:922
+#, python-format
+msgid "%s KB"
+msgstr "%s KB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:924
+#, python-format
+msgid "%s MB"
+msgstr "%s MB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:926
+#, python-format
+msgid "%s GB"
+msgstr "%s GB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:928
+#, python-format
+msgid "%s TB"
+msgstr "%s TB"
+
+#: .\venv\Lib\site-packages\django\template\defaultfilters.py:930
+#, python-format
+msgid "%s PB"
+msgstr "%s PB"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:74
+msgid "p.m."
+msgstr "p.m."
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:75
+msgid "a.m."
+msgstr "a.m."
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:80
+msgid "PM"
+msgstr "PM"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:81
+msgid "AM"
+msgstr "AM"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:153
+msgid "midnight"
+msgstr "tengah malam"
+
+#: .\venv\Lib\site-packages\django\utils\dateformat.py:155
+msgid "noon"
+msgstr "siang"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:12
+msgid "Saturday"
+msgstr "Sabtu"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:13
+msgid "Sunday"
+msgstr "Minggu"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:16
+msgid "Mon"
+msgstr "Sen"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:17
+msgid "Tue"
+msgstr "Sel"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:18
+msgid "Wed"
+msgstr "Rab"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:19
+msgid "Thu"
+msgstr "Kam"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:20
+msgid "Fri"
+msgstr "Jum"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:21
+msgid "Sat"
+msgstr "Sab"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:22
+msgid "Sun"
+msgstr "Min"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:25
+msgid "January"
+msgstr "Januari"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:26
+msgid "February"
+msgstr "Februari"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:27
+msgid "March"
+msgstr "Maret"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:28
+msgid "April"
+msgstr "April"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:29
+msgid "May"
+msgstr "Mei"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:30
+msgid "June"
+msgstr "Juni"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:31
+msgid "July"
+msgstr "Juli"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:32
+msgid "August"
+msgstr "Agustus"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:33
+msgid "September"
+msgstr "September"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:34
+msgid "October"
+msgstr "Oktober"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:35
+msgid "November"
+msgstr "November"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:36
+msgid "December"
+msgstr "Desember"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:39
+msgid "jan"
+msgstr "jan"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:40
+msgid "feb"
+msgstr "feb"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:41
+msgid "mar"
+msgstr "mar"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:42
+msgid "apr"
+msgstr "apr"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:43
+msgid "may"
+msgstr "mei"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:44
+msgid "jun"
+msgstr "jun"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:45
+msgid "jul"
+msgstr "jul"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:46
+msgid "aug"
+msgstr "agu"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:47
+msgid "sep"
+msgstr "sep"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:48
+msgid "oct"
+msgstr "okt"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:49
+msgid "nov"
+msgstr "nov"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:50
+msgid "dec"
+msgstr "des"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:53
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr "Jan."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:54
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr "Feb."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:55
+msgctxt "abbrev. month"
+msgid "March"
+msgstr "Mar."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:56
+msgctxt "abbrev. month"
+msgid "April"
+msgstr "Apr."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:57
+msgctxt "abbrev. month"
+msgid "May"
+msgstr "Mei"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:58
+msgctxt "abbrev. month"
+msgid "June"
+msgstr "Jun."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:59
+msgctxt "abbrev. month"
+msgid "July"
+msgstr "Jul."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:60
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr "Agu."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:61
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr "Sep."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:62
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr "Okt."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:63
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr "Nov."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:64
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr "Des."
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:67
+msgctxt "alt. month"
+msgid "January"
+msgstr "Januari"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:68
+msgctxt "alt. month"
+msgid "February"
+msgstr "Februari"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:69
+msgctxt "alt. month"
+msgid "March"
+msgstr "Maret"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:70
+msgctxt "alt. month"
+msgid "April"
+msgstr "April"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:71
+msgctxt "alt. month"
+msgid "May"
+msgstr "Mei"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:72
+msgctxt "alt. month"
+msgid "June"
+msgstr "Juni"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:73
+msgctxt "alt. month"
+msgid "July"
+msgstr "Juli"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:74
+msgctxt "alt. month"
+msgid "August"
+msgstr "Agustus"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:75
+msgctxt "alt. month"
+msgid "September"
+msgstr "September"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:76
+msgctxt "alt. month"
+msgid "October"
+msgstr "Oktober"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:77
+msgctxt "alt. month"
+msgid "November"
+msgstr "November"
+
+#: .\venv\Lib\site-packages\django\utils\dates.py:78
+msgctxt "alt. month"
+msgid "December"
+msgstr "Desember"
+
+#: .\venv\Lib\site-packages\django\utils\ipv6.py:20
+msgid "This is not a valid IPv6 address."
+msgstr "Ini bukan alamat IPv6 yang valid."
+
+#: .\venv\Lib\site-packages\django\utils\text.py:76
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s…"
+msgstr "%(truncated_text)s…"
+
+#: .\venv\Lib\site-packages\django\utils\text.py:287
+msgid "or"
+msgstr "atau"
+
+#. Translators: This string is used as a separator between list elements
+#: .\venv\Lib\site-packages\django\utils\text.py:306
+#: .\venv\Lib\site-packages\django\utils\timesince.py:135
+msgid ", "
+msgstr ", "
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:8
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d tahun"
+msgstr[1] "%(num)d tahun"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:9
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d bulan"
+msgstr[1] "%(num)d bulan"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:10
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d minggu"
+msgstr[1] "%(num)d minggu"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:11
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d hari"
+msgstr[1] "%(num)d hari"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:12
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d jam"
+msgstr[1] "%(num)d jam"
+
+#: .\venv\Lib\site-packages\django\utils\timesince.py:13
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d menit"
+msgstr[1] "%(num)d menit"
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:29
+msgid "Forbidden"
+msgstr "Dilarang"
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:30
+msgid "CSRF verification failed. Request aborted."
+msgstr "Verifikasi CSRF gagal. Permintaan dibatalkan."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:34
+#, fuzzy
+#| msgid ""
+#| "You are seeing this message because this HTTPS site requires a \"Referer "
+#| "header\" to be sent by your web browser, but none was sent. This header "
+#| "is required for security reasons, to ensure that your browser is not "
+#| "being hijacked by third parties."
+msgid ""
+"You are seeing this message because this HTTPS site requires a “Referer "
+"header” to be sent by your web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+"Anda melihat pesan ini karena situs HTTPS ini membutuhkan \"header Referer\" "
+"untuk dikirim oleh browser web Anda, tetapi tidak ada yang dikirim. Header "
+"ini diperlukan untuk alasan keamanan, untuk memastikan bahwa browser Anda "
+"tidak dibajak oleh pihak ketiga."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:40
+#, fuzzy
+#| msgid ""
+#| "If you have configured your browser to disable \"Referer\" headers, "
+#| "please re-enable them, at least for this site, or for HTTPS connections, "
+#| "or for \"same-origin\" requests."
+msgid ""
+"If you have configured your browser to disable “Referer” headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for “same-"
+"origin” requests."
+msgstr ""
+"Jika Anda telah mengonfigurasi browser Anda untuk menonaktifkan header "
+"\"Referer\", harap aktifkan kembali, setidaknya untuk situs ini, atau untuk "
+"koneksi HTTPS, atau untuk permintaan \"same-origin\"."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:45
+#, fuzzy
+#| msgid ""
+#| "If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag "
+#| "or including the \"Referrer-Policy: no-referrer\" header, please remove "
+#| "them. The CSRF protection requires the \"Referer\" header to do strict "
+#| "referer checking. If you're concerned about privacy, use alternatives "
+#| "like <a rel=\"noreferrer\" …> for links to third-party sites."
+msgid ""
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
+"including the “Referrer-Policy: no-referrer” header, please remove them. The "
+"CSRF protection requires the “Referer” header to do strict referer checking. "
+"If you’re concerned about privacy, use alternatives like <a "
+"rel=\"noreferrer\" …> for links to third-party sites."
+msgstr ""
+"Jika Anda menggunakan tag <meta name=\"referrer\" content=\"no-referrer\"> "
+"atau menyertakan header \"Referrer-Policy: no-referrer\", harap hapus. "
+"Perlindungan CSRF membutuhkan header \"Referer\" untuk melakukan pemeriksaan "
+"referer yang ketat. Jika Anda peduli dengan privasi, gunakan alternatif "
+"seperti <a rel=\"noreferrer\" …> untuk tautan ke situs pihak ketiga."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:54
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+"Anda melihat pesan ini karena situs ini membutuhkan cookie CSRF saat "
+"mengirimkan formulir. Cookie ini diperlukan untuk alasan keamanan, untuk "
+"memastikan bahwa browser Anda tidak dibajak oleh pihak ketiga."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:60
+#, fuzzy
+#| msgid ""
+#| "If you have configured your browser to disable cookies, please re-enable "
+#| "them, at least for this site, or for \"same-origin\" requests."
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for “same-origin” requests."
+msgstr ""
+"Jika Anda telah mengonfigurasi browser Anda untuk menonaktifkan cookie, "
+"harap aktifkan kembali, setidaknya untuk situs ini, atau untuk permintaan "
+"\"same-origin\"."
+
+#: .\venv\Lib\site-packages\django\views\csrf.py:66
+msgid "More information is available with DEBUG=True."
+msgstr "Informasi lebih lanjut tersedia dengan DEBUG=True."
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:44
+msgid "No year specified"
+msgstr "Tidak ada tahun yang ditentukan"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:64
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:115
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:214
+msgid "Date out of range"
+msgstr "Tanggal di luar rentang"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:94
+msgid "No month specified"
+msgstr "Tidak ada bulan yang ditentukan"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:147
+msgid "No day specified"
+msgstr "Tidak ada hari yang ditentukan"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:194
+msgid "No week specified"
+msgstr "Tidak ada minggu yang ditentukan"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:353
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:384
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr "Tidak ada %(verbose_name_plural)s tersedia"
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:680
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
+msgstr ""
+"%(verbose_name_plural)s mendatang tidak tersedia karena "
+"%(class_name)s.allow_future adalah False."
+
+#: .\venv\Lib\site-packages\django\views\generic\dates.py:720
+#, fuzzy, python-format
+#| msgid "Invalid date string \"%(datestr)s\" given format \"%(format)s\""
+msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
+msgstr ""
+"String tanggal tidak valid \"%(datestr)s\" dengan format \"%(format)s\""
+
+#: .\venv\Lib\site-packages\django\views\generic\detail.py:56
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr "Tidak ada %(verbose_name)s yang ditemukan sesuai dengan kueri"
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:70
+#, fuzzy
+#| msgid "Page is not \"last\", nor can it be converted to an int."
+msgid "Page is not “last”, nor can it be converted to an int."
+msgstr "Halaman bukan \"last\", dan tidak dapat dikonversi ke int."
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:77
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr "Halaman tidak valid (%(page_number)s): %(message)s"
+
+#: .\venv\Lib\site-packages\django\views\generic\list.py:173
+#, fuzzy, python-format
+#| msgid "Empty list and \"%(class_name)s.allow_empty\" is False."
+msgid "Empty list and “%(class_name)s.allow_empty” is False."
+msgstr "Daftar kosong dan \"%(class_name)s.allow_empty\" adalah False."
+
+#: .\venv\Lib\site-packages\django\views\static.py:49
+msgid "Directory indexes are not allowed here."
+msgstr "Indeks direktori tidak diizinkan di sini."
+
+#: .\venv\Lib\site-packages\django\views\static.py:51
+#, fuzzy, python-format
+#| msgid "\"%(path)s\" does not exist"
+msgid "“%(path)s” does not exist"
+msgstr "\"%(path)s\" tidak ada"
+
+#: .\venv\Lib\site-packages\django\views\static.py:68
+#: .\venv\Lib\site-packages\django\views\templates\directory_index.html:8
+#: .\venv\Lib\site-packages\django\views\templates\directory_index.html:11
+#, python-format
+msgid "Index of %(directory)s"
+msgstr "Indeks %(directory)s"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:7
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:204
+msgid "The install worked successfully! Congratulations!"
+msgstr "Instalasi berhasil! Selamat!"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:206
+#, python-format
+msgid ""
+"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
+msgstr ""
+"Lihat <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
+"target=\"_blank\" rel=\"noopener\">catatan rilis</a> untuk Django %(version)s"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:208
+#, python-format
+msgid ""
+"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
+"configured any URLs."
+msgstr ""
+"Anda melihat halaman ini karena <a href=\"https://docs.djangoproject.com/en/"
+"%(version)s/ref/settings/#debug\" target=\"_blank\" "
+"rel=\"noopener\">DEBUG=True</a> ada di file pengaturan Anda dan Anda belum "
+"mengonfigurasi URL apa pun."
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:217
+msgid "Django Documentation"
+msgstr "Dokumentasi Django"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:218
+#, fuzzy
+#| msgid "Topics, references, &amp; how-to's"
+msgid "Topics, references, &amp; how-to’s"
+msgstr "Topik, referensi, &amp; panduan"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:226
+msgid "Tutorial: A Polling App"
+msgstr "Tutorial: Aplikasi Polling"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:227
+msgid "Get started with Django"
+msgstr "Memulai dengan Django"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:235
+msgid "Django Community"
+msgstr "Komunitas Django"
+
+#: .\venv\Lib\site-packages\django\views\templates\default_urlconf.html:236
+msgid "Connect, get help, or contribute"
+msgstr "Terhubung, dapatkan bantuan, atau berkontribusi"
+
+#~ msgid "Sistem Manajemen Presensi & SKS"
+#~ msgstr "Sistem Manajemen Presensi & SKS"
+
+#~ msgid "Kamera Presensi Mahasiswa"
+#~ msgstr "Kamera Presensi Mahasiswa"
+
+#~ msgid "Monitor Durasi Presensi"
+#~ msgstr "Monitor Durasi Presensi"
+
+#~ msgid "Approval Pendaftaran Akun"
+#~ msgstr "Persetujuan Pendaftaran Akun"
+
+#~ msgid "Data Mahasiswa"
+#~ msgstr "Data Mahasiswa"
+
+#~ msgid "Master Data Wajah Mahasiswa"
+#~ msgstr "Master Data Wajah Mahasiswa"
+
+#~ msgid "Data SKS PA"
+#~ msgstr "Data SKS PA"
+
+#~ msgid "Monitoring Presensi"
+#~ msgstr "Monitoring Presensi"
+
+#~ msgid "Status Pemenuhan SKS"
+#~ msgstr "Status Pemenuhan SKS"
+
+#~ msgid "Rekap Presensi"
+#~ msgstr "Rekap Presensi"

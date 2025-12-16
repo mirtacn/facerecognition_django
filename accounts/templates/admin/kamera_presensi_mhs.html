@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block page_title %}Kamera Presensi Mahasiswa{% endblock %}
+{% block page_title %}{% trans "Student Attendance Camera" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -9,26 +10,26 @@
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Daftar Presensi Mahasiswa</h5>
-                    <span class="badge bg-secondary">Total: {{ total_mahasiswa }} mahasiswa</span>
+                    <h5 class="mb-0">{% trans "Student Attendance List" %}</h5>
+                    <span class="badge bg-secondary">{% trans "Total" %}: {{ total_mahasiswa }} {% trans "students" %}</span>
                 </div>
-                <small class="text-muted">Tanggal: {{ today|date:"d/m/Y" }}</small>
+                <small class="text-muted">{% trans "Date" %}: {{ today|date:"d/m/Y" }}</small>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-hover" id="presensi-table">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Gambar checkin</th>
-                                <th>Gambar checkout</th>
-                                <th>Nama</th>
-                                <th>NRP</th>
-                                <th>Kelas</th>
-                                <th>Tanggal</th>
-                                <th>Jam Check-in</th>
-                                <th>Jam Check-out</th>
-                                <th>Aksi</th>
+                                <th>{% trans "No" %}</th>
+                                <th>{% trans "Check-in Image" %}</th>
+                                <th>{% trans "Check-out Image" %}</th>
+                                <th>{% trans "Name" %}</th>
+                                <th>{% trans "Student ID" %}</th>
+                                <th>{% trans "Class" %}</th>
+                                <th>{% trans "Date" %}</th>
+                                <th>{% trans "Check-in Time" %}</th>
+                                <th>{% trans "Check-out Time" %}</th>
+                                <th>{% trans "Action" %}</th>
                             </tr>
                         </thead>
                         <tbody id="student-table-body">
@@ -39,10 +40,10 @@
                                     {% if data.presensi and data.presensi.foto_checkin %}
                                         <img src="{{ data.presensi.foto_checkin.url }}" 
                                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
-                                            alt="Foto Check-in" 
+                                            alt="{% trans 'Check-in Photo' %}" 
                                             class="img-thumbnail">
                                     {% else %}
-                                        <div class="avatar-circle" ...>
+                                        <div class="avatar-circle">
                                         {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
                                         </div>
                                     {% endif %}
@@ -51,16 +52,16 @@
                                     {% if data.presensi and data.presensi.foto_checkout %}
                                         <img src="{{ data.presensi.foto_checkout.url }}" 
                                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
-                                            alt="Foto Check-out" 
+                                            alt="{% trans 'Check-out Photo' %}" 
                                             class="img-thumbnail">
                                     {% else %}
-                                        <div class="avatar-circle" ...>
+                                        <div class="avatar-circle">
                                         {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
                                         </div>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <strong>{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}</strong>
+                                    <strong>{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.nama_lengkap }}</strong>
                                 </td>
                                 <td>
                                     <span class="badge bg-info">{{ data.mahasiswa.user.nrp|default:"-" }}</span>
@@ -88,18 +89,18 @@
                                                 data-mahasiswa-id="{{ data.mahasiswa.id }}"
                                                 data-mahasiswa-nama="{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}"
                                                 {% if data.is_checked_in %}disabled{% endif %}
-                                                title="Check-in">
+                                                title="{% trans 'Check-in' %}">
                                             <i class="fas fa-sign-in-alt"></i>
-                                            <span class="d-none d-md-inline"> Check-in</span>
+                                            <span class="d-none d-md-inline"> {% trans "Check-in" %}</span>
                                         </button>
                                         <button type="button" 
                                                 class="btn {% if not data.is_checked_in %}btn-outline-secondary disabled{% else %}btn-warning{% endif %} btn-checkout"
                                                 data-mahasiswa-id="{{ data.mahasiswa.id }}"
                                                 data-mahasiswa-nama="{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}"
                                                 {% if not data.is_checked_in %}disabled{% endif %}
-                                                title="Check-out">
+                                                title="{% trans 'Check-out' %}">
                                             <i class="fas fa-sign-out-alt"></i>
-                                            <span class="d-none d-md-inline"> Check-out</span>
+                                            <span class="d-none d-md-inline"> {% trans "Check-out" %}</span>
                                         </button>
                                     </div>
                                 </td>
@@ -109,10 +110,10 @@
                                 <td colspan="9" class="text-center py-5">
                                     <div class="text-muted">
                                         <i class="fas fa-user-check fa-3x mb-3 opacity-25"></i>
-                                        <h5 class="mb-2">Belum ada mahasiswa yang disetujui</h5>
-                                        <p>Semua mahasiswa yang status pengajuannya sudah disetujui akan muncul di sini</p>
+                                        <h5 class="mb-2">{% trans "No approved students yet" %}</h5>
+                                        <p>{% trans "All students whose registration approval status has been approved will appear here" %}</p>
                                         <a href="{% url 'approval_pendaftaran' %}" class="btn btn-outline-primary mt-2">
-                                            <i class="fas fa-clipboard-check"></i> Ke Approval Pendaftaran
+                                            <i class="fas fa-clipboard-check"></i> {% trans "Go to Registration Approval" %}
                                         </a>
                                     </div>
                                 </td>
@@ -125,9 +126,7 @@
             <div class="card-footer">
                 <small class="text-muted">
                     <i class="fas fa-info-circle"></i> 
-                    Hanya menampilkan mahasiswa yang status pengajuannya sudah DISETUJUI.
-                    Dalam sehari bisa beberapa kali check-in/out, harus check-out dulu sebelum check-in lagi.
-                    Data direset setiap hari baru.
+                    {% trans "Only displays students whose registration approval status has been APPROVED. Multiple check-ins/outs per day are allowed, must check-out before checking in again. Data is reset every new day." %}
                 </small>
             </div>
         </div>
@@ -139,7 +138,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="cameraModalLabel">Ambil Foto Presensi</h5>
+                <h5 class="modal-title" id="cameraModalLabel">{% trans "Take Attendance Photo" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -148,14 +147,14 @@
                         <div class="camera-container mb-3">
                             <div class="card">
                                 <div class="card-header bg-dark text-white py-2">
-                                    <i class="fas fa-video"></i> Kamera Live
+                                    <i class="fas fa-video"></i> {% trans "Live Camera" %}
                                 </div>
                                 <div class="card-body p-0">
                                     <video id="cameraPreview" autoplay playsinline 
                                            style="width: 100%; height: 300px; object-fit: cover; background-color: #000;"></video>
                                     <div class="text-center bg-dark py-2">
                                         <div class="text-white small">
-                                            <i class="fas fa-lightbulb"></i> Pastikan wajah terlihat jelas
+                                            <i class="fas fa-lightbulb"></i> {% trans "Make sure your face is clearly visible" %}
                                         </div>
                                     </div>
                                 </div>
@@ -164,10 +163,10 @@
                         </div>
                         <div class="text-center">
                             <button type="button" class="btn btn-primary btn-lg" id="captureBtn">
-                                <i class="fas fa-camera"></i> Ambil Foto
+                                <i class="fas fa-camera"></i> {% trans "Take Photo" %}
                             </button>
                             <button type="button" class="btn btn-secondary btn-lg" id="retakeBtn" style="display: none;">
-                                <i class="fas fa-redo"></i> Ambil Ulang
+                                <i class="fas fa-redo"></i> {% trans "Retake" %}
                             </button>
                         </div>
                     </div>
@@ -175,14 +174,14 @@
                         <div class="preview-container">
                             <div class="card">
                                 <div class="card-header bg-info text-white py-2">
-                                    <i class="fas fa-image"></i> Preview
+                                    <i class="fas fa-image"></i> {% trans "Preview" %}
                                 </div>
                                 <div class="card-body text-center">
                                     <img id="photoPreview" src="" 
                                          style="width: 100%; max-height: 200px; object-fit: cover; border: 2px dashed #ddd; border-radius: 4px; display: none;">
                                     <div id="noPreview" class="text-muted py-5">
                                         <i class="fas fa-user-circle fa-3x mb-3"></i>
-                                        <p>Foto akan muncul di sini</p>
+                                        <p>{% trans "Photo will appear here" %}</p>
                                     </div>
                                     <div class="mt-3">
                                         <div class="alert alert-info p-2">
@@ -194,7 +193,7 @@
                                             <strong id="actionType"></strong>
                                         </div>
                                         <div class="alert alert-light p-2">
-                                            <small><i class="fas fa-exclamation-circle"></i> Foto akan disimpan sebagai bukti presensi</small>
+                                            <small><i class="fas fa-exclamation-circle"></i> {% trans "Photo will be saved as attendance evidence" %}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -205,10 +204,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Batal
+                    <i class="fas fa-times"></i> {% trans "Cancel" %}
                 </button>
                 <button type="button" class="btn btn-success" id="confirmBtn" style="display: none;">
-                    <i class="fas fa-check"></i> Konfirmasi & Simpan
+                    <i class="fas fa-check"></i> {% trans "Confirm & Save" %}
                 </button>
             </div>
         </div>
@@ -321,7 +320,7 @@ async function startCamera() {
         
     } catch (err) {
         console.error('Error accessing camera:', err);
-        showNotification('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.', 'danger');
+        showNotification('{% trans "Cannot access camera. Please ensure camera permission is granted." %}', 'danger');
         if (cameraModal) cameraModal.hide();
     }
 }
@@ -371,7 +370,7 @@ document.addEventListener('click', function(e) {
         
         // Update info di modal
         document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
-        document.getElementById('actionType').textContent = 'Aksi: CHECK-IN';
+        document.getElementById('actionType').textContent = '{% trans "Action: CHECK-IN" %}';
         
         resetCameraModal();
         if (cameraModal) cameraModal.show();
@@ -387,7 +386,7 @@ document.addEventListener('click', function(e) {
         
         // Update info di modal
         document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
-        document.getElementById('actionType').textContent = 'Aksi: CHECK-OUT';
+        document.getElementById('actionType').textContent = '{% trans "Action: CHECK-OUT" %}';
         
         resetCameraModal();
         if (cameraModal) cameraModal.show();
@@ -441,13 +440,13 @@ document.getElementById('retakeBtn')?.addEventListener('click', function() {
 // Tombol Konfirmasi
 document.getElementById('confirmBtn')?.addEventListener('click', async function() {
     if (!capturedPhoto || !currentMahasiswaId) {
-        showNotification('Tidak ada foto yang diambil!', 'warning');
+        showNotification('{% trans "No photo taken!" %}', 'warning');
         return;
     }
     
     const btn = this;
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Processing..." %}';
     btn.disabled = true;
     
     try {
@@ -475,7 +474,7 @@ document.getElementById('confirmBtn')?.addEventListener('click', async function(
             updatePresensiUI(currentMahasiswaId, currentAction, result.data);
             
             // Tampilkan notifikasi
-            showNotification(`${currentAction.toUpperCase()} berhasil untuk ${currentMahasiswaNama}`, 'success');
+            showNotification('{% trans "CHECK-IN/OUT successful for" %} ' + currentMahasiswaNama, 'success');
             
             // Tutup modal
             if (cameraModal) cameraModal.hide();
@@ -483,12 +482,12 @@ document.getElementById('confirmBtn')?.addEventListener('click', async function(
             // Refresh data setelah 1 detik
             setTimeout(refreshPresensiData, 1000);
         } else {
-            showNotification(`Gagal: ${result.message}`, 'danger');
+            showNotification('{% trans "Failed:" %} ' + result.message, 'danger');
         }
         
     } catch (error) {
         console.error('Error:', error);
-        showNotification('Terjadi kesalahan saat memproses: ' + error.message, 'danger');
+        showNotification('{% trans "An error occurred while processing:" %} ' + error.message, 'danger');
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;

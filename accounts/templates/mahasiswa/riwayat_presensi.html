@@ -1,65 +1,65 @@
-<!-- riwayat_presensi.html -->
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Riwayat Presensi{% endblock %}
-{% block page_title %}Riwayat Presensi{% endblock %}
+{% block title %}{% trans "Attendance History" %}{% endblock %}
+{% block page_title %}{% trans "Attendance History" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <!-- Card utama -->
+        <!-- Main card -->
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-calendar-check me-2"></i>
-                        Riwayat Presensi
+                        {% trans "Attendance History" %}
                     </h5>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-info text-dark">
                             <i class="bi bi-book me-1"></i>
-                            Total SKS: {{ total_sks }} SKS
+                            {% trans "Total Credits" %}: {{ total_sks }} {% trans "Credits" %}
                         </span>
                         <div class="dropdown">
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-filter me-1"></i> Filter
+                                <i class="bi bi-filter me-1"></i> {% trans "Filter" %}
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('ganjil')">Semester Ganjil</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('genap')">Semester Genap</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('ganjil')">{% trans "Odd Semester" %}</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('genap')">{% trans "Even Semester" %}</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" onclick="showAll()">Tampilkan Semua</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="showAll()">{% trans "Show All" %}</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     
-                    <!-- Info SKS -->
+                    <!-- Credits Info -->
                     <div class="alert alert-primary mb-4">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-info-circle-fill me-2"></i>
                             <div>
-                                <strong>Kegiatan SKS Semester Ini</strong> - Total SKS: {{ total_sks }} SKS
+                                <strong>{% trans "This Semester's Credit Activities" %}</strong> - {% trans "Total Credits" %}: {{ total_sks }} {% trans "Credits" %}
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Tabel Riwayat Presensi -->
+                    <!-- Attendance History Table -->
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered" id="presensiTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 8%; font-size: 13px;">Tanggal</th>
-                                    <th style="width: 10%; font-size: 13px;">NRP</th>
-                                    <th style="width: 15%; font-size: 13px;">Nama</th>
-                                    <th style="width: 8%; font-size: 13px;">Kelas</th>
-                                    <th style="width: 8%; font-size: 13px;">Tingkatan</th>
-                                    <th style="width: 8%; font-size: 13px;">Check-in</th>
-                                    <th style="width: 8%; font-size: 13px;">Check-out</th>
-                                    <th style="width: 8%; font-size: 13px;">Durasi</th>
-                                    <th style="width: 8%; font-size: 13px;">Status</th>
+                                    <th style="width: 8%; font-size: 13px;">{% trans "Date" %}</th>
+                                    <th style="width: 10%; font-size: 13px;">{% trans "Student ID" %}</th>
+                                    <th style="width: 15%; font-size: 13px;">{% trans "Name" %}</th>
+                                    <th style="width: 8%; font-size: 13px;">{% trans "Class" %}</th>
+                                    <th style="width: 8%; font-size: 13px;">{% trans "Level" %}</th>
+                                    <th style="width: 8%; font-size: 13px;">{% trans "Check-in" %}</th>
+                                    <th style="width: 8%; font-size: 13px;">{% trans "Check-out" %}</th>
+                                    <th style="width: 8%; font-size: 13px;">{% trans "Duration" %}</th>
+                                    <th style="width: 8%; font-size: 13px;">{% trans "Status" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -94,15 +94,15 @@
                                         </td>
                                         <td style="font-size: 13px;">
                                             {% if presensi.status == 'Hadir' %}
-                                                <span class="badge bg-success">Hadir</span>
+                                                <span class="badge bg-success">{% trans "Present" %}</span>
                                             {% elif presensi.status == 'Terlambat' %}
-                                                <span class="badge bg-warning text-dark">Terlambat</span>
+                                                <span class="badge bg-warning text-dark">{% trans "Late" %}</span>
                                             {% elif presensi.status == 'Izin' %}
-                                                <span class="badge bg-info">Izin</span>
+                                                <span class="badge bg-info">{% trans "Permission" %}</span>
                                             {% elif presensi.status == 'Sakit' %}
-                                                <span class="badge bg-primary">Sakit</span>
+                                                <span class="badge bg-primary">{% trans "Sick" %}</span>
                                             {% else %}
-                                                <span class="badge bg-danger">Alpha</span>
+                                                <span class="badge bg-danger">{% trans "Absent" %}</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -112,7 +112,7 @@
                                         <td colspan="9" class="text-center py-4">
                                             <div class="text-muted">
                                                 <i class="bi bi-calendar-x display-6 mb-3"></i>
-                                                <p>Belum ada data presensi</p>
+                                                <p>{% trans "No attendance data available" %}</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -121,28 +121,28 @@
                         </table>
                     </div>
                     
-                    <!-- Informasi Semester -->
+                    <!-- Semester Information -->
                     <div class="alert alert-secondary mt-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="bi bi-calendar-date me-2"></i>
-                                <strong>Semester:</strong> {{ semester_nama }}
+                                <strong>{% trans "Semester" %}:</strong> {{ semester_nama }}
                             </div>
                             <div>
                                 <button class="btn btn-outline-primary btn-sm" onclick="exportToExcel()">
-                                    <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+                                    <i class="bi bi-file-earmark-excel me-1"></i> {% trans "Export Excel" %}
                                 </button>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Statistik Presensi
+                    <!-- Attendance Statistics (Commented out)
                     <div class="row mt-4">
                         <div class="col-md-3 col-6 mb-3">
                             <div class="card border-primary bg-primary bg-opacity-10">
                                 <div class="card-body text-center">
                                     <h3 class="mb-1 text-primary">{{ statistik.hadir }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">Hadir</p>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Present" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -150,7 +150,7 @@
                             <div class="card border-warning bg-warning bg-opacity-10">
                                 <div class="card-body text-center">
                                     <h3 class="mb-1 text-warning">{{ statistik.terlambat }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">Terlambat</p>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Late" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -158,7 +158,7 @@
                             <div class="card border-info bg-info bg-opacity-10">
                                 <div class="card-body text-center">
                                     <h3 class="mb-1 text-info">{{ statistik.izin }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">Izin</p>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Permission" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -166,7 +166,7 @@
                             <div class="card border-danger bg-danger bg-opacity-10">
                                 <div class="card-body text-center">
                                     <h3 class="mb-1 text-danger">{{ statistik.alpha }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">Alpha</p>
+                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Absent" %}</p>
                                 </div>
                             </div>
                         </div>
@@ -225,15 +225,12 @@
 
 {% block extra_js %}
 <script>
-    // Fungsi untuk filter berdasarkan semester
+    // Function to filter by semester
     function filterBySemester(semester) {
-        // Simulasi filter - implementasi sesuai kebutuhan
         const rows = document.querySelectorAll('#presensiTable tbody tr');
         let count = 0;
         
         rows.forEach(row => {
-            // Logika filter berdasarkan semester
-            // Contoh: jika semester ganjil, tampilkan data tanggal ganjil
             const tanggalCell = row.querySelector('td:nth-child(1)');
             if (tanggalCell) {
                 const hari = parseInt(tanggalCell.textContent.split('/')[0]);
@@ -247,43 +244,40 @@
             }
         });
         
-        showNotification(`Menampilkan ${count} data presensi semester ${semester}`, 'info');
+        const semesterText = semester === 'ganjil' ? "{% trans 'Odd Semester' %}" : "{% trans 'Even Semester' %}";
+        showNotification("{% trans 'Showing' %} " + count + " {% trans 'attendance data for' %} " + semesterText, 'info');
     }
     
-    // Fungsi untuk menampilkan semua data
+    // Function to show all data
     function showAll() {
         const rows = document.querySelectorAll('#presensiTable tbody tr');
         rows.forEach(row => {
             row.style.display = '';
         });
-        showNotification('Menampilkan semua data presensi', 'info');
+        showNotification("{% trans 'Showing all attendance data' %}", 'info');
     }
     
-    // Fungsi untuk export ke Excel
+    // Function to export to Excel
     function exportToExcel() {
-        // Simulasi export Excel
-        showNotification('Mempersiapkan file Excel...', 'info');
+        showNotification("{% trans 'Preparing Excel file...' %}", 'info');
         
-        // Simulasi delay download
         setTimeout(() => {
             const link = document.createElement('a');
             link.href = 'data:application/vnd.ms-excel;base64,' + btoa('Simulated Excel Data');
-            link.download = `riwayat_presensi_${new Date().toISOString().slice(0,10)}.xls`;
+            link.download = `attendance_history_${new Date().toISOString().slice(0,10)}.xls`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            showNotification('File Excel berhasil diunduh', 'success');
+            showNotification("{% trans 'Excel file successfully downloaded' %}", 'success');
         }, 1500);
     }
     
-    // Fungsi untuk menampilkan notifikasi
+    // Function to show notification
     function showNotification(message, type) {
-        // Hapus notifikasi lama
         const oldAlerts = document.querySelectorAll('.alert.position-fixed');
         oldAlerts.forEach(alert => alert.remove());
         
-        // Buat notifikasi baru
         const alert = document.createElement('div');
         alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
         alert.style.cssText = `
@@ -309,7 +303,6 @@
         
         document.body.appendChild(alert);
         
-        // Auto hide setelah 3 detik
         setTimeout(() => {
             if (alert.parentNode) {
                 alert.remove();
@@ -317,9 +310,9 @@
         }, 3000);
     }
     
-    // Inisialisasi DataTable (jika menggunakan library DataTables)
+    // Initialize DataTable (if using DataTables library)
     document.addEventListener('DOMContentLoaded', function() {
-        // Jika menggunakan DataTables, uncomment kode di bawah
+        // If using DataTables, uncomment code below
         /*
         $('#presensiTable').DataTable({
             "language": {

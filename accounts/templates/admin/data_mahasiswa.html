@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block page_title %}Data Mahasiswa{% endblock %}
+{% block page_title %}{% trans "Student Data" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -35,7 +36,7 @@
             <form method="get" action="" class="row g-3 align-items-center">
                 <!-- Search -->
                 <div class="col-md-5">
-                    <label for="searchInput" class="form-label small fw-semibold text-muted">Cari Mahasiswa</label>
+                    <label for="searchInput" class="form-label small fw-semibold text-muted">{% trans "Search Student" %}</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-0">
                             <i class="fas fa-search text-muted"></i>
@@ -44,7 +45,7 @@
                                class="form-control border-0 ps-0" 
                                name="search" 
                                id="searchInput"
-                               placeholder="Cari berdasarkan nama, NRP, email, jurusan, atau kelas..."
+                               placeholder="{% trans 'Search by name, ID, email, major, or class...' %}"
                                value="{{ search_query }}"
                                autocomplete="off">
                     {% if search_query %}
@@ -57,9 +58,9 @@
 
                 <!-- Jenjang Filter -->
                 <div class="col-md-4">
-                    <label for="jenjangFilter" class="form-label small fw-semibold text-muted">Filter Jenjang</label>
+                    <label for="jenjangFilter" class="form-label small fw-semibold text-muted">{% trans "Filter by Level" %}</label>
                     <select class="form-select" name="jenjang" id="jenjangFilter">
-                        <option value="">Semua Jenjang</option>
+                        <option value="">{% trans "All Levels" %}</option>
                         {% for jenjang in jenjang_pendidikan_list %}
                         <option value="{{ jenjang.nama_jenjang }}" 
                                 {% if jenjang_filter == jenjang.nama_jenjang %}selected{% endif %}>
@@ -73,7 +74,7 @@
                 <div class="col-md-2">
                         <a href="?export=excel{% if jenjang_filter %}&jenjang={{ jenjang_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
                            class="btn btn-success">
-                            <i class="fas fa-file-excel me-2"></i>Excel
+                            <i class="fas fa-file-excel me-2"></i>{% trans "Excel" %}
                         </a>
                 </div>
             </form>
@@ -85,13 +86,13 @@
         <div class="card-header bg-white border-0 rounded-top-3 py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold">
-                    Daftar Mahasiswa :
+                    {% trans "Student List" %}:
                     {% if jenjang_filter %}
                     <span class="text-muted">({{ jenjang_filter }})</span>
                     {% endif %}
                 </h5>
                 <span class="badge bg-primary rounded-pill fs-6">
-                    Total {{ total_mahasiswa }} mahasiswa ditemukan
+                    {% trans "Total" %} {{ total_mahasiswa }} {% trans "students found" %}
                 </span>
             </div>
         </div>
@@ -100,14 +101,14 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-3 ps-4" style="width: 10%;">NRP</th>
-                            <th class="py-3" style="width: 20%;">Nama Mahasiswa</th>
-                            <th class="py-3" style="width: 10%;">Tingkatan</th>
-                            <th class="py-3" style="width: 10%;">Kelas</th>
-                            <th class="py-3" style="width: 10%;">Semester</th>
-                            <th class="py-3" style="width: 25%;">Kegiatan SKS</th>
-                            <th class="py-3" style="width: 10%;">Status</th>
-                            <th class="py-3 pe-4" style="width: 5%;">Aksi</th>
+                            <th class="py-3 ps-4" style="width: 10%;">{% trans "Student ID" %}</th>
+                            <th class="py-3" style="width: 20%;">{% trans "Student Name" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Level" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Class" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Semester" %}</th>
+                            <th class="py-3" style="width: 25%;">{% trans "Credit Activities" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Status" %}</th>
+                            <th class="py-3 pe-4" style="width: 5%;">{% trans "Action" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,9 +124,6 @@
                             <!-- Nama Mahasiswa -->
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-sm rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3">
-                                        <i class="fas fa-user text-primary"></i>
-                                    </div>
                                     <div>
                                         <strong class="d-block mb-1">{{ mahasiswa.user.nama_lengkap }}</strong>
                                         <small class="text-muted">{{ mahasiswa.user.email|default:"-" }}</small>
@@ -171,12 +169,12 @@
                                     {% endfor %}
                                     {% if mahasiswa.kegiatan_pa.count > 2 %}
                                     <span class="badge bg-light text-dark border">
-                                        +{{ mahasiswa.kegiatan_pa.count|add:"-2" }} lagi
+                                        +{{ mahasiswa.kegiatan_pa.count|add:"-2" }} {% trans "more" %}
                                     </span>
                                     {% endif %}
                                 </div>
                                 {% else %}
-                                <span class="text-muted">Belum ada kegiatan</span>
+                                <span class="text-muted">{% trans "No activities yet" %}</span>
                                 {% endif %}
                             </td>
                             
@@ -184,11 +182,11 @@
                             <td>
                                 {% if mahasiswa.user.is_active %}
                                 <span class="badge bg-success text-white fw-bold">
-                                    <i class="fas fa-check-circle me-1"></i>Aktif
+                                    <i class="fas fa-check-circle me-1"></i>{% trans "Active" %}
                                 </span>
                                 {% else %}
                                 <span class="badge bg-danger text-white fw-bold">
-                                    <i class="fas fa-times-circle me-1"></i>Nonaktif
+                                    <i class="fas fa-times-circle me-1"></i>{% trans "Inactive" %}
                                 </span>
                                 {% endif %}
                             </td>
@@ -202,7 +200,7 @@
                                             data-bs-toggle="modal"
                                             data-bs-target="#editModal"
                                             data-mahasiswa-id="{{ mahasiswa.id }}"
-                                            title="Edit">
+                                            title="{% trans 'Edit' %}">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     
@@ -214,7 +212,7 @@
                                             data-mahasiswa-id="{{ mahasiswa.id }}"
                                             data-mahasiswa-nama="{{ mahasiswa.user.nama_lengkap }}"
                                             data-mahasiswa-nrp="{{ mahasiswa.user.nrp }}"
-                                            title="Hapus">
+                                            title="{% trans 'Delete' %}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -225,9 +223,9 @@
                             <td colspan="8" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                                    <h5 class="mb-2">Tidak ada data mahasiswa</h5>
+                                    <h5 class="mb-2">{% trans "No student data found" %}</h5>
                                     {% if jenjang_filter or search_query %}
-                                    <p>Coba dengan filter atau kata kunci lain</p>
+                                    <p>{% trans "Try with other filters or keywords" %}</p>
                                     {% endif %}
                                 </div>
                             </td>
@@ -245,14 +243,14 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="editModalLabel">Edit Data Mahasiswa</h5>
+                <h5 class="modal-title fw-bold" id="editModalLabel">{% trans "Edit Student Data" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="editModalBody">
                 <!-- Konten akan dimuat via AJAX -->
                 <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{% trans "Loading" %}...</span>
                     </div>
                 </div>
             </div>
@@ -265,7 +263,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">{% trans "Confirm Delete" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
@@ -274,9 +272,9 @@
                          style="width: 60px; height: 60px;">
                         <i class="fas fa-exclamation-triangle fs-4"></i>
                     </div>
-                    <h5 class="fw-bold mb-2">Hapus Data Mahasiswa?</h5>
+                    <h5 class="fw-bold mb-2">{% trans "Delete Student Data?" %}</h5>
                     <p class="text-muted mb-0" id="deleteMessage">
-                        Apakah Anda yakin ingin menghapus data mahasiswa ini?
+                        {% trans "Are you sure you want to delete this student's data?" %}
                     </p>
                 </div>
                 
@@ -287,19 +285,19 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <strong id="deleteMahasiswaNama">-</strong><br>
-                            <small class="text-muted" id="deleteMahasiswaNRP">NRP: -</small>
+                            <small class="text-muted" id="deleteMahasiswaNRP">{% trans "Student ID" %}: -</small>
                         </div>
                     </div>
                 </div>
                 
                 <p class="text-muted small mt-3">
                     <i class="fas fa-info-circle me-1"></i>
-                    Data yang dihapus tidak dapat dikembalikan.
+                    {% trans "Deleted data cannot be recovered." %}
                 </p>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" id="confirmDelete">Ya, Hapus Data</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">{% trans "Yes, Delete Data" %}</button>
             </div>
         </div>
     </div>
@@ -477,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update modal content
             document.getElementById('deleteMahasiswaNama').textContent = mahasiswaNama;
-            document.getElementById('deleteMahasiswaNRP').textContent = `NRP: ${mahasiswaNRP}`;
+            document.getElementById('deleteMahasiswaNRP').textContent = '{% trans "Student ID" %}: ' + mahasiswaNRP;
         });
         
         // Tombol konfirmasi hapus
@@ -488,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitButton.innerHTML;
             
             // Show loading
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menghapus...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Deleting..." %}';
             submitButton.disabled = true;
             
             // Kirim request hapus (dummy - sesuaikan dengan endpoint Anda)
@@ -506,20 +504,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     const modal = bootstrap.Modal.getInstance(deleteModal);
                     modal.hide();
                     
-                    showAlert('Data mahasiswa berhasil dihapus!', 'success');
+                    showAlert('{% trans "Student data successfully deleted!" %}', 'success');
                     
                     // Reload page after 1.5 seconds
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    showAlert(data.message || 'Terjadi kesalahan', 'error');
+                    showAlert(data.message || '{% trans "An error occurred" %}', 'error');
                     submitButton.innerHTML = originalText;
                     submitButton.disabled = false;
                 }
             })
             .catch(error => {
-                showAlert('Terjadi kesalahan jaringan', 'error');
+                showAlert('{% trans "Network error occurred" %}', 'error');
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
             });
@@ -543,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('{% trans "Network response was not ok" %}');
                 return response.text();
             })
             .then(html => {
@@ -554,8 +552,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalBody.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Gagal memuat data. Silakan coba lagi.<br>
-                        Error: ${error.message}
+                        {% trans "Failed to load data. Please try again." %}<br>
+                        {% trans "Error:" %} ${error.message}
                     </div>
                 `;
             });
@@ -566,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function makeTableResponsive() {
         if (window.innerWidth < 768) {
             const tableCells = document.querySelectorAll('tbody td');
-            const headers = ['NRP', 'Nama Mahasiswa', 'Tingkatan', 'Kelas', 'Semester', 'Kegiatan SKS', 'Status', 'Aksi'];
+            const headers = ['{% trans "Student ID" %}', '{% trans "Student Name" %}', '{% trans "Level" %}', '{% trans "Class" %}', '{% trans "Semester" %}', '{% trans "Credit Activities" %}', '{% trans "Status" %}', '{% trans "Action" %}'];
             
             tableCells.forEach((cell, index) => {
                 const headerIndex = index % headers.length;

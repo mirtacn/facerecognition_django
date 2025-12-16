@@ -1,9 +1,9 @@
-<!-- data_wajah.html -->
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Data Wajah{% endblock %}
-{% block page_title %}Data Wajah{% endblock %}
+{% block title %}{% trans "Face Data" %}{% endblock %}
+{% block page_title %}{% trans "Face Data" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -14,17 +14,17 @@
                 <div class="card-body">
                     <!-- Header dengan judul dan status -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="card-title mb-0">Dataset Wajah untuk Face Recognition</h5>
+                        <h5 class="card-title mb-0">{% trans "Face Dataset for Face Recognition" %}</h5>
                         {% if foto_count >= 10 %}
-                            <span class="badge bg-success">Dataset Terpenuhi</span>
+                            <span class="badge bg-success">{% trans "Dataset Complete" %}</span>
                         {% else %}
-                            <span class="badge bg-warning">Dataset Belum Lengkap</span>
+                            <span class="badge bg-warning">{% trans "Dataset Incomplete" %}</span>
                         {% endif %}
                     </div>
                     
                     <!-- Deskripsi -->
                     <p class="mb-4">
-                        Upload foto wajah Anda dari berbagai sudut dan ekspresi untuk meningkatkan akurasi sistem presensi face recognition.
+                        {% trans "Upload photos of your face from various angles and expressions to improve the accuracy of the face recognition attendance system." %}
                     </p>
                     
                     <!-- Statistik jumlah foto -->
@@ -32,7 +32,7 @@
                         <div class="d-flex align-items-center">
                             <i class="bi bi-info-circle-fill me-2"></i>
                             <div>
-                                <strong>Jumlah Foto:</strong> {{ foto_count }} / 10 (Minimal)
+                                <strong>{% trans "Number of Photos:" %}</strong> {{ foto_count }} / 10 ({% trans "Minimum" %})
                             </div>
                         </div>
                     </div>
@@ -43,7 +43,7 @@
                         <div class="d-flex align-items-center">
                             <i class="bi bi-check-circle-fill me-2"></i>
                             <div>
-                                Anda telah memenuhi minimal foto yang diperlukan. Sistem face recognition siap digunakan untuk presensi.
+                                {% trans "You have met the minimum required photos. The face recognition system is ready for attendance." %}
                             </div>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                         <div class="d-flex align-items-center">
                             <i class="bi bi-exclamation-circle-fill me-2"></i>
                             <div>
-                                Anda belum memenuhi minimal foto yang diperlukan. Upload minimal 10 foto wajah.
+                                {% trans "You have not met the minimum required photos. Upload at least 10 face photos." %}
                             </div>
                         </div>
                     </div>
@@ -61,24 +61,24 @@
                     <!-- Upload section -->
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h6 class="mb-0">Upload Foto Wajah</h6>
+                            <h6 class="mb-0">{% trans "Upload Face Photo" %}</h6>
                         </div>
                         <div class="card-body text-center">
                             <!-- Area upload -->
                             <div class="border-2 border-dashed border-primary rounded p-5 mb-3" 
                                  style="border-style: dashed; background-color: #f8f9fa;">
                                 <i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
-                                <h5 class="mb-2">Klik untuk upload foto</h5>
-                                <p class="text-muted mb-4">Format: JPG, PNG (Max Size: 5MB)</p>
+                                <h5 class="mb-2">{% trans "Click to upload photo" %}</h5>
+                                <p class="text-muted mb-4">{% trans "Format: JPG, PNG (Max Size: 5MB)" %}</p>
                                 <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                                    <i class="bi bi-upload me-1"></i> Upload Foto
+                                    <i class="bi bi-upload me-1"></i> {% trans "Upload Photo" %}
                                 </button>
                             </div>
                             
                             <!-- Informasi format -->
                             <small class="text-muted">
                                 <i class="bi bi-lightbulb me-1"></i>
-                                Rekomendasi: Upload foto dengan berbagai ekspresi (senyum, netral) dan sudut (depan, kiri, kanan)
+                                {% trans "Recommendation: Upload photos with various expressions (smile, neutral) and angles (front, left, right)" %}
                             </small>
                         </div>
                     </div>
@@ -86,10 +86,10 @@
                     <!-- Galeri foto -->
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">Galeri Foto ({{ foto_count }})</h6>
+                            <h6 class="mb-0">{% trans "Photo Gallery" %} ({{ foto_count }})</h6>
                             {% if foto_count > 0 %}
                             <button class="btn btn-outline-danger btn-sm" onclick="hapusSemuaFoto()">
-                                <i class="bi bi-trash me-1"></i> Hapus Semua
+                                <i class="bi bi-trash me-1"></i> {% trans "Delete All" %}
                             </button>
                             {% endif %}
                         </div>
@@ -103,12 +103,12 @@
                                             {% if foto.file_path %}
                                                 <img src="{{ foto.file_path.url }}" 
                                                      class="img-fluid rounded" 
-                                                     alt="Foto Wajah {{ forloop.counter }}"
+                                                     alt="{% trans 'Face Photo' %} {{ forloop.counter }}"
                                                      style="width: 100%; height: 150px; object-fit: cover;">
                                             {% else %}
                                                 <img src="{% static 'images/default-face.jpg' %}" 
                                                      class="img-fluid rounded" 
-                                                     alt="Foto Default"
+                                                     alt="{% trans 'Default Photo' %}"
                                                      style="width: 100%; height: 150px; object-fit: cover;">
                                             {% endif %}
                                             <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" 
@@ -127,8 +127,8 @@
                                 {% else %}
                                 <div class="col-12 text-center py-5">
                                     <i class="bi bi-images display-4 text-muted mb-3"></i>
-                                    <h5 class="text-muted">Belum ada foto wajah</h5>
-                                    <p class="text-muted">Upload foto pertama Anda untuk memulai</p>
+                                    <h5 class="text-muted">{% trans "No face photos yet" %}</h5>
+                                    <p class="text-muted">{% trans "Upload your first photo to get started" %}</p>
                                 </div>
                                 {% endif %}
                             </div>
@@ -138,8 +138,7 @@
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                     <div>
-                                        <strong>Penting:</strong> Foto wajah digunakan hanya untuk sistem presensi face recognition. 
-                                        Pastikan foto Anda jelas dan terlihat wajah dengan baik.
+                                        <strong>{% trans "Important:" %}</strong> {% trans "Face photos are used only for the face recognition attendance system. Make sure your photos are clear and your face is clearly visible." %}
                                     </div>
                                 </div>
                             </div>
@@ -156,26 +155,26 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="uploadModalLabel">Upload Foto Wajah</h5>
+                <h5 class="modal-title" id="uploadModalLabel">{% trans "Upload Face Photo" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="uploadFotoForm" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="fotoWajah" class="form-label">Pilih Foto</label>
+                        <label for="fotoWajah" class="form-label">{% trans "Select Photo" %}</label>
                         <input class="form-control" type="file" id="fotoWajah" accept="image/jpeg,image/png" required>
-                        <div class="form-text">Format yang didukung: JPG, PNG. Ukuran maksimal: 5MB.</div>
+                        <div class="form-text">{% trans "Supported formats: JPG, PNG. Maximum size: 5MB." %}</div>
                     </div>
                     <div class="mb-3">
-                        <label for="keterangan" class="form-label">Keterangan (Opsional)</label>
-                        <input type="text" class="form-control" id="keterangan" placeholder="Contoh: Foto senyum, foto sudut kiri">
+                        <label for="keterangan" class="form-label">{% trans "Description (Optional)" %}</label>
+                        <input type="text" class="form-control" id="keterangan" placeholder="{% trans 'Example: Smiling photo, left angle photo' %}">
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary-custom" onclick="uploadFoto()">Upload</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary-custom" onclick="uploadFoto()">{% trans "Upload" %}</button>
             </div>
         </div>
     </div>
@@ -230,20 +229,20 @@
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
         if (!fileInput.files[0]) {
-            showNotification('Silakan pilih foto terlebih dahulu!', 'warning');
+            showNotification('{% trans "Please select a photo first!" %}', 'warning');
             return;
         }
         
         // Validasi ukuran file (max 5MB)
         if (fileInput.files[0].size > 5 * 1024 * 1024) {
-            showNotification('Ukuran foto maksimal 5MB!', 'danger');
+            showNotification('{% trans "Photo size maximum 5MB!" %}', 'danger');
             return;
         }
         
         // Validasi tipe file
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!allowedTypes.includes(fileInput.files[0].type)) {
-            showNotification('Format file harus JPG atau PNG!', 'danger');
+            showNotification('{% trans "File format must be JPG or PNG!" %}', 'danger');
             return;
         }
         
@@ -254,7 +253,7 @@
         formData.append('csrfmiddlewaretoken', csrfToken);
         
         // Tampilkan loading
-        showNotification('Mengupload foto...', 'info');
+        showNotification('{% trans "Uploading photo..." %}', 'info');
         
         // Kirim ke server
         fetch('{% url "upload_foto_wajah" %}', {
@@ -282,13 +281,13 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('Terjadi kesalahan saat mengupload', 'danger');
+            showNotification('{% trans "An error occurred while uploading" %}', 'danger');
         });
     }
     
     // Fungsi untuk menghapus foto
     function hapusFoto(id) {
-        if (confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
+        if (confirm('{% trans "Are you sure you want to delete this photo?" %}')) {
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
             fetch(`/api/hapus-foto-wajah/${id}/`, {
@@ -312,14 +311,14 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Terjadi kesalahan saat menghapus', 'danger');
+                showNotification('{% trans "An error occurred while deleting" %}', 'danger');
             });
         }
     }
     
     // Fungsi untuk menghapus semua foto
     function hapusSemuaFoto() {
-        if (confirm('Apakah Anda yakin ingin menghapus semua foto? Tindakan ini tidak dapat dibatalkan!')) {
+        if (confirm('{% trans "Are you sure you want to delete all photos? This action cannot be undone!" %}')) {
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             
             fetch('{% url "hapus_semua_foto" %}', {
@@ -343,7 +342,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Terjadi kesalahan saat menghapus', 'danger');
+                showNotification('{% trans "An error occurred while deleting" %}', 'danger');
             });
         }
     }

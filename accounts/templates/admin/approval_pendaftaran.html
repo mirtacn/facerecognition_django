@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block page_title %}Approval Pendaftaran Akun Mahasiswa{% endblock %}
+{% block page_title %}{% trans "Student Account Registration Approval" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -12,7 +13,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Total Pendaftaran</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Total Registrations" %}</h6>
                             <h3 class="fw-bold mb-0">{{ total_pendaftaran }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -30,7 +31,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Menunggu Approval</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Waiting Approval" %}</h6>
                             <h3 class="fw-bold mb-0 text-warning">{{ menunggu_approval }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -48,7 +49,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Disetujui</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Approved" %}</h6>
                             <h3 class="fw-bold mb-0 text-success">{{ disetujui }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -66,7 +67,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Ditolak</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Rejected" %}</h6>
                             <h3 class="fw-bold mb-0 text-danger">{{ ditolak }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -92,7 +93,7 @@
                            class="form-control border-0 ps-0" 
                            name="search" 
                            id="searchInput"
-                           placeholder="Cari berdasarkan nama, NRP, atau email..."
+                           placeholder="{% trans 'Search by name, student ID, or email...' %}"
                            value="{{ search_query }}"
                            autocomplete="off">
                     {% if search_query %}
@@ -109,8 +110,8 @@
     <div class="card border-0 shadow-sm rounded-3">
         <div class="card-header bg-white border-0 rounded-top-3 py-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">Daftar Pengajuan Akun Mahasiswa :</h5>
-                <span class="badge bg-primary rounded-pill fs-6">Total {{ total_pendaftaran }} pendaftaran ditemukan</span>
+                <h5 class="mb-0 fw-bold">{% trans "List of Student Account Submissions:" %}</h5>
+                <span class="badge bg-primary rounded-pill fs-6">{% trans "Total" %} {{ total_pendaftaran }} {% trans "registrations found" %}</span>
             </div>
         </div>
         <div class="card-body p-0">
@@ -118,15 +119,15 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-3 ps-4" style="width: 10%;">Tanggal Pengajuan</th>
-                            <th class="py-3" style="width: 10%;">Tanggal ACC/Tolak</th>
-                            <th class="py-3" style="width: 10%;">Foto Wajah</th>
-                            <th class="py-3" style="width: 15%;">Nama Mahasiswa</th>
-                            <th class="py-3" style="width: 10%;">NRP</th>
-                            <th class="py-3" style="width: 10%;">Prodi</th>
-                            <th class="py-3" style="width: 15%;">Email</th>
-                            <th class="py-3" style="width: 10%;">Status</th>
-                            <th class="py-3 pe-4" style="width: 10%;">Aksi</th>
+                            <th class="py-3 ps-4" style="width: 10%;">{% trans "Submission Date" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Approval/Rejection Date" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Face Photo" %}</th>
+                            <th class="py-3" style="width: 15%;">{% trans "Student Name" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Student ID" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Program" %}</th>
+                            <th class="py-3" style="width: 15%;">{% trans "Email" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Status" %}</th>
+                            <th class="py-3 pe-4" style="width: 10%;">{% trans "Action" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -154,7 +155,7 @@
                                     <div class="me-2">
                                         <div class="avatar-sm rounded-circle overflow-hidden border">
                                             {% if foto.file_path %}
-                                            <img src="{{ foto.file_path.url }}" alt="Foto" 
+                                            <img src="{{ foto.file_path.url }}" alt="{% trans 'Photo' %}" 
                                                 class="img-fluid w-100 h-100 object-fit-cover"
                                                 onerror="this.onerror=null;">
                                             {% else %}
@@ -200,7 +201,7 @@
                                 </span>
                                 {% else %}
                                 <span class="badge bg-secondary text-white">
-                                    Belum diisi
+                                    {% trans "Not filled" %}
                                 </span>
                                 {% endif %}
                             </td>
@@ -214,15 +215,15 @@
                             <td>
                                 {% if pendaftaran.status_pengajuan == 'pending' %}
                                 <span class="badge bg-warning text-dark fw-bold">
-                                    <i class="fas fa-clock me-1"></i> Pending
+                                    <i class="fas fa-clock me-1"></i> {% trans "Pending" %}
                                 </span>
                                 {% elif pendaftaran.status_pengajuan == 'disetujui' %}
                                 <span class="badge bg-success text-white fw-bold">
-                                    <i class="fas fa-check me-1"></i> Disetujui
+                                    <i class="fas fa-check me-1"></i> {% trans "Approved" %}
                                 </span>
                                 {% else %}
                                 <span class="badge bg-danger text-white fw-bold">
-                                    <i class="fas fa-times me-1"></i> Ditolak
+                                    <i class="fas fa-times me-1"></i> {% trans "Rejected" %}
                                 </span>
                                 {% endif %}
                             </td>
@@ -236,7 +237,7 @@
                                             data-bs-toggle="modal" 
                                             data-bs-target="#detailModal"
                                             data-mahasiswa-id="{{ pendaftaran.mahasiswa.id }}"
-                                            title="Detail">
+                                            title="{% trans 'Detail' %}">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     
@@ -247,7 +248,7 @@
                                             data-bs-toggle="modal" 
                                             data-bs-target="#approveModal"
                                             data-pengajuan-id="{{ pendaftaran.id }}"
-                                            title="Approve">
+                                            title="{% trans 'Approve' %}">
                                         <i class="fas fa-check"></i>
                                     </button>
                                     
@@ -257,7 +258,7 @@
                                             data-bs-toggle="modal" 
                                             data-bs-target="#rejectModal"
                                             data-pengajuan-id="{{ pendaftaran.id }}"
-                                            title="Reject">
+                                            title="{% trans 'Reject' %}">
                                         <i class="fas fa-times"></i>
                                     </button>
                                     {% endif %}
@@ -268,7 +269,7 @@
                                             data-mahasiswa-id="{{ pendaftaran.mahasiswa.id }}"
                                             data-nama="{{ pendaftaran.mahasiswa.user.nama_lengkap }}"
                                             data-nrp="{{ pendaftaran.mahasiswa.user.nrp }}"
-                                            title="Download Foto">
+                                            title="{% trans 'Download Photos' %}">
                                         <i class="fas fa-download"></i>
                                     </button>
                                 </div>
@@ -279,9 +280,9 @@
                             <td colspan="9" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                                    <h5 class="mb-2">Tidak ada data pendaftaran</h5>
+                                    <h5 class="mb-2">{% trans "No registration data" %}</h5>
                                     {% if search_query %}
-                                    <p>Coba dengan kata kunci lain</p>
+                                    <p>{% trans "Try with different keywords" %}</p>
                                     {% endif %}
                                 </div>
                             </td>
@@ -299,14 +300,14 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="detailModalLabel">Detail Pendaftaran Mahasiswa</h5>
+                <h5 class="modal-title fw-bold" id="detailModalLabel">{% trans "Student Registration Detail" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-0" id="detailModalBody">
                 <!-- Konten akan dimuat via AJAX -->
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{% trans "Loading" %}...</span>
                     </div>
                 </div>
             </div>
@@ -319,20 +320,20 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="approveModalLabel">Konfirmasi Approval</h5>
+                <h5 class="modal-title fw-bold" id="approveModalLabel">{% trans "Approval Confirmation" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="approveModalBody">
                 <!-- Konten akan dimuat via AJAX -->
                 <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{% trans "Loading" %}...</span>
                     </div>
                 </div>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-success" id="confirmApprove">Ya, Setujui</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-success" id="confirmApprove">{% trans "Yes, Approve" %}</button>
             </div>
         </div>
     </div>
@@ -343,20 +344,20 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="rejectModalLabel">Konfirmasi Penolakan</h5>
+                <h5 class="modal-title fw-bold" id="rejectModalLabel">{% trans "Rejection Confirmation" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="rejectModalBody">
                 <!-- Konten akan dimuat via AJAX -->
                 <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{% trans "Loading" %}...</span>
                     </div>
                 </div>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" id="confirmReject">Tolak Pendaftaran</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-danger" id="confirmReject">{% trans "Reject Registration" %}</button>
             </div>
         </div>
     </div>
@@ -628,7 +629,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Handle modal detail
-    // Handle modal detail
     const detailModal = document.getElementById('detailModal');
     if (detailModal) {
         detailModal.addEventListener('show.bs.modal', function(event) {
@@ -659,8 +659,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalBody.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Gagal memuat data. Silakan coba lagi.<br>
-                        Error: ${error.message}
+                        {% trans "Failed to load data. Please try again." %}<br>
+                        {% trans "Error" %}: ${error.message}
                     </div>
                 `;
             });
@@ -672,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function() {
             modalBody.innerHTML = `
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{% trans "Loading" %}...</span>
                     </div>
                 </div>
             `;
@@ -703,7 +703,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalBody.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Gagal memuat data. Silakan coba lagi.
+                        {% trans "Failed to load data. Please try again." %}
                     </div>
                 `;
             });
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitButton.innerHTML;
             
             // Show loading
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Processing" %}...';
             submitButton.disabled = true;
             
             fetch('', {
@@ -737,20 +737,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     const modal = bootstrap.Modal.getInstance(approveModal);
                     modal.hide();
                     
-                    showAlert('Pendaftaran berhasil disetujui!', 'success');
+                    showAlert('{% trans "Registration successfully approved!" %}', 'success');
                     
                     // Reload page after 1.5 seconds
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    showAlert(data.message || 'Terjadi kesalahan', 'error');
+                    showAlert(data.message || '{% trans "An error occurred" %}', 'error');
                     submitButton.innerHTML = originalText;
                     submitButton.disabled = false;
                 }
             })
             .catch(error => {
-                showAlert('Terjadi kesalahan jaringan', 'error');
+                showAlert('{% trans "Network error occurred" %}', 'error');
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
             });
@@ -781,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalBody.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Gagal memuat data. Silakan coba lagi.
+                        {% trans "Failed to load data. Please try again." %}
                     </div>
                 `;
             });
@@ -793,7 +793,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const alasan = alasanField ? alasanField.value.trim() : '';
             
             if (!alasan) {
-                showAlert('Alasan penolakan harus diisi', 'error');
+                showAlert('{% trans "Rejection reason must be filled" %}', 'error');
                 if (alasanField) {
                     alasanField.classList.add('is-invalid');
                     alasanField.focus();
@@ -811,7 +811,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = submitButton.innerHTML;
             
             // Show loading
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Processing" %}...';
             submitButton.disabled = true;
             
             fetch('', {
@@ -828,20 +828,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     const modal = bootstrap.Modal.getInstance(rejectModal);
                     modal.hide();
                     
-                    showAlert('Pendaftaran berhasil ditolak!', 'success');
+                    showAlert('{% trans "Registration successfully rejected!" %}', 'success');
                     
                     // Reload page after 1.5 seconds
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    showAlert(data.message || 'Terjadi kesalahan', 'error');
+                    showAlert(data.message || '{% trans "An error occurred" %}', 'error');
                     submitButton.innerHTML = originalText;
                     submitButton.disabled = false;
                 }
             })
             .catch(error => {
-                showAlert('Terjadi kesalahan jaringan', 'error');
+                showAlert('{% trans "Network error occurred" %}', 'error');
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
             });
@@ -885,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
             button.innerHTML = originalText;
             button.disabled = false;
             document.body.removeChild(iframe);
-            showAlert('Download foto berhasil dimulai', 'success');
+            showAlert('{% trans "Photo download started successfully" %}', 'success');
         }, 2000);
     }
     
@@ -933,7 +933,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function makeTableResponsive() {
         if (window.innerWidth < 768) {
             const tableCells = document.querySelectorAll('tbody td');
-            const headers = ['Foto Wajah', 'Nama Mahasiswa', 'NRP', 'Prodi', 'Email', 'Status', 'Aksi'];
+            const headers = [
+                '{% trans "Face Photo" %}', 
+                '{% trans "Student Name" %}', 
+                '{% trans "Student ID" %}', 
+                '{% trans "Program" %}', 
+                '{% trans "Email" %}', 
+                '{% trans "Status" %}', 
+                '{% trans "Action" %}'
+            ];
             
             tableCells.forEach((cell, index) => {
                 const headerIndex = index % headers.length;

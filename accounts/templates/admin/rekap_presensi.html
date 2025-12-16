@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Attendance Recap" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{% trans "Report Filter" %}</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="get" class="row g-3" id="filterForm">
+                                <div class="col-md-3">
+                                    <label for="{{ form.tanggal_mulai.id_for_label }}" class="form-label">{% trans "Start Date" %}</label>
+                                    {{ form.tanggal_mulai }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.tanggal_selesai.id_for_label }}" class="form-label">{% trans "End Date" %}</label>
+                                    {{ form.tanggal_selesai }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.tingkatan.id_for_label }}" class="form-label">{% trans "Education Level" %}</label>
+                                    {{ form.tingkatan }}
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="{{ form.kegiatan.id_for_label }}" class="form-label">{% trans "Activity" %}</label>
+                                    {{ form.kegiatan }}
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter"></i> {% trans "Apply Filter" %}
+                                    </button>
+                                    <a href="{% url 'rekap_presensi' %}" class="btn btn-secondary">
+                                        <i class="fas fa-redo"></i> {% trans "Reset Filter" %}
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{% trans "Attendance Data" %} ({{ total_presensi }})</h5>
+                            </div>
+                        </div>
+                        <div class="card-body px-0 pt-0 pb-2">
+                            {% if data_presensi %}
+                            <div class="table-responsive p-0">
+                                <table class="table align-items-center mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-4">{% trans "Date" %}</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% trans "Student ID" %}</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% trans "Name" %}</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% trans "Education Level" %}</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% trans "Final Project Activity" %}</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% trans "Check-in" %}</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% trans "Check-out" %}</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">{% trans "Duration" %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for presensi in data_presensi %}
+                                        <tr>
+                                            <td class="ps-4">
+                                                <p class="text-xs font-weight-bold mb-0">
+                                                    {{ presensi.tanggal|date:"d/m/Y" }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">
+                                                    {{ presensi.nrp|default:"-" }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">
+                                                    {{ presensi.nama|default:"-" }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-sm 
+                                                    {% if presensi.tingkatan == 'D4' %}bg-gradient-success
+                                                    {% elif presensi.tingkatan == 'D3' %}bg-gradient-info
+                                                    {% else %}bg-gradient-secondary{% endif %}">
+                                                    {{ presensi.tingkatan|default:"-" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs mb-0" title="{{ presensi.kegiatan_pa }}">
+                                                    {{ presensi.kegiatan_pa|default:"-" }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">
+                                                    {% if presensi.check_in %}
+                                                        {{ presensi.check_in|time:"H:i" }}
+                                                    {% else %}
+                                                        <span class="text-danger">-</span>
+                                                    {% endif %}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="text-xs font-weight-bold mb-0">
+                                                    {% if presensi.check_out %}
+                                                        {{ presensi.check_out|time:"H:i" }}
+                                                    {% else %}
+                                                        <span class="text-warning">{% trans "Not Checked-out Yet" %}</span>
+                                                    {% endif %}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-sm bg-gradient-warning">
+                                                    {{ presensi.durasi|default:"-" }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="8" class="text-center py-5">
+                                                <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                                                <p class="text-muted mb-0">{% trans "No attendance data found" %}</p>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">{% trans "No attendance data" %}</h5>
+                                <p class="text-muted mb-0">
+                                    {% trans "No attendance data found for the selected filter." %}
+                                    <br>{% trans "Try changing the filter or date range." %}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.table th {
+    font-weight: 700;
+    color: #000000 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    padding: 1rem 0.5rem;
+}
+
+.table td {
+    font-size: 0.85rem;
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+}
+
+.table-responsive {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(87deg, #5e72e4 0, #825ee4 100%) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(87deg, #11cdef 0, #1171ef 100%) !important;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(87deg, #2dce89 0, #2dcecc 100%) !important;
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(87deg, #fb6340 0, #fbb140 100%) !important;
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(87deg, #172b4d 0, #1a174d 100%) !important;
+}
+</style>
+{% endblock %}

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persetujuan Akun - Sedang Diproses</title>
+    <title>{% trans "Account Approval - In Process" %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -34,7 +34,7 @@
         .header-title {
             color: #1a1a1a;
             font-size: 1.4rem;
-            font-weight: 700; /* Bold */
+            font-weight: 700;
             margin-bottom: 8px;
             text-align: center;
         }
@@ -48,12 +48,12 @@
             border-radius: 20px;
             font-size: 13px;
             font-weight: 500;
-            margin: 0 auto 25px auto; /* Center dengan margin auto */
+            margin: 0 auto 25px auto;
             border: 1px solid #ffeaa7;
-            justify-content: center; /* Rata tengah konten */
-            text-align: center; /* Rata tengah teks */
-            display: block; /* Agar margin auto bekerja */
-            width: fit-content; /* Sesuai dengan konten */
+            justify-content: center;
+            text-align: center;
+            display: block;
+            width: fit-content;
         }
 
         .divider {
@@ -264,12 +264,12 @@
 <body>
     <div class="status-container">
         <!-- Header - Bold -->
-        <h1 class="header-title" style="font-weight: 700;">Persetujuan Akun Anda Sedang Diproses</h1>
+        <h1 class="header-title" style="font-weight: 700;">{% trans "Your Account Approval is in Process" %}</h1>
         
-        <!-- Status Label - Rata Tengah -->
+        <!-- Status Label - Centered -->
         <div class="status-label">
             <i class="bi bi-clock me-2"></i>
-            Status: Menunggu Verifikasi Admin
+            {% trans "Status: Awaiting Admin Verification" %}
         </div>
 
         <!-- Divider -->
@@ -280,7 +280,7 @@
             <div class="success-icon">
                 <i class="bi bi-check-circle-fill"></i>
             </div>
-            <h2 class="section-title">Akun Anda telah terdaftar!</h2>
+            <h2 class="section-title">{% trans "Your account has been registered!" %}</h2>
         </div>
 
         <!-- Verification Box -->
@@ -289,27 +289,27 @@
                 <div class="clock-icon">
                     <i class="bi bi-clock"></i>
                 </div>
-                <h3 class="verification-title">Proses Verifikasi</h3>
+                <h3 class="verification-title">{% trans "Verification Process" %}</h3>
             </div>
             
             <p class="verification-desc">
-                Kami sedang memverifikasi data akademik dan validasi foto wajah Anda.
+                {% trans "We are verifying your academic data and validating your face photos." %}
             </p>
             
             <div class="warning-box">
                 <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
-                <p class="warning-text">Mohon tunggu maksimal 3×24 jam</p>
+                <p class="warning-text">{% trans "Please wait up to 3×24 hours" %}</p>
             </div>
             
             <ul class="info-list">
-                <li>Anda akan menerima notifikasi email setelah disetujui.</li>
-                <li>Silakan cek email Anda secara berkala untuk update status akun.</li>
+                <li>{% trans "You will receive an email notification after approval." %}</li>
+                <li>{% trans "Please check your email periodically for account status updates." %}</li>
             </ul>
         </div>
 
-        <!-- Email Notice -->
-        <!-- <div class="email-notice">
-            <div class="email-label">Notifikasi akan dikirim ke:</div>
+        <!-- Email Notice (Commented out)
+        <div class="email-notice">
+            <div class="email-label">{% trans "Notification will be sent to:" %}</div>
             <div class="email-address">
                 {% if request.user.is_authenticated and request.user.email %}
                     {{ request.user.email }}
@@ -324,12 +324,12 @@
         <!-- Login Button -->
         <a href="{% url 'login' %}" class="login-button">
             <i class="bi bi-box-arrow-in-right me-2"></i>
-            Kembali ke Halaman Login
+            {% trans "Back to Login Page" %}
         </a>
 
         <!-- Footer Note -->
         <div class="footer-note">
-            Jika tidak menerima email dalam 24 jam, hubungi 
+            {% trans "If you don't receive an email within 24 hours, contact" %}
             <a href="mailto:admin@universitas.edu" class="contact-link">admin@universitas.edu</a>
         </div>
     </div>

@@ -1,48 +1,48 @@
-<!-- progress_sks.html -->
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Progress SKS{% endblock %}
-{% block page_title %}Progress SKS{% endblock %}
+{% block title %}{% trans "Credit Progress" %}{% endblock %}
+{% block page_title %}{% trans "Credit Progress" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <!-- Card utama -->
+        <!-- Main card -->
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-graph-up me-2"></i>
-                        Progress SKS
+                        {% trans "Credit Progress" %}
                     </h5>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-primary">
                             <i class="bi bi-book me-1"></i>
-                            SKS: 12 SKS
+                            {% trans "Credits" %}: 12 {% trans "Credits" %}
                         </span>
                     </div>
                 </div>
                 <div class="card-body">
                     
-                    <!-- Info SKS -->
+                    <!-- Credit Info -->
                     <div class="alert alert-primary mb-4">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-info-circle-fill me-2"></i>
                             <div>
-                                <strong>Progress SKS Semester Ini</strong> - Total SKS: 12 SKS
+                                <strong>{% trans "This Semester's Credit Progress" %}</strong> - {% trans "Total Credits" %}: 12 {% trans "Credits" %}
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Progress Bar dan Statistik -->
+                    <!-- Progress Bar and Statistics -->
                     <div class="row mb-4">
-                        <!-- Progress Bar Utama -->
+                        <!-- Main Progress Bar -->
                         <div class="col-12 mb-4">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="mb-0">Progress Keseluruhan Semester</h6>
+                                        <h6 class="mb-0">{% trans "Overall Semester Progress" %}</h6>
                                         <span class="badge bg-success">68%</span>
                                     </div>
                                     <div class="progress mb-3" style="height: 25px;">
@@ -56,20 +56,20 @@
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <small class="text-muted">Jam Terselesaikan: 234 jam</small>
-                                        <small class="text-muted">Jam Target: 344 jam</small>
+                                        <small class="text-muted">{% trans "Completed Hours" %}: 234 {% trans "hours" %}</small>
+                                        <small class="text-muted">{% trans "Target Hours" %}: 344 {% trans "hours" %}</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Statistik Card -->
+                        <!-- Statistics Card -->
                         <div class="col-md-4 mb-3">
                             <div class="card border-primary bg-primary bg-opacity-10">
                                 <div class="card-body text-center">
                                     <h2 class="mb-1 text-primary">12</h2>
                                     <p class="mb-0 text-muted" style="font-size: 14px;">
-                                        <i class="bi bi-tools me-1"></i> Total SKS
+                                        <i class="bi bi-tools me-1"></i> {% trans "Total Credits" %}
                                     </p>
                                 </div>
                             </div>
@@ -80,7 +80,7 @@
                                 <div class="card-body text-center">
                                     <h2 class="mb-1 text-success">234</h2>
                                     <p class="mb-0 text-muted" style="font-size: 14px;">
-                                        <i class="bi bi-clock-history me-1"></i> Jam Terselesaikan
+                                        <i class="bi bi-clock-history me-1"></i> {% trans "Completed Hours" %}
                                     </p>
                                 </div>
                             </div>
@@ -91,21 +91,21 @@
                                 <div class="card-body text-center">
                                     <h2 class="mb-1 text-info">110</h2>
                                     <p class="mb-0 text-muted" style="font-size: 14px;">
-                                        <i class="bi bi-clock me-1"></i> Jam Tersisa
+                                        <i class="bi bi-clock me-1"></i> {% trans "Remaining Hours" %}
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Detail Progress -->
+                    <!-- Progress Details -->
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
                                     <h6 class="mb-0">
                                         <i class="bi bi-bar-chart me-2"></i>
-                                        Detail Progress SKS
+                                        {% trans "Credit Progress Details" %}
                                     </h6>
                                 </div>
                                 <div class="card-body">
@@ -113,32 +113,32 @@
                                         <table class="table table-bordered">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th>Deskripsi</th>
-                                                    <th class="text-center">Jumlah</th>
-                                                    <th class="text-center">Status</th>
+                                                    <th>{% trans "Description" %}</th>
+                                                    <th class="text-center">{% trans "Amount" %}</th>
+                                                    <th class="text-center">{% trans "Status" %}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
                                                     <td>
                                                         <i class="bi bi-tools me-2"></i>
-                                                        <strong>Total SKS</strong>
+                                                        <strong>{% trans "Total Credits" %}</strong>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-primary">12 SKS</span>
+                                                        <span class="badge bg-primary">12 {% trans "Credits" %}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-info">Aktif</span>
+                                                        <span class="badge bg-info">{% trans "Active" %}</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td>
                                                         <i class="bi bi-clock-history me-2"></i>
-                                                        <strong>Jam Terselesaikan</strong>
-                                                        <p class="mb-0 text-muted small">Dari 344 jam target</p>
+                                                        <strong>{% trans "Completed Hours" %}</strong>
+                                                        <p class="mb-0 text-muted small">{% trans "From 344 target hours" %}</p>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-success">234 jam</span>
+                                                        <span class="badge bg-success">234 {% trans "hours" %}</span>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge bg-success">68%</span>
@@ -147,27 +147,27 @@
                                                 <tr>
                                                     <td>
                                                         <i class="bi bi-clock me-2"></i>
-                                                        <strong>Jam Tersisa</strong>
-                                                        <p class="mb-0 text-muted small">Untuk mencapai target</p>
+                                                        <strong>{% trans "Remaining Hours" %}</strong>
+                                                        <p class="mb-0 text-muted small">{% trans "To reach target" %}</p>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-warning text-dark">110 jam</span>
+                                                        <span class="badge bg-warning text-dark">110 {% trans "hours" %}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-warning text-dark">Dalam Proses</span>
+                                                        <span class="badge bg-warning text-dark">{% trans "In Progress" %}</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td>
                                                         <i class="bi bi-target me-2"></i>
-                                                        <strong>Jam Target Total</strong>
-                                                        <p class="mb-0 text-muted small">Target semester ini</p>
+                                                        <strong>{% trans "Total Target Hours" %}</strong>
+                                                        <p class="mb-0 text-muted small">{% trans "This semester's target" %}</p>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-primary">344 jam</span>
+                                                        <span class="badge bg-primary">344 {% trans "hours" %}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge bg-primary">Target</span>
+                                                        <span class="badge bg-primary">{% trans "Target" %}</span>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -178,52 +178,52 @@
                         </div>
                     </div>
                     
-                    <!-- Ringkasan -->
+                    <!-- Summary -->
                     <div class="alert alert-success mt-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="bi bi-check-circle-fill me-2"></i>
-                                <strong>Status Progress:</strong> 
-                                <span class="text-success">Sangat Baik</span>
+                                <strong>{% trans "Progress Status" %}:</strong> 
+                                <span class="text-success">{% trans "Excellent" %}</span>
                             </div>
                             <div>
                                 <button class="btn btn-outline-primary btn-sm" onclick="exportProgressReport()">
-                                    <i class="bi bi-file-earmark-pdf me-1"></i> Export Laporan
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> {% trans "Export Report" %}
                                 </button>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Estimasi Penyelesaian -->
+                    <!-- Completion Estimate -->
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
                                     <h6 class="mb-0">
                                         <i class="bi bi-calendar-check me-2"></i>
-                                        Estimasi Penyelesaian
+                                        {% trans "Completion Estimate" %}
                                     </h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <p class="mb-1">
-                                                <strong>Rata-rata per Minggu:</strong> 
-                                                <span class="text-success">15.6 jam</span>
+                                                <strong>{% trans "Average per Week" %}:</strong> 
+                                                <span class="text-success">15.6 {% trans "hours" %}</span>
                                             </p>
                                             <p class="mb-0">
-                                                <strong>Estimasi Selesai:</strong> 
-                                                <span class="text-primary">25 Desember 2024</span>
+                                                <strong>{% trans "Estimated Completion" %}:</strong> 
+                                                <span class="text-primary">25 December 2024</span>
                                             </p>
                                         </div>
                                         <div class="text-end">
                                             <p class="mb-1">
-                                                <strong>Sisa Waktu:</strong> 
-                                                <span class="text-warning">45 hari</span>
+                                                <strong>{% trans "Time Remaining" %}:</strong> 
+                                                <span class="text-warning">45 {% trans "days" %}</span>
                                             </p>
                                             <p class="mb-0">
-                                                <strong>Rekomendasi/jam:</strong> 
-                                                <span class="text-info">2.44 jam/hari</span>
+                                                <strong>{% trans "Recommendation/hour" %}:</strong> 
+                                                <span class="text-info">2.44 {% trans "hours/day" %}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -271,7 +271,7 @@
         border: 1px solid #e9ecef;
     }
     
-    /* Style untuk card statistik */
+    /* Style for statistics cards */
     .card.border-primary .card-body h2 {
         color: #0d6efd;
     }
@@ -292,57 +292,57 @@
 
 {% block extra_js %}
 <script>
-    // Data statis (hardcoded) untuk menghindari error
+    // Static data (hardcoded) to avoid errors
     const progressPercentage = 68; // (234/344)*100 = 68%
     const jamTerselesaikan = 234;
     const jamSisa = 110; // 344 - 234
     
     console.log('Progress:', progressPercentage + '%');
-    console.log('Jam Terselesaikan:', jamTerselesaikan + ' jam');
-    console.log('Jam Sisa:', jamSisa + ' jam');
+    console.log('{% trans "Completed Hours" %}:', jamTerselesaikan + ' {% trans "hours" %}');
+    console.log('{% trans "Remaining Hours" %}:', jamSisa + ' {% trans "hours" %}');
     
-    // Fungsi untuk export laporan
+    // Function to export report
     function exportProgressReport() {
-        showNotification('Mempersiapkan laporan progress SKS...', 'info');
+        showNotification("{% trans 'Preparing credit progress report...' %}", 'info');
         
-        // Simulasi delay download
+        // Simulate download delay
         setTimeout(() => {
-            // Buat konten laporan
+            // Create report content
             const reportContent = `
-                LAPORAN PROGRESS SKS
+                {% trans "CREDIT PROGRESS REPORT" %}
                 ====================
-                Tanggal: ${new Date().toLocaleDateString('id-ID')}
+                {% trans "Date" %}: ${new Date().toLocaleDateString('id-ID')}
                 
-                Total SKS: 12 SKS
-                Jam Target Total: 344 jam
-                Jam Terselesaikan: 234 jam (68%)
-                Jam Tersisa: 110 jam
+                {% trans "Total Credits" %}: 12 {% trans "Credits" %}
+                {% trans "Total Target Hours" %}: 344 {% trans "hours" %}
+                {% trans "Completed Hours" %}: 234 {% trans "hours" %} (68%)
+                {% trans "Remaining Hours" %}: 110 {% trans "hours" %}
                 
-                Status: Sangat Baik
+                {% trans "Status" %}: {% trans "Excellent" %}
                 
-                Estimasi Selesai: 25 Desember 2024
-                Rekomendasi: 2.44 jam per hari
+                {% trans "Estimated Completion" %}: 25 December 2024
+                {% trans "Recommendation" %}: 2.44 {% trans "hours per day" %}
             `;
             
-            // Simulasi download file
+            // Simulate file download
             const link = document.createElement('a');
             link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportContent);
-            link.download = `progress_sks_${new Date().toISOString().slice(0,10)}.txt`;
+            link.download = `credit_progress_${new Date().toISOString().slice(0,10)}.txt`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            showNotification('Laporan progress berhasil diunduh', 'success');
+            showNotification("{% trans 'Progress report successfully downloaded' %}", 'success');
         }, 1500);
     }
     
-    // Fungsi untuk menampilkan notifikasi
+    // Function to show notification
     function showNotification(message, type) {
-        // Hapus notifikasi lama
+        // Remove old notifications
         const oldAlerts = document.querySelectorAll('.alert.position-fixed');
         oldAlerts.forEach(alert => alert.remove());
         
-        // Buat notifikasi baru
+        // Create new notification
         const alert = document.createElement('div');
         alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
         alert.style.cssText = `
@@ -368,7 +368,7 @@
         
         document.body.appendChild(alert);
         
-        // Auto hide setelah 3 detik
+        // Auto hide after 3 seconds
         setTimeout(() => {
             if (alert.parentNode) {
                 alert.remove();
@@ -376,9 +376,9 @@
         }, 3000);
     }
     
-    // Animasi progress bar saat halaman dimuat
+    // Progress bar animation when page loads
     document.addEventListener('DOMContentLoaded', function() {
-        // Animasikan progress bar
+        // Animate progress bar
         const progressBar = document.querySelector('.progress-bar');
         let currentProgress = 0;
         const interval = setInterval(() => {
@@ -392,7 +392,7 @@
             progressBar.textContent = currentProgress + '%';
         }, 20);
         
-        console.log('Animasi progress bar dimulai...');
+        console.log('{% trans "Progress bar animation started..." %}');
     });
 </script>
 {% endblock %}

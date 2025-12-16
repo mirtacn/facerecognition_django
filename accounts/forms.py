@@ -3,7 +3,7 @@
 from django import forms
 from django.core.validators import MinValueValidator, MaxValueValidator
 from datetime import datetime
-from .models import Jenjang_Pendidikan, Tahun_Ajaran, Dosen, Kegiatan_PA, Semester, FotoWajah
+from .models import Jenjang_Pendidikan, Tahun_Ajaran, Dosen, Kegiatan_PA, Semester, FotoWajah, Semester
 
 # --- STEP 1: Akun & Identitas ---
 class Step1Form(forms.Form):
@@ -189,3 +189,49 @@ class Step3Form(forms.Form):
         label="Foto Wajah",
         required=True
     )
+
+class FilterRekapPresensiForm(forms.Form):
+    tanggal_mulai = forms.DateField(
+        label='Tanggal Mulai',
+        required=False,
+        widget=forms.DateInput(attrs={
+            'type': 'date', 
+            'class': 'form-control',
+            'id': 'tanggal_mulai_filter'
+        })
+    )
+    
+    tanggal_selesai = forms.DateField(
+        label='Tanggal Selesai',
+        required=False,
+        widget=forms.DateInput(attrs={
+            'type': 'date', 
+            'class': 'form-control',
+            'id': 'tanggal_selesai_filter'
+        })
+    )
+    
+    # UBAH INI: Gunakan ModelChoiceField
+    tingkatan = forms.ModelChoiceField(
+        queryset=Jenjang_Pendidikan.objects.all(),
+        label='Tingkatan',
+        required=False,
+        empty_label="Semua Tingkatan",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'id': 'tingkatan_filter'
+        })
+    )
+    
+    kegiatan = forms.ModelChoiceField(
+        queryset=Kegiatan_PA.objects.all().order_by('nama_kegiatan'),
+        label='Kegiatan',
+        required=False,
+        empty_label="Semua Kegiatan",
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'id': 'kegiatan_filter'
+        })
+    )
+    
+    # HAPUS __init__ method yang lama

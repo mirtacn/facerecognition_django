@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block page_title %}Data SKS/Kegiatan{% endblock %}
+{% block page_title %}{% trans "PA Credit Data" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -16,7 +17,7 @@
                                 <button class="nav-link active w-100 h-100" id="kegiatan-tab" data-bs-toggle="tab" data-bs-target="#kegiatan" type="button" role="tab">
                                     <div class="tab-content-wrapper d-flex align-items-center justify-content-center py-3">
                                         <i class="fas fa-tasks me-2"></i>
-                                        <span>Kegiatan SKS</span>
+                                        <span>{% trans "PA Credit Data" %}</span>
                                     </div>
                                 </button>
                             </li>
@@ -24,7 +25,7 @@
                                 <button class="nav-link w-100 h-100" id="semester-tab" data-bs-toggle="tab" data-bs-target="#semester" type="button" role="tab">
                                     <div class="tab-content-wrapper d-flex align-items-center justify-content-center py-3">
                                         <i class="fas fa-calendar-alt me-2"></i>
-                                        <span>Pengaturan Semester</span>
+                                        <span>{% trans "Academic Year Settings" %}</span>
                                     </div>
                                 </button>
                             </li>
@@ -55,7 +56,7 @@
                                                     class="form-control border-0 ps-0" 
                                                     name="search" 
                                                     id="searchInput"
-                                                    placeholder="Cari berdasarkan nama kegiatan..."
+                                                    placeholder="{% trans 'Search by activity name...' %}"
                                                     value="{{ search_query }}"
                                                     autocomplete="off">
                                             {% if search_query %}
@@ -67,7 +68,7 @@
                                     </form>
                                 </div>
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahKegiatanModal">
-                                    <i class="fas fa-plus me-2"></i>Tambah Kegiatan
+                                    <i class="fas fa-plus me-2"></i>{% trans "Add PA Course" %}
                                 </button>
                             </div>
                         </div>
@@ -84,12 +85,12 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="py-3 ps-4" style="width: 25%;">Nama Kegiatan</th>
-                                            <th class="py-3" style="width: 15%;">Tingkatan</th>
-                                            <th class="py-3" style="width: 10%;">SKS</th>
-                                            <th class="py-3" style="width: 15%;">Jam/Minggu</th>
-                                            <th class="py-3" style="width: 15%;">Total Jam</th>
-                                            <th class="py-3 pe-4" style="width: 20%;">Aksi</th>
+                                            <th class="py-3 ps-4" style="width: 25%;">{% trans "Course" %}</th>
+                                            <th class="py-3" style="width: 15%;">{% trans "Level" %}</th>
+                                            <th class="py-3" style="width: 10%;">{% trans "Credits" %}</th>
+                                            <th class="py-3" style="width: 15%;">{% trans "Hours/Week" %}</th>
+                                            <th class="py-3" style="width: 15%;">{% trans "Total Hours" %}</th>
+                                            <th class="py-3 pe-4" style="width: 20%;">{% trans "Action" %}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -100,7 +101,7 @@
                                                 <div class="d-flex flex-column">
                                                     <strong class="mb-1">{{ kegiatan.nama_kegiatan }}</strong>
                                                     <small class="text-muted">
-                                                        Tahun Ajaran: {{ kegiatan.tahun_ajaran.nama_tahun_ajaran|default:"-" }}
+                                                        {% trans "Academic Year:" %} {{ kegiatan.tahun_ajaran.nama_tahun_ajaran|default:"-" }}
                                                     </small>
                                                 </div>
                                             </td>
@@ -114,17 +115,17 @@
                                             
                                             <!-- SKS -->
                                             <td>
-                                                <small>{{ kegiatan.jumlah_sks }} SKS</small>
+                                                <small>{{ kegiatan.jumlah_sks }} {% trans "Credits" %}</small>
                                             </td>
                                             
                                             <!-- Jam/Minggu -->
                                             <td>
-                                                <small>{{ kegiatan.total_jam_minggu }} jam</small> 
+                                                <small>{{ kegiatan.total_jam_minggu }} {% trans "hours" %}</small> 
                                             </td>
                                             
                                             <!-- Total Jam -->
                                             <td>
-                                                <small>{{ kegiatan.target_jam }} jam</small> 
+                                                <small>{{ kegiatan.target_jam }} {% trans "hours" %}</small> 
                                             </td>
                                             
                                             <!-- Aksi -->
@@ -134,7 +135,7 @@
                                                     <button type="button" 
                                                             class="btn btn-outline-primary btn-edit-kegiatan"
                                                             data-kegiatan-id="{{ kegiatan.id }}"
-                                                            title="Edit">
+                                                            title="{% trans 'Edit' %}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     
@@ -143,7 +144,7 @@
                                                             class="btn btn-outline-danger btn-hapus-kegiatan"
                                                             data-kegiatan-id="{{ kegiatan.id }}"
                                                             data-kegiatan-nama="{{ kegiatan.nama_kegiatan }}"
-                                                            title="Hapus">
+                                                            title="{% trans 'Delete' %}">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -154,8 +155,8 @@
                                             <td colspan="6" class="text-center py-5">
                                                 <div class="text-muted">
                                                     <i class="fas fa-tasks fa-3x mb-3 opacity-25"></i>
-                                                    <h5 class="mb-2">Belum ada data kegiatan</h5>
-                                                    <p>Tambahkan kegiatan baru dengan tombol di atas</p>
+                                                    <h5 class="mb-2">{% trans "No activity data yet" %}</h5>
+                                                    <p>{% trans "Add new activity with the button above" %}</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -183,7 +184,7 @@
                                                class="form-control" 
                                                name="search_semester" 
                                                id="searchSemesterInput"
-                                               placeholder="Cari berdasarkan nama semester atau tahun ajaran..."
+                                               placeholder="{% trans 'Search by semester name or academic year...' %}"
                                                value="">
                                         <button class="btn btn-outline-secondary" type="button" id="searchSemesterBtn">
                                             <i class="fas fa-search"></i>
@@ -191,7 +192,7 @@
                                     </div>
                                 </div>
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahSemesterModal">
-                                    <i class="fas fa-plus me-2"></i>Tambah Semester
+                                    <i class="fas fa-plus me-2"></i>{% trans "Add Academic Year" %}
                                 </button>
                             </div>
                         </div>
@@ -208,11 +209,11 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="py-3 ps-4" style="width: 25%;">Nama</th>
-                                            <th class="py-3" style="width: 15%;">Tanggal Mulai</th>
-                                            <th class="py-3" style="width: 15%;">Tanggal Selesai</th>
-                                            <th class="py-3" style="width: 15%;">Status</th>
-                                            <th class="py-3 pe-4" style="width: 30%;">Aksi</th>
+                                            <th class="py-3 ps-4" style="width: 25%;">{% trans "Name" %}</th>
+                                            <th class="py-3" style="width: 15%;">{% trans "Start Date" %}</th>
+                                            <th class="py-3" style="width: 15%;">{% trans "End Date" %}</th>
+                                            <th class="py-3" style="width: 15%;">{% trans "Status" %}</th>
+                                            <th class="py-3 pe-4" style="width: 30%;">{% trans "Action" %}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -237,11 +238,11 @@
                                             <td>
                                                 {% if tahun.status_aktif == 'aktif' %}
                                                 <span class="badge bg-success text-white">
-                                                    <i class="fas fa-check me-1"></i> Aktif
+                                                    <i class="fas fa-check me-1"></i> {% trans "Active" %}
                                                 </span>
                                                 {% else %}
                                                 <span class="badge bg-secondary text-white">
-                                                    Nonaktif
+                                                    {% trans "Inactive" %}
                                                 </span>
                                                 {% endif %}
                                             </td>
@@ -254,8 +255,8 @@
                                                             class="btn btn-success btn-aktifkan-semester"
                                                             data-tahun-id="{{ tahun.id }}"
                                                             data-tahun-nama="{{ tahun.nama_tahun_ajaran }}"
-                                                            title="Aktifkan">
-                                                        <i class="fas fa-power-off me-1"></i>Aktifkan
+                                                            title="{% trans 'Activate' %}">
+                                                        <i class="fas fa-power-off me-1"></i>{% trans "Activate" %}
                                                     </button>
                                                     {% endif %}
                                                     
@@ -263,7 +264,7 @@
                                                     <button type="button" 
                                                             class="btn btn-outline-primary btn-edit-semester"
                                                             data-tahun-id="{{ tahun.id }}"
-                                                            title="Edit">
+                                                            title="{% trans 'Edit' %}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     
@@ -272,7 +273,7 @@
                                                             class="btn btn-outline-danger btn-hapus-semester"
                                                             data-tahun-id="{{ tahun.id }}"
                                                             data-tahun-nama="{{ tahun.nama_tahun_ajaran }}"
-                                                            title="Hapus">
+                                                            title="{% trans 'Delete' %}">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -283,8 +284,8 @@
                                             <td colspan="5" class="text-center py-5">
                                                 <div class="text-muted">
                                                     <i class="fas fa-calendar fa-3x mb-3 opacity-25"></i>
-                                                    <h5 class="mb-2">Belum ada data semester</h5>
-                                                    <p>Tambahkan semester baru dengan tombol di atas</p>
+                                                    <h5 class="mb-2">{% trans "No semester data yet" %}</h5>
+                                                    <p>{% trans "Add new semester with the button above" %}</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -305,21 +306,21 @@
     <div class="modal-dialog">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="tambahKegiatanModalLabel">Tambah Kegiatan SKS</h5>
+                <h5 class="modal-title fw-bold" id="tambahKegiatanModalLabel">{% trans "Add Credit Activity" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{% url 'tambah_kegiatan_sks' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nama_kegiatan" class="form-label">Nama Kegiatan</label>
+                        <label for="nama_kegiatan" class="form-label">{% trans "Activity Name" %}</label>
                         <input type="text" class="form-control" id="nama_kegiatan" name="nama_kegiatan" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="jenjang_pendidikan" class="form-label">Jenjang Pendidikan</label>
+                        <label for="jenjang_pendidikan" class="form-label">{% trans "Education Level" %}</label>
                         <select class="form-select" id="jenjang_pendidikan" name="jenjang_pendidikan" required>
-                            <option value="">Pilih Jenjang</option>
+                            <option value="">{% trans "Select Level" %}</option>
                             {% for jenjang in jenjang_list %}
                             <option value="{{ jenjang.id }}">{{ jenjang.nama_jenjang }}</option>
                             {% endfor %}
@@ -328,23 +329,23 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="jumlah_sks" class="form-label">Jumlah SKS</label>
+                            <label for="jumlah_sks" class="form-label">{% trans "Number of Credits" %}</label>
                             <input type="number" class="form-control" id="jumlah_sks" name="jumlah_sks" min="0" step="0.5" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="total_jam_minggu" class="form-label">Jam/Minggu</label>
+                            <label for="total_jam_minggu" class="form-label">{% trans "Hours/Week" %}</label>
                             <input type="number" class="form-control" id="total_jam_minggu" name="total_jam_minggu" min="0" required>
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="target_jam" class="form-label">Total Jam</label>
+                        <label for="target_jam" class="form-label">{% trans "Total Hours" %}</label>
                         <input type="number" class="form-control" id="target_jam" name="target_jam" min="0" required>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
                 </div>
             </form>
         </div>
@@ -356,19 +357,19 @@
     <div class="modal-dialog">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="editModalLabel">Edit Kegiatan SKS</h5>
+                <h5 class="modal-title fw-bold" id="editModalLabel">{% trans "Edit Credit Activity" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="" id="editForm">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="edit_nama_kegiatan" class="form-label">Nama Kegiatan</label>
+                        <label for="edit_nama_kegiatan" class="form-label">{% trans "Activity Name" %}</label>
                         <input type="text" class="form-control" id="edit_nama_kegiatan" name="nama_kegiatan" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="edit_jenjang_pendidikan" class="form-label">Jenjang Pendidikan</label>
+                        <label for="edit_jenjang_pendidikan" class="form-label">{% trans "Education Level" %}</label>
                         <select class="form-select" id="edit_jenjang_pendidikan" name="jenjang_pendidikan" required>
                             {% for jenjang in jenjang_list %}
                             <option value="{{ jenjang.id }}">{{ jenjang.nama_jenjang }}</option>
@@ -378,23 +379,23 @@
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="edit_jumlah_sks" class="form-label">Jumlah SKS</label>
+                            <label for="edit_jumlah_sks" class="form-label">{% trans "Number of Credits" %}</label>
                             <input type="number" class="form-control" id="edit_jumlah_sks" name="jumlah_sks" min="0" step="0.5" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="edit_total_jam_minggu" class="form-label">Jam/Minggu</label>
+                            <label for="edit_total_jam_minggu" class="form-label">{% trans "Hours/Week" %}</label>
                             <input type="number" class="form-control" id="edit_total_jam_minggu" name="total_jam_minggu" min="0" required>
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="edit_target_jam" class="form-label">Total Jam</label>
+                        <label for="edit_target_jam" class="form-label">{% trans "Total Hours" %}</label>
                         <input type="number" class="form-control" id="edit_target_jam" name="target_jam" min="0" required>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Save Changes" %}</button>
                 </div>
             </form>
         </div>
@@ -406,18 +407,18 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-danger" id="hapusModalLabel">Konfirmasi Hapus</h5>
+                <h5 class="modal-title fw-bold text-danger" id="hapusModalLabel">{% trans "Delete Confirmation" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus kegiatan <strong id="namaKegiatanHapus">-</strong>?</p>
-                <p class="text-danger small">Data yang dihapus tidak dapat dikembalikan.</p>
+                <p>{% trans "Are you sure you want to delete activity" %} <strong id="namaKegiatanHapus">-</strong>?</p>
+                <p class="text-danger small">{% trans "Deleted data cannot be recovered." %}</p>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
                 <form method="post" action="" id="hapusForm" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Hapus</button>
+                    <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
                 </form>
             </div>
         </div>
@@ -429,32 +430,32 @@
     <div class="modal-dialog">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="tambahSemesterModalLabel">Tambah Semester</h5>
+                <h5 class="modal-title fw-bold" id="tambahSemesterModalLabel">{% trans "Add Academic Year" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="{% url 'tambah_tahun_ajaran' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nama_tahun_ajaran" class="form-label">Nama Tahun Ajaran</label>
+                        <label for="nama_tahun_ajaran" class="form-label">{% trans "Academic Year Name" %}</label>
                         <input type="text" class="form-control" id="nama_tahun_ajaran" name="nama_tahun_ajaran" required>
-                        <small class="text-muted">Contoh: Ganjil 2024/2025</small>
+                        <small class="text-muted">{% trans "Example: Odd 2024/2025" %}</small>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
+                            <label for="tanggal_mulai" class="form-label">{% trans "Start Date" %}</label>
                             <input type="date" class="form-control" id="tanggal_mulai" name="tanggal_mulai" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="tanggal_selesai" class="form-label">Tanggal Selesai</label>
+                            <label for="tanggal_selesai" class="form-label">{% trans "End Date" %}</label>
                             <input type="date" class="form-control" id="tanggal_selesai" name="tanggal_selesai" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
                 </div>
             </form>
         </div>
@@ -466,31 +467,31 @@
     <div class="modal-dialog">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="editSemesterModalLabel">Edit Semester</h5>
+                <h5 class="modal-title fw-bold" id="editSemesterModalLabel">{% trans "Edit Semester" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" action="" id="editSemesterForm">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="edit_nama_tahun_ajaran" class="form-label">Nama Tahun Ajaran</label>
+                        <label for="edit_nama_tahun_ajaran" class="form-label">{% trans "Academic Year Name" %}</label>
                         <input type="text" class="form-control" id="edit_nama_tahun_ajaran" name="nama_tahun_ajaran" required>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="edit_tanggal_mulai" class="form-label">Tanggal Mulai</label>
+                            <label for="edit_tanggal_mulai" class="form-label">{% trans "Start Date" %}</label>
                             <input type="date" class="form-control" id="edit_tanggal_mulai" name="tanggal_mulai" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="edit_tanggal_selesai" class="form-label">Tanggal Selesai</label>
+                            <label for="edit_tanggal_selesai" class="form-label">{% trans "End Date" %}</label>
                             <input type="date" class="form-control" id="edit_tanggal_selesai" name="tanggal_selesai" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Save Changes" %}</button>
                 </div>
             </form>
         </div>
@@ -502,18 +503,18 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-danger" id="hapusSemesterModalLabel">Konfirmasi Hapus</h5>
+                <h5 class="modal-title fw-bold text-danger" id="hapusSemesterModalLabel">{% trans "Delete Confirmation" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus tahun ajaran <strong id="namaTahunHapus">-</strong>?</p>
-                <p class="text-danger small">Data yang dihapus tidak dapat dikembalikan.</p>
+                <p>{% trans "Are you sure you want to delete academic year" %} <strong id="namaTahunHapus">-</strong>?</p>
+                <p class="text-danger small">{% trans "Deleted data cannot be recovered." %}</p>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
                 <form method="post" action="" id="hapusSemesterForm" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Hapus</button>
+                    <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
                 </form>
             </div>
         </div>
@@ -868,12 +869,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Show modal
                     editModal.show();
                 } else {
-                    alert('Gagal memuat data kegiatan');
+                    alert('{% trans "Failed to load activity data" %}');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat memuat data');
+                alert('{% trans "An error occurred while loading data" %}');
             });
     }
     
@@ -925,12 +926,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Show modal
                     editSemesterModal.show();
                 } else {
-                    alert('Gagal memuat data semester');
+                    alert('{% trans "Failed to load semester data" %}');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat memuat data');
+                alert('{% trans "An error occurred while loading data" %}');
             });
     }
     
@@ -960,7 +961,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const tahunId = this.getAttribute('data-tahun-id');
             const tahunNama = this.getAttribute('data-tahun-nama');
             
-            if (confirm(`Apakah Anda yakin ingin mengaktifkan tahun ajaran ${tahunNama}?`)) {
+            if (confirm(`{% trans "Are you sure you want to activate academic year" %} ${tahunNama}?`)) {
                 aktifkanTahunAjaran(tahunId);
             }
         });
@@ -978,15 +979,15 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Tahun ajaran berhasil diaktifkan');
+                alert('{% trans "Academic year successfully activated" %}');
                 location.reload();
             } else {
-                alert(data.error || 'Terjadi kesalahan');
+                alert(data.error || '{% trans "An error occurred" %}');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Terjadi kesalahan');
+            alert('{% trans "An error occurred" %}');
         });
     }
     

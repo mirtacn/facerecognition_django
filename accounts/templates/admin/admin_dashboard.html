@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block page_title %}Dashboard Admin{% endblock %}
+{% block page_title %}{% trans "Admin Dashboard" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -9,15 +10,15 @@
         <div class="col-lg-8">
             <!-- Statistics Cards -->
             <div class="row mb-4">
-                <!-- Card 1: Presensi Hari Ini -->
+                <!-- Card 1: Today's Attendance -->
                 <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Presensi Hari Ini</h6>
+                                    <h6 class="card-subtitle mb-2 text-muted">{% trans "Today's Attendance" %}</h6>
                                     <h2 class="card-title mb-0" style="color: #f59e0b;">11</h2>
-                                    <small class="text-muted">Dari 45 mahasiswa</small>
+                                    <small class="text-muted">{% trans "From 45 students" %}</small>
                                 </div>
                                 <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
                                     <i class="bi bi-calendar-check fs-4 text-warning"></i>
@@ -27,19 +28,19 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Rata-rata Kehadiran -->
+                <!-- Card 2: Average Attendance -->
                 <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Rata-rata Kehadiran</h6>
+                                    <h6 class="card-subtitle mb-2 text-muted">{% trans "Average Attendance" %}</h6>
                                     <h2 class="card-title mb-2" style="color: #8b5cf6;">74%</h2>
                                     <div class="d-flex align-items-center mt-2">
                                         <div class="progress flex-grow-1 me-2" style="height: 6px;">
                                             <div class="progress-bar" style="width: 74%; background-color: #8b5cf6;"></div>
                                         </div>
-                                        <small class="text-muted">Minggu ini</small>
+                                        <small class="text-muted">{% trans "This week" %}</small>
                                     </div>
                                 </div>
                                 <div class="p-3 rounded-circle" style="background-color: rgba(139, 92, 246, 0.1);">
@@ -56,12 +57,12 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="card-subtitle mb-2 text-muted">Semester</h6>
-                                    <h5 class="card-title mb-3">Ganjil 2025/2026</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{% trans "Semester" %}</h6>
+                                    <h5 class="card-title mb-3">{% trans "Odd 2025/2026" %}</h5>
                                     <div class="progress mb-2" style="height: 6px;">
                                         <div class="progress-bar bg-primary" style="width: 75%"></div>
                                     </div>
-                                    <small class="text-muted">Sisa 8 minggu</small>
+                                    <small class="text-muted">{% trans "8 weeks remaining" %}</small>
                                 </div>
                                 <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
                                     <i class="bi bi-calendar-week fs-4 text-primary"></i>
@@ -75,103 +76,103 @@
             <!-- Weekly Attendance Chart (tetap sama) -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Presensi Mingguan per Program :</h5>
+                    <h5 class="card-title mb-4">{% trans "Weekly Attendance per Program:" %}</h5>
                     
                     <!-- Chart Container -->
                     <div class="chart-container mb-4">
                         <div class="d-flex justify-content-between align-items-end mb-3" style="height: 200px;">
-                            <!-- Senin -->
+                            <!-- Monday -->
                             <div class="day-column text-center" style="flex: 1;">
                                 <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
                                     <div class="bar-group d-flex align-end h-100">
                                         <!-- D3 -->
                                         <div class="bar bg-primary mx-1" style="height: 60%; width: 15px;" 
-                                             data-bs-toggle="tooltip" title="D3: 12 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D3: {% trans '12 present' %}"></div>
                                         <!-- D4 -->
                                         <div class="bar bg-info mx-1" style="height: 80%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: 16 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D4: {% trans '16 present' %}"></div>
                                         <!-- LJ -->
                                         <div class="bar bg-success mx-1" style="height: 40%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: 8 hadir"></div>
+                                             data-bs-toggle="tooltip" title="LJ: {% trans '8 present' %}"></div>
                                         <!-- S2 -->
                                         <div class="bar bg-warning mx-1" style="height: 70%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: 14 hadir"></div>
+                                             data-bs-toggle="tooltip" title="S2: {% trans '14 present' %}"></div>
                                     </div>
                                 </div>
-                                <div class="day-label fw-bold">Senin</div>
-                                <small class="text-muted">Total: 50</small>
+                                <div class="day-label fw-bold">{% trans "Monday" %}</div>
+                                <small class="text-muted">{% trans "Total:" %} 50</small>
                             </div>
 
-                            <!-- Selasa -->
+                            <!-- Tuesday -->
                             <div class="day-column text-center" style="flex: 1;">
                                 <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
                                     <div class="bar-group d-flex align-end h-100">
                                         <div class="bar bg-primary mx-1" style="height: 70%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: 14 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D3: {% trans '14 present' %}"></div>
                                         <div class="bar bg-info mx-1" style="height: 85%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: 17 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D4: {% trans '17 present' %}"></div>
                                         <div class="bar bg-success mx-1" style="height: 45%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: 9 hadir"></div>
+                                             data-bs-toggle="tooltip" title="LJ: {% trans '9 present' %}"></div>
                                         <div class="bar bg-warning mx-1" style="height: 65%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: 13 hadir"></div>
+                                             data-bs-toggle="tooltip" title="S2: {% trans '13 present' %}"></div>
                                     </div>
                                 </div>
-                                <div class="day-label fw-bold">Selasa</div>
-                                <small class="text-muted">Total: 53</small>
+                                <div class="day-label fw-bold">{% trans "Tuesday" %}</div>
+                                <small class="text-muted">{% trans "Total:" %} 53</small>
                             </div>
 
-                            <!-- Rabu -->
+                            <!-- Wednesday -->
                             <div class="day-column text-center" style="flex: 1;">
                                 <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
                                     <div class="bar-group d-flex align-end h-100">
                                         <div class="bar bg-primary mx-1" style="height: 65%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: 13 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D3: {% trans '13 present' %}"></div>
                                         <div class="bar bg-info mx-1" style="height: 90%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: 18 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D4: {% trans '18 present' %}"></div>
                                         <div class="bar bg-success mx-1" style="height: 50%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: 10 hadir"></div>
+                                             data-bs-toggle="tooltip" title="LJ: {% trans '10 present' %}"></div>
                                         <div class="bar bg-warning mx-1" style="height: 60%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: 12 hadir"></div>
+                                             data-bs-toggle="tooltip" title="S2: {% trans '12 present' %}"></div>
                                     </div>
                                 </div>
-                                <div class="day-label fw-bold">Rabu</div>
-                                <small class="text-muted">Total: 53</small>
+                                <div class="day-label fw-bold">{% trans "Wednesday" %}</div>
+                                <small class="text-muted">{% trans "Total:" %} 53</small>
                             </div>
 
-                            <!-- Kamis -->
+                            <!-- Thursday -->
                             <div class="day-column text-center" style="flex: 1;">
                                 <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
                                     <div class="bar-group d-flex align-end h-100">
                                         <div class="bar bg-primary mx-1" style="height: 75%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: 15 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D3: {% trans '15 present' %}"></div>
                                         <div class="bar bg-info mx-1" style="height: 75%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: 15 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D4: {% trans '15 present' %}"></div>
                                         <div class="bar bg-success mx-1" style="height: 50%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: 10 hadir"></div>
+                                             data-bs-toggle="tooltip" title="LJ: {% trans '10 present' %}"></div>
                                         <div class="bar bg-warning mx-1" style="height: 60%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: 12 hadir"></div>
+                                             data-bs-toggle="tooltip" title="S2: {% trans '12 present' %}"></div>
                                     </div>
                                 </div>
-                                <div class="day-label fw-bold">Kamis</div>
-                                <small class="text-muted">Total: 52</small>
+                                <div class="day-label fw-bold">{% trans "Thursday" %}</div>
+                                <small class="text-muted">{% trans "Total:" %} 52</small>
                             </div>
 
-                            <!-- Jumat -->
+                            <!-- Friday -->
                             <div class="day-column text-center" style="flex: 1;">
                                 <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
                                     <div class="bar-group d-flex align-end h-100">
                                         <div class="bar bg-primary mx-1" style="height: 55%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: 11 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D3: {% trans '11 present' %}"></div>
                                         <div class="bar bg-info mx-1" style="height: 70%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: 14 hadir"></div>
+                                             data-bs-toggle="tooltip" title="D4: {% trans '14 present' %}"></div>
                                         <div class="bar bg-success mx-1" style="height: 35%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: 7 hadir"></div>
+                                             data-bs-toggle="tooltip" title="LJ: {% trans '7 present' %}"></div>
                                         <div class="bar bg-warning mx-1" style="height: 50%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: 10 hadir"></div>
+                                             data-bs-toggle="tooltip" title="S2: {% trans '10 present' %}"></div>
                                     </div>
                                 </div>
-                                <div class="day-label fw-bold">Jumat</div>
-                                <small class="text-muted">Total: 42</small>
+                                <div class="day-label fw-bold">{% trans "Friday" %}</div>
+                                <small class="text-muted">{% trans "Total:" %} 42</small>
                             </div>
                         </div>
                     </div>
@@ -200,15 +201,15 @@
 
                     <!-- Detail Table -->
                     <div class="mt-4">
-                        <h6>Detail Presensi Minggu Ini :</h6>
+                        <h6>{% trans "This Week's Attendance Details:" %}</h6>
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Jenjang</th>
-                                        <th>Jumlah Hadir</th>
-                                        <th>Total Mahasiswa</th>
-                                        <th>Persentase</th>
+                                        <th>{% trans "Level" %}</th>
+                                        <th>{% trans "Present Count" %}</th>
+                                        <th>{% trans "Total Students" %}</th>
+                                        <th>{% trans "Percentage" %}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -239,7 +240,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr class="fw-bold">
-                                        <td>Total</td>
+                                        <td>{% trans "Total" %}</td>
                                         <td>52</td>
                                         <td>70</td>
                                         <td>74%</td>
@@ -257,8 +258,8 @@
             <!-- Recent Activity -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Aktivitas Terbaru</h5>
-                    <p class="text-muted small mb-4">Updates real-time kegiatan mahasiswa</p>
+                    <h5 class="card-title mb-3">{% trans "Recent Activity" %}</h5>
+                    <p class="text-muted small mb-4">{% trans "Real-time updates of student activities" %}</p>
                     
                     <div class="activity-list">
                         <div class="activity-item mb-3">
@@ -268,8 +269,8 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0">Ahmad Rizki</h6>
-                                    <small class="text-muted">NIM: 75087000001</small>
-                                    <p class="mb-0 small">Projek Akhir D4 - Check-in</p>
+                                    <small class="text-muted">{% trans "Student ID:" %} 75087000001</small>
+                                    <p class="mb-0 small">{% trans "Final Project D4 - Check-in" %}</p>
                                 </div>
                                 <div class="ms-auto text-end">
                                     <small class="text-muted">08:30</small>
@@ -284,8 +285,8 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0">Siti Mulyani</h6>
-                                    <small class="text-muted">NIM: 75087000002</small>
-                                    <p class="mb-0 small">Proyek Tridi 52 - Check-out</p>
+                                    <small class="text-muted">{% trans "Student ID:" %} 75087000002</small>
+                                    <p class="mb-0 small">{% trans "Tridi Project 52 - Check-out" %}</p>
                                 </div>
                                 <div class="ms-auto text-end">
                                     <small class="text-muted">09:15</small>
@@ -300,8 +301,8 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0">Rizki Saputra</h6>
-                                    <small class="text-muted">NIM: 75087000003</small>
-                                    <p class="mb-0 small">Projek Akhir 2 D4 - Upload file</p>
+                                    <small class="text-muted">{% trans "Student ID:" %} 75087000003</small>
+                                    <p class="mb-0 small">{% trans "Final Project 2 D4 - File upload" %}</p>
                                 </div>
                                 <div class="ms-auto text-end">
                                     <small class="text-muted">08:45</small>
@@ -316,8 +317,8 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0">Rina Devi</h6>
-                                    <small class="text-muted">NIM: 75087000004</small>
-                                    <p class="mb-0 small">Proyek Akhir 03 - Check-in</p>
+                                    <small class="text-muted">{% trans "Student ID:" %} 75087000004</small>
+                                    <p class="mb-0 small">{% trans "Final Project 03 - Check-in" %}</p>
                                 </div>
                                 <div class="ms-auto text-end">
                                     <small class="text-muted">08:00</small>
@@ -332,8 +333,8 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0">Muhammad Iqbal</h6>
-                                    <small class="text-muted">NIM: 75087000005</small>
-                                    <p class="mb-0 small">Proyek Tridi 123 - Submit laporan</p>
+                                    <small class="text-muted">{% trans "Student ID:" %} 75087000005</small>
+                                    <p class="mb-0 small">{% trans "Tridi Project 123 - Report submission" %}</p>
                                 </div>
                                 <div class="ms-auto text-end">
                                     <small class="text-muted">07:45</small>
@@ -347,30 +348,30 @@
             <!-- Quick Actions -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Aksi Cepat :</h5>
+                    <h5 class="card-title mb-3">{% trans "Quick Actions:" %}</h5>
                     <div class="row g-2">
                         <div class="col-6">
                             <a href="{% url 'approval_pendaftaran' %}" class="btn btn-outline-primary w-100 d-flex flex-column align-items-center py-3">
                                 <i class="bi bi-check-circle fs-4 mb-2"></i>
-                                <span>Approval Pendaftaran</span>
+                                <span>{% trans "Registration Approval" %}</span>
                             </a>
                         </div>
                         <div class="col-6">
                             <a href="{% url 'data_mahasiswa' %}" class="btn btn-outline-success w-100 d-flex flex-column align-items-center py-3">
                                 <i class="bi bi-people fs-4 mb-2"></i>
-                                <span>Data Mahasiswa</span>
+                                <span>{% trans "Student Data" %}</span>
                             </a>
                         </div>
                         <div class="col-6">
                             <a href="{% url 'monitor_durasi' %}" class="btn btn-outline-info w-100 d-flex flex-column align-items-center py-3">
                                 <i class="bi bi-clock fs-4 mb-2"></i>
-                                <span>Monitor Durasi</span>
+                                <span>{% trans "Duration Monitor" %}</span>
                             </a>
                         </div>
                         <div class="col-6">
                             <a href="{% url 'kamera_presensi_mhs' %}" class="btn btn-outline-warning w-100 d-flex flex-column align-items-center py-3">
                                 <i class="bi bi-camera-video fs-4 mb-2"></i>
-                                <span>Kamera Presensi</span>
+                                <span>{% trans "Attendance Camera" %}</span>
                             </a>
                         </div>
                     </div>
@@ -385,7 +386,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Detail Presensi - <span id="modalDay"></span></h5>
+                <h5 class="modal-title">{% trans "Attendance Details - " %}<span id="modalDay"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -393,10 +394,10 @@
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Jenjang</th>
-                                <th>Jumlah Hadir</th>
-                                <th>Total Mahasiswa</th>
-                                <th>Persentase</th>
+                                <th>{% trans "Level" %}</th>
+                                <th>{% trans "Present Count" %}</th>
+                                <th>{% trans "Total Students" %}</th>
+                                <th>{% trans "Percentage" %}</th>
                             </tr>
                         </thead>
                         <tbody id="modalDetailBody">
@@ -530,31 +531,31 @@
         
         // Data for each day (this would normally come from backend)
         const dayData = {
-            'Senin': [
+            '{% trans "Monday" %}': [
                 { jenjang: 'D3', hadir: 12, total: 20, percentage: 60 },
                 { jenjang: 'D4', hadir: 16, total: 20, percentage: 80 },
                 { jenjang: 'LJ', hadir: 8, total: 15, percentage: 53 },
                 { jenjang: 'S2', hadir: 14, total: 15, percentage: 93 }
             ],
-            'Selasa': [
+            '{% trans "Tuesday" %}': [
                 { jenjang: 'D3', hadir: 14, total: 20, percentage: 70 },
                 { jenjang: 'D4', hadir: 17, total: 20, percentage: 85 },
                 { jenjang: 'LJ', hadir: 9, total: 15, percentage: 60 },
                 { jenjang: 'S2', hadir: 13, total: 15, percentage: 87 }
             ],
-            'Rabu': [
+            '{% trans "Wednesday" %}': [
                 { jenjang: 'D3', hadir: 13, total: 20, percentage: 65 },
                 { jenjang: 'D4', hadir: 18, total: 20, percentage: 90 },
                 { jenjang: 'LJ', hadir: 10, total: 15, percentage: 67 },
                 { jenjang: 'S2', hadir: 12, total: 15, percentage: 80 }
             ],
-            'Kamis': [
+            '{% trans "Thursday" %}': [
                 { jenjang: 'D3', hadir: 15, total: 20, percentage: 75 },
                 { jenjang: 'D4', hadir: 15, total: 20, percentage: 75 },
                 { jenjang: 'LJ', hadir: 10, total: 15, percentage: 67 },
                 { jenjang: 'S2', hadir: 12, total: 15, percentage: 80 }
             ],
-            'Jumat': [
+            '{% trans "Friday" %}': [
                 { jenjang: 'D3', hadir: 11, total: 20, percentage: 55 },
                 { jenjang: 'D4', hadir: 14, total: 20, percentage: 70 },
                 { jenjang: 'LJ', hadir: 7, total: 15, percentage: 47 },
@@ -606,7 +607,7 @@
                 const totalPercentage = totalMahasiswa > 0 ? Math.round((totalHadir / totalMahasiswa) * 100) : 0;
                 html += `
                     <tr class="fw-bold">
-                        <td>Total</td>
+                        <td>{% trans "Total" %}</td>
                         <td>${totalHadir}</td>
                         <td>${totalMahasiswa}</td>
                         <td>${totalPercentage}%</td>

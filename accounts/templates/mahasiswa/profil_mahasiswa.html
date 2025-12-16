@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Profil Mahasiswa - {{ mahasiswa.nama }}{% endblock %}
-{% block page_title %}Profil Mahasiswa{% endblock %}
+{% block title %}{% trans "Student Profile" %} - {{ mahasiswa.nama }}{% endblock %}
+{% block page_title %}{% trans "Student Profile" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -12,11 +13,11 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-info-circle me-2"></i>
-                        Informasi Pribadi
+                        {% trans "Personal Information" %}
                     </h5>
                     <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal"
                         data-bs-target="#editProfileModal">
-                        <i class="bi bi-pencil me-1"></i> Edit Profil
+                        <i class="bi bi-pencil me-1"></i> {% trans "Edit Profile" %}
                     </button>
                 </div>
                 <div class="card-body">
@@ -24,7 +25,7 @@
                         <div class="col-md-6">
                             <div class="row mb-3">
                                 <div class="col-4">
-                                    <strong style="font-size: 14px; color: #6b7280;">Nama</strong>
+                                    <strong style="font-size: 14px; color: #6b7280;">{% trans "Name" %}</strong>
                                 </div>
                                 <div class="col-8">
                                     <p class="mb-0" style="font-size: 14px;">: {{ mahasiswa.nama }}</p>
@@ -32,7 +33,7 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-4">
-                                    <strong style="font-size: 14px; color: #6b7280;">NRP</strong>
+                                    <strong style="font-size: 14px; color: #6b7280;">{% trans "Student ID" %}</strong>
                                 </div>
                                 <div class="col-8">
                                     <p class="mb-0" style="font-size: 14px;">: {{ mahasiswa.nrp }}</p>
@@ -40,7 +41,7 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-4">
-                                    <strong style="font-size: 14px; color: #6b7280;">Email</strong>
+                                    <strong style="font-size: 14px; color: #6b7280;">{% trans "Email" %}</strong>
                                 </div>
                                 <div class="col-8">
                                     <p class="mb-0" style="font-size: 14px;">: {{ mahasiswa.email }}</p>
@@ -48,7 +49,7 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-4">
-                                    <strong style="font-size: 14px; color: #6b7280;">Jenjang Pendidikan</strong>
+                                    <strong style="font-size: 14px; color: #6b7280;">{% trans "Education Level" %}</strong>
                                 </div>
                                 <div class="col-8">
                                     <p class="mb-0" style="font-size: 14px;">: {{ mahasiswa.jenjang }}</p>
@@ -58,7 +59,7 @@
                         <div class="col-md-6">
                             <div class="row mb-3">
                                 <div class="col-4">
-                                    <strong style="font-size: 14px; color: #6b7280;">Kelas</strong>
+                                    <strong style="font-size: 14px; color: #6b7280;">{% trans "Class" %}</strong>
                                 </div>
                                 <div class="col-8">
                                     <p class="mb-0" style="font-size: 14px;">: {{ mahasiswa.kelas }}</p>
@@ -66,7 +67,7 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-4">
-                                    <strong style="font-size: 14px; color: #6b7280;">Semester</strong>
+                                    <strong style="font-size: 14px; color: #6b7280;">{% trans "Semester" %}</strong>
                                 </div>
                                 <div class="col-8">
                                     <p class="mb-0" style="font-size: 14px;">: {{ mahasiswa.semester }}</p>
@@ -74,7 +75,7 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-4">
-                                    <strong style="font-size: 14px; color: #6b7280;">Kegiatan PA</strong>
+                                    <strong style="font-size: 14px; color: #6b7280;">{% trans "PA Activities" %}</strong>
                                 </div>
                                 <div class="col-8">
                                     <div class="d-flex flex-wrap gap-1">
@@ -87,7 +88,7 @@
                                             </span>
                                             {% endfor %}
                                         {% else %}
-                                            <span class="text-muted" style="font-size: 14px;">Belum ada kegiatan PA</span>
+                                            <span class="text-muted" style="font-size: 14px;">{% trans "No PA activities yet" %}</span>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -98,17 +99,17 @@
             </div>
         </div>
 
-        <!-- Dosen Pembimbing Card -->
+        <!-- Supervisor Card -->
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-people me-2"></i>
-                        Dosen Pembimbing
+                        {% trans "Supervisors" %}
                     </h5>
                     <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal"
                         data-bs-target="#editDosenModal">
-                        <i class="bi bi-pencil me-1"></i> Edit Dosen Pembimbing
+                        <i class="bi bi-pencil me-1"></i> {% trans "Edit Supervisors" %}
                     </button>
                 </div>
                 <div class="card-body">
@@ -122,13 +123,13 @@
                                 </span>
                                 <div>
                                     <h6 class="fw-bold mb-0" style="font-size: 15px;">{{ dosen.nama_dosen }}</h6>
-                                    <small class="text-muted" style="font-size: 13px;">NIP: {{ dosen.nip }}</small>
+                                    <small class="text-muted" style="font-size: 13px;">{% trans "NIP" %}: {{ dosen.nip }}</small>
                                 </div>
                             </div>
                         </div>
                         {% empty %}
                         <div class="list-group-item border-0 px-0 py-3">
-                            <p class="text-muted text-center">Data dosen pembimbing belum tersedia.</p>
+                            <p class="text-muted text-center">{% trans "Supervisor data is not available yet." %}</p>
                         </div>
                         {% endfor %}
                     </div>
@@ -143,7 +144,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="editProfileModalLabel">Edit Profil Mahasiswa</h5>
+                <h5 class="modal-title fw-bold" id="editProfileModalLabel">{% trans "Edit Student Profile" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -151,24 +152,24 @@
                     {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Nama Lengkap</label>
+                            <label class="form-label">{% trans "Full Name" %}</label>
                             <input type="text" class="form-control" value="{{ mahasiswa.nama }}" name="nama" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">NRP</label>
+                            <label class="form-label">{% trans "Student ID" %}</label>
                             <input type="text" class="form-control" value="{{ mahasiswa.nrp }}" name="nrp" required
                                 readonly>
-                            <small class="text-muted">NRP tidak dapat diubah</small>
+                            <small class="text-muted">{% trans "Student ID cannot be changed" %}</small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Email</label>
+                            <label class="form-label">{% trans "Email" %}</label>
                             <input type="email" class="form-control" value="{{ mahasiswa.email }}" name="email"
                                 required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Jenjang Pendidikan</label>
+                            <label class="form-label">{% trans "Education Level" %}</label>
                             <select class="form-select" name="jenjang" id="jenjangSelect" required>
-                                <option value="">Pilih Jenjang</option>
+                                <option value="">{% trans "Select Level" %}</option>
                                 {% for jenjang in jenjang_list %}
                                 <option value="{{ jenjang.id }}" 
                                     {% if mahasiswa.jenjang_pendidikan.id == jenjang.id %}selected{% endif %}>
@@ -178,13 +179,13 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Kelas</label>
+                            <label class="form-label">{% trans "Class" %}</label>
                             <input type="text" class="form-control" value="{{ mahasiswa.kelas }}" name="kelas" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Semester</label>
+                            <label class="form-label">{% trans "Semester" %}</label>
                             <select class="form-select" name="semester" id="semesterSelect" required>
-                                <option value="">Pilih Semester</option>
+                                <option value="">{% trans "Select Semester" %}</option>
                                 {% for semester in semester_list %}
                                 <option value="{{ semester.id }}" 
                                     {% if mahasiswa.semester_id == semester.id %}selected{% endif %}>
@@ -194,16 +195,15 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Kegiatan PA yang Diambil</label>
+                            <label class="form-label">{% trans "Selected PA Activities" %}</label>
                             <div id="kegiatanPAContainer" class="border rounded p-3">
                                 {% if mahasiswa.jenjang_pendidikan %}
                                 <div class="text-center py-3">
-                                    <div class="spinner-border spinner-border-sm text-primary"></div> Memuat kegiatan
-                                    PA...
+                                    <div class="spinner-border spinner-border-sm text-primary"></div> {% trans "Loading PA activities..." %}
                                 </div>
                                 {% else %}
                                 <div class="text-center text-muted py-3">
-                                    Pilih jenjang pendidikan terlebih dahulu
+                                    {% trans "Select education level first" %}
                                 </div>
                                 {% endif %}
                             </div>
@@ -212,38 +212,37 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="changePassword">
                                 <label class="form-check-label" for="changePassword">
-                                    Ubah Password
+                                    {% trans "Change Password" %}
                                 </label>
                             </div>
                         </div>
                         <div class="col-md-6 d-none" id="passwordField">
-                            <label class="form-label">Password Baru</label>
+                            <label class="form-label">{% trans "New Password" %}</label>
                             <input type="password" class="form-control" name="password"
-                                placeholder="Masukkan password baru">
+                                placeholder="{% trans 'Enter new password' %}">
                         </div>
                         <div class="col-md-6 d-none" id="confirmPasswordField">
-                            <label class="form-label">Konfirmasi Password</label>
+                            <label class="form-label">{% trans "Confirm Password" %}</label>
                             <input type="password" class="form-control" name="confirm_password"
-                                placeholder="Konfirmasi password baru">
+                                placeholder="{% trans 'Confirm new password' %}">
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary-custom" onclick="saveProfile()" id="saveProfileBtn">Simpan
-                    Perubahan</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary-custom" onclick="saveProfile()" id="saveProfileBtn">{% trans "Save Changes" %}</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Edit Dosen Modal -->
+<!-- Edit Supervisor Modal -->
 <div class="modal fade" id="editDosenModal" tabindex="-1" aria-labelledby="editDosenModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="editDosenModalLabel">Edit Dosen Pembimbing</h5>
+                <h5 class="modal-title fw-bold" id="editDosenModalLabel">{% trans "Edit Supervisors" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -251,9 +250,9 @@
                     {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label">Dosen Pembimbing 1 *</label>
+                            <label class="form-label">{% trans "Supervisor 1 *" %}</label>
                             <select class="form-select" name="dosen_pembimbing1" required>
-                                <option value="">Pilih Dosen</option>
+                                <option value="">{% trans "Select Supervisor" %}</option>
                                 {% for dosen in dosen_list %}
                                 <option value="{{ dosen.id }}" 
                                     {% if dosen_pembimbing.0 and dosen_pembimbing.0.dosen.id == dosen.id %}selected{% endif %}>
@@ -263,9 +262,9 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Dosen Pembimbing 2 *</label>
+                            <label class="form-label">{% trans "Supervisor 2 *" %}</label>
                             <select class="form-select" name="dosen_pembimbing2" required>
-                                <option value="">Pilih Dosen</option>
+                                <option value="">{% trans "Select Supervisor" %}</option>
                                 {% for dosen in dosen_list %}
                                 <option value="{{ dosen.id }}" 
                                     {% if dosen_pembimbing.1 and dosen_pembimbing.1.dosen.id == dosen.id %}selected{% endif %}>
@@ -275,9 +274,9 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Dosen Pembimbing 3 (Opsional)</label>
+                            <label class="form-label">{% trans "Supervisor 3 (Optional)" %}</label>
                             <select class="form-select" name="dosen_pembimbing3">
-                                <option value="">Pilih Dosen (Opsional)</option>
+                                <option value="">{% trans "Select Supervisor (Optional)" %}</option>
                                 {% for dosen in dosen_list %}
                                 <option value="{{ dosen.id }}" 
                                     {% if dosen_pembimbing.2 and dosen_pembimbing.2.dosen.id == dosen.id %}selected{% endif %}>
@@ -290,9 +289,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary-custom" onclick="saveDosen()" id="saveDosenBtn">Simpan
-                    Perubahan</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary-custom" onclick="saveDosen()" id="saveDosenBtn">{% trans "Save Changes" %}</button>
             </div>
         </div>
     </div>
@@ -305,12 +303,12 @@
     const currentKegiatanIds = JSON.parse('{{ kegiatan_ids_json|safe }}' || '[]');
 
     // Debug info ke console
-    console.log('Current mahasiswa data:', {
-        nama: '{{ mahasiswa.nama|default:"No name" }}',
-        nrp: '{{ mahasiswa.nrp|default:"No NRP" }}',
-        jenjang_id: '{{ mahasiswa.jenjang_pendidikan.id|default:"0" }}',
-        kegiatan_pa_ids: currentKegiatanIds,
-        kegiatan_pa_count: currentKegiatanIds.length
+    console.log('Current student data:', {
+        name: '{{ mahasiswa.nama|default:"No name" }}',
+        student_id: '{{ mahasiswa.nrp|default:"No ID" }}',
+        level_id: '{{ mahasiswa.jenjang_pendidikan.id|default:"0" }}',
+        pa_activity_ids: currentKegiatanIds,
+        pa_activity_count: currentKegiatanIds.length
     });
 
     // Toggle password fields for profile edit
@@ -350,12 +348,12 @@
         const container = document.getElementById('kegiatanPAContainer');
 
         if (!jenjangId) {
-            container.innerHTML = '<div class="text-center text-muted py-3">Pilih jenjang pendidikan terlebih dahulu</div>';
+            container.innerHTML = '<div class="text-center text-muted py-3">{% trans "Select education level first" %}</div>';
             return;
         }
 
         // Show loading
-        container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> Memuat kegiatan PA...</div>';
+        container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> {% trans "Loading PA activities..." %}</div>';
 
         // Fetch kegiatan PA dari API
         fetch(`/api/kegiatan-pa-by-jenjang/${jenjangId}/`)
@@ -371,7 +369,7 @@
                     data.kegiatan.forEach(kegiatan => {
                         // Cek apakah kegiatan ini sudah dipilih sebelumnya
                         const isChecked = currentKegiatanIds.includes(parseInt(kegiatan.id));
-                        console.log(`Kegiatan ${kegiatan.id}: ${kegiatan.nama_kegiatan}, checked: ${isChecked}`);
+                        console.log(`Activity ${kegiatan.id}: ${kegiatan.nama_kegiatan}, checked: ${isChecked}`);
 
                         html += `
                         <div class="form-check mb-2">
@@ -380,7 +378,7 @@
                                    id="kegiatan${kegiatan.id}"
                                    ${isChecked ? 'checked' : ''}>
                             <label class="form-check-label" for="kegiatan${kegiatan.id}">
-                                ${kegiatan.nama_kegiatan} (${kegiatan.jumlah_sks} SKS - Target ${kegiatan.target_jam} jam)
+                                ${kegiatan.nama_kegiatan} (${kegiatan.jumlah_sks} Credits - Target ${kegiatan.target_jam} hours)
                             </label>
                         </div>`;
                     });
@@ -388,14 +386,14 @@
 
                     // Tampilkan jumlah checkbox tercentang
                     const checkedCount = document.querySelectorAll('input[name="kegiatan_pa"]:checked').length;
-                    console.log(`Total ${checkedCount} kegiatan PA tercentang`);
+                    console.log(`Total ${checkedCount} PA activities checked`);
                 } else {
-                    container.innerHTML = '<div class="text-center text-muted py-3">Tidak ada kegiatan PA untuk jenjang ini</div>';
+                    container.innerHTML = '<div class="text-center text-muted py-3">{% trans "No PA activities for this level" %}</div>';
                 }
             })
             .catch(error => {
-                console.error('Error loading kegiatan PA:', error);
-                container.innerHTML = '<div class="text-center text-danger py-3">Gagal memuat kegiatan PA. Silakan refresh halaman.</div>';
+                console.error('Error loading PA activities:', error);
+                container.innerHTML = '<div class="text-center text-danger py-3">{% trans "Failed to load PA activities. Please refresh the page." %}</div>';
             });
     }
 
@@ -421,7 +419,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const jenjangSelect = document.getElementById('jenjangSelect');
         if (jenjangSelect && jenjangSelect.value && currentKegiatanIds.length > 0) {
-            console.log('Auto loading kegiatan PA for selected jenjang');
+            console.log('Auto loading PA activities for selected level');
             // Tunggu modal siap jika akan dibuka
             setTimeout(loadKegiatanPA, 1000);
         }
@@ -439,12 +437,12 @@
             const confirmPassword = formData.get('confirm_password');
 
             if (!password || !confirmPassword) {
-                showNotification('Harap isi password dan konfirmasi password!', 'danger');
+                showNotification('{% trans "Please fill in password and confirm password!" %}', 'danger');
                 return;
             }
 
             if (password !== confirmPassword) {
-                showNotification('Password dan konfirmasi password tidak sama!', 'danger');
+                showNotification('{% trans "Password and confirmation do not match!" %}', 'danger');
                 return;
             }
         }
@@ -457,7 +455,7 @@
 
         // Validasi minimal 1 kegiatan PA
         if (kegiatanPaSelected.length === 0) {
-            showNotification('Harap pilih minimal satu kegiatan PA!', 'danger');
+            showNotification('{% trans "Please select at least one PA activity!" %}', 'danger');
             return;
         }
 
@@ -467,7 +465,7 @@
         // Show loading
         const saveBtn = document.getElementById('saveProfileBtn');
         const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Saving..." %}';
         saveBtn.disabled = true;
 
         // Send data via AJAX
@@ -492,7 +490,7 @@
             .then(data => {
                 console.log('Response data:', data);
                 if (data.success) {
-                    showNotification(data.message || 'Profil berhasil diperbarui!', 'success');
+                    showNotification(data.message || '{% trans "Profile updated successfully!" %}', 'success');
 
                     // Close modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
@@ -503,14 +501,14 @@
                         location.reload();
                     }, 1500);
                 } else {
-                    showNotification(data.error || 'Gagal memperbarui profil!', 'danger');
+                    showNotification(data.error || '{% trans "Failed to update profile!" %}', 'danger');
                     saveBtn.innerHTML = originalText;
                     saveBtn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Terjadi kesalahan saat menyimpan: ' + error.message, 'danger');
+                showNotification('{% trans "An error occurred while saving:" %} ' + error.message, 'danger');
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
             });
@@ -526,24 +524,24 @@
         const pembimbing2 = formData.get('dosen_pembimbing2');
 
         if (!pembimbing1 || !pembimbing2) {
-            showNotification('Dosen pembimbing 1 dan 2 wajib diisi!', 'danger');
+            showNotification('{% trans "Supervisor 1 and 2 are required!" %}', 'danger');
             return;
         }
 
         if (pembimbing1 === pembimbing2) {
-            showNotification('Dosen pembimbing 1 dan 2 tidak boleh sama!', 'danger');
+            showNotification('{% trans "Supervisor 1 and 2 cannot be the same!" %}', 'danger');
             return;
         }
 
         // Show loading
         const saveBtn = document.getElementById('saveDosenBtn');
         const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Saving..." %}';
         saveBtn.disabled = true;
 
         // Send data via AJAX
         const url = '{% url "edit_dosen_pembimbing" %}';
-        console.log('Saving dosen to URL:', url);
+        console.log('Saving supervisor to URL:', url);
 
         fetch(url, {
             method: 'POST',
@@ -554,16 +552,16 @@
             body: formData
         })
             .then(response => {
-                console.log('Dosen response status:', response.status);
+                console.log('Supervisor response status:', response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Dosen response data:', data);
+                console.log('Supervisor response data:', data);
                 if (data.success) {
-                    showNotification(data.message || 'Dosen pembimbing berhasil diperbarui!', 'success');
+                    showNotification(data.message || '{% trans "Supervisors updated successfully!" %}', 'success');
 
                     // Close modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editDosenModal'));
@@ -574,14 +572,14 @@
                         location.reload();
                     }, 1500);
                 } else {
-                    showNotification(data.error || 'Gagal memperbarui dosen pembimbing!', 'danger');
+                    showNotification(data.error || '{% trans "Failed to update supervisors!" %}', 'danger');
                     saveBtn.innerHTML = originalText;
                     saveBtn.disabled = false;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Terjadi kesalahan saat menyimpan: ' + error.message, 'danger');
+                showNotification('{% trans "An error occurred while saving:" %} ' + error.message, 'danger');
                 saveBtn.innerHTML = originalText;
                 saveBtn.disabled = false;
             });

@@ -1,10 +1,11 @@
+{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistem Manajemen Presensi & SKS</title>
+    <title>{% trans "Login - Attendance & Credit Management System" %}</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,7 +13,7 @@
 
     <style>
         body {
-            background: #eef2f6; /* Warna konsisten dengan step 2 & 3 */
+            background: #eef2f6;
             font-family: 'Segoe UI', sans-serif;
         }
 
@@ -103,7 +104,7 @@
             border-color: #0f172a;
             font-weight: 600;
             font-size: 16px;
-            color: white; /* Tambah warna putih untuk teks */
+            color: white;
             transition: all 0.3s;
         }
 
@@ -120,16 +121,15 @@
             color: white;
         }
 
-        .logo-img {
-            width: 120px;
-            margin-bottom: 20px;
-        }
-
         .title {
             font-weight: 700;
             font-size: 24px;
             color: #1e293b;
             margin-bottom: 8px;
+        }
+
+        .logo-img {
+            margin-bottom: 20px;
         }
 
         .subtitle {
@@ -235,28 +235,27 @@
             <div class="left-image">
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <img src="{% static 'img/logoPENS.png' %}" alt="Logo PENS" width="100">
-                    <img src="{% static 'img/logoMSECT.png' %}" alt="Logo MSECT" width="100">
+                    <img src="{% static 'img/logoMSECTnih.png' %}" alt="Logo MSECT" width="180px">
                 </div>
                 <h1 class="system-title">
-                    Sistem Manajemen Presensi & SKS PA Lab MSECT<br>
-                    <span style="color: #93c5fd;">Face Recognition</span>
+                    {% trans "Attendance & Credit Management System PA Lab MSECT" %}<br>
+                    <span style="color: #93c5fd;">{% trans "Face Recognition" %}</span>
                 </h1>
                 
                 <p class="system-description">
-                    Sistem terintegrasi untuk manajemen presensi, penilaian SKS, 
-                    dan monitoring progress proyek akhir mahasiswa.
+                    {% trans "Integrated system for attendance management, credit assessment, and final project student progress monitoring." %}
                 </p>
 
                 <ul class="feature-list">
-                    <li>Presensi menggunakan Face Recognition</li>
-                    <li>Monitoring Progress SKS</li>
-                    <li>Manajemen Kegiatan PA</li>
+                    <li>{% trans "Attendance using Face Recognition" %}</li>
+                    <li>{% trans "Credit Progress Monitoring" %}</li>
+                    <li>{% trans "Final Project Activity Management" %}</li>
                 </ul>
 
                 <div class="mt-4 pt-3 border-top border-light border-opacity-25">
                     <p class="small mb-0 opacity-75">
                         <i class="bi bi-shield-check me-2"></i>
-                        Sistem terenkripsi & aman
+                        {% trans "Encrypted & secure system" %}
                     </p>
                 </div>
             </div>
@@ -266,34 +265,34 @@
         <div class="col-md-6">
             <div class="form-section">
                 <div class="text-center mb-4">
-                    <h3 class="title">Selamat Datang!</h3>
-                    <p class="subtitle">Silakan login untuk mengakses akun Anda</p>
+                    <h3 class="title">{% trans "Welcome!" %}</h3>
+                    <p class="subtitle">{% trans "Please login to access your account" %}</p>
                 </div>
 
                 <form method="POST" id="loginForm">
                     {% csrf_token %}
 
                     <div class="mb-4">
-                        <label class="form-label">NRP :</label>
+                        <label class="form-label">{% trans "NRP" %} :</label>
                         <div class="position-relative">
                             <i class="bi bi-person-fill input-icon"></i>
                             <input type="text" 
                                    name="username" 
                                    class="form-control" 
-                                   placeholder="Masukkan NRP"
+                                   placeholder="{% trans 'Enter NRP' %}"
                                    required
                                    autocomplete="username">
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label">Password :</label>
+                        <label class="form-label">{% trans "Password" %} :</label>
                         <div class="position-relative">
                             <i class="bi bi-lock-fill input-icon"></i>
                             <input type="password" 
                                    name="password" 
                                    class="form-control" 
-                                   placeholder="Masukkan password"
+                                   placeholder="{% trans 'Enter password' %}"
                                    required
                                    autocomplete="current-password"
                                    id="passwordInput">
@@ -306,22 +305,17 @@
                         </div>
                     </div>
 
-                     <!-- <p class="mb-0 small text-muted">
-                            Lupa password? Hubungi admin di 
-                            <a href="mailto:admin@msect.ac.id">admin@msect.ac.id</a>
-                    </p> -->
-
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-login" id="loginButton">
-                            <span id="buttonText">Login</span>
+                            <span id="buttonText">{% trans "Login" %}</span>
                             <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
                         </button>
                     </div>
 
                     <div class="login-footer">
                         <p class="mb-2 small">
-                            Belum memiliki akun? 
-                            <a href="{% url 'register' %}" class="fw-bold">Daftar akun baru</a>
+                            {% trans "Don't have an account?" %}
+                            <a href="{% url 'register' %}" class="fw-bold">{% trans "Register new account" %}</a>
                         </p>
                     </div>
                 </form>
@@ -358,7 +352,7 @@
         const spinner = document.getElementById('loadingSpinner');
         
         button.disabled = true;
-        buttonText.textContent = 'Memproses...';
+        buttonText.textContent = "{% trans 'Processing...' %}";
         spinner.classList.remove('d-none');
     });
 

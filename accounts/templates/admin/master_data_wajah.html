@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block page_title %}Master Data Wajah Mahasiswa{% endblock %}
+{% block page_title %}{% trans "Student Face Data Master" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -12,7 +13,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Total Mahasiswa</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Total Students" %}</h6>
                             <h3 class="fw-bold mb-0">{{ total_mahasiswa }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -30,7 +31,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Status Aktif</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Active Status" %}</h6>
                             <h3 class="fw-bold mb-0 text-success">{{ total_mahasiswa }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -48,7 +49,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Total Foto Tersimpan</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Total Photos Stored" %}</h6>
                             <h3 class="fw-bold mb-0 text-info">{{ total_foto }}</h3>
                         </div>
                         <div class="col-4 text-end">
@@ -66,7 +67,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">Rata-rata Foto/Mahasiswa</h6>
+                            <h6 class="text-muted text-uppercase small">{% trans "Average Photos/Student" %}</h6>
                             <h3 class="fw-bold mb-0 text-warning">
                                 {% if total_mahasiswa > 0 %}
                                     {{ total_foto|floatformat:0 }}/{{ total_mahasiswa }}
@@ -98,7 +99,7 @@
                            class="form-control border-0 ps-0" 
                            name="search" 
                            id="searchInput"
-                           placeholder="Cari berdasarkan nama, NRP, atau prodi..."
+                           placeholder="{% trans 'Search by name, student ID, or program...' %}"
                            value="{{ search_query }}"
                            autocomplete="off">
                     {% if search_query %}
@@ -115,8 +116,8 @@
     <div class="card border-0 shadow-sm rounded-3">
         <div class="card-header bg-white border-0 rounded-top-3 py-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">Daftar Data Wajah Mahasiswa :</h5>
-                <span class="badge bg-primary rounded-pill fs-6">Total {{ mahasiswa_list.count }} data ditemukan</span>
+                <h5 class="mb-0 fw-bold">{% trans "List of Student Face Data:" %}</h5>
+                <span class="badge bg-primary rounded-pill fs-6">{% trans "Total" %} {{ mahasiswa_list.count }} {% trans "data found" %}</span>
             </div>
         </div>
         <div class="card-body p-0">
@@ -124,15 +125,15 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-3 ps-4" style="width: 15%;">Foto Profil</th>
-                            <th class="py-3" style="width: 15%;">Nama Mahasiswa</th>
-                            <th class="py-3" style="width: 10%;">NRP</th>
-                            <th class="py-3" style="width: 10%;">Prodi</th>
-                            <th class="py-3" style="width: 10%;">Jenjang</th>
-                            <th class="py-3" style="width: 10%;">Semester</th>
-                            <th class="py-3" style="width: 10%;">Jumlah Foto</th>
-                            <th class="py-3" style="width: 10%;">Status</th>
-                            <th class="py-3 pe-4" style="width: 10%;">Aksi</th>
+                            <th class="py-3 ps-4" style="width: 15%;">{% trans "Profile Photo" %}</th>
+                            <th class="py-3" style="width: 15%;">{% trans "Student Name" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Student ID" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Program" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Level" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Semester" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Number of Photos" %}</th>
+                            <th class="py-3" style="width: 10%;">{% trans "Status" %}</th>
+                            <th class="py-3 pe-4" style="width: 10%;">{% trans "Action" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,7 +147,7 @@
                                     <div class="me-2">
                                         <div class="avatar-sm rounded-circle overflow-hidden border">
                                             {% if foto.file_path %}
-                                            <img src="{{ foto.file_path.url }}" alt="Foto" 
+                                            <img src="{{ foto.file_path.url }}" alt="{% trans 'Photo' %}" 
                                                 class="img-fluid w-100 h-100 object-fit-cover"
                                                 onerror="this.onerror=null;">
                                             {% else %}
@@ -192,7 +193,7 @@
                                 </span>
                                 {% else %}
                                 <span class="badge bg-secondary text-white">
-                                    Belum diisi
+                                    {% trans "Not filled" %}
                                 </span>
                                 {% endif %}
                             </td>
@@ -216,7 +217,7 @@
                                 {% with jumlah_foto=mahasiswa.foto_wajah.count %}
                                 <span class="badge bg-primary bg-opacity-10 text-primary border-0 px-3 py-2">
                                     <i class="fas fa-image me-1"></i>
-                                    <small>{{ jumlah_foto }}</small> Foto
+                                    <small>{{ jumlah_foto }}</small> {% trans "Photos" %}
                                 </span>
                                 {% endwith %}
                             </td>
@@ -225,7 +226,7 @@
                             <td>
                                 {% if mahasiswa.pengajuan_pendaftaran.status_pengajuan == 'disetujui' %}
                                 <span class="badge bg-success text-white">
-                                    <i class="fas fa-check me-1"></i> Disetujui
+                                    <i class="fas fa-check me-1"></i> {% trans "Approved" %}
                                 </span>
                                 {% endif %}
                             </td>
@@ -237,14 +238,14 @@
                                     <button type="button" 
                                             class="btn btn-outline-info btn-view-detail" 
                                             data-mahasiswa-id="{{ mahasiswa.id }}"
-                                            title="Detail">
+                                            title="{% trans 'Detail' %}">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     
                                     <!-- Tombol Download -->
                                     <a href="{% url 'download_all_fotos' mahasiswa.id %}" 
                                        class="btn btn-outline-primary"
-                                       title="Download Foto">
+                                       title="{% trans 'Download Photos' %}">
                                         <i class="fas fa-download"></i>
                                     </a>
                                 </div>
@@ -255,9 +256,9 @@
                             <td colspan="9" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-user-slash fa-3x mb-3 opacity-25"></i>
-                                    <h5 class="mb-2">Tidak ada data mahasiswa</h5>
+                                    <h5 class="mb-2">{% trans "No student data" %}</h5>
                                     {% if search_query %}
-                                    <p>Coba dengan kata kunci lain</p>
+                                    <p>{% trans "Try with different keywords" %}</p>
                                     {% endif %}
                                 </div>
                             </td>
@@ -275,16 +276,16 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-3">
             <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold" id="detailModalLabel">Detail Data Wajah Mahasiswa</h5>
+                <h5 class="modal-title fw-bold" id="detailModalLabel">{% trans "Student Face Data Detail" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
                 <!-- Loading Spinner -->
                 <div id="loadingSpinner" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{% trans "Loading" %}...</span>
                     </div>
-                    <p class="mt-2 text-muted">Memuat data...</p>
+                    <p class="mt-2 text-muted">{% trans "Loading data" %}...</p>
                 </div>
                 
                 <!-- Content will be loaded here -->
@@ -295,7 +296,7 @@
                             <div class="p-4">
                                 <!-- Nama Lengkap -->
                                 <div class="mb-4">
-                                    <h6 class="text-muted text-uppercase small mb-2">Nama Lengkap</h6>
+                                    <h6 class="text-muted text-uppercase small mb-2">{% trans "Full Name" %}</h6>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-md rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3">
                                             <i class="fas fa-user fs-5"></i>
@@ -309,10 +310,10 @@
                                 
                                 <!-- Prodi & Jenjang -->
                                 <div class="mb-4">
-                                    <h6 class="text-muted text-uppercase small mb-2">Prodi</h6>
+                                    <h6 class="text-muted text-uppercase small mb-2">{% trans "Program" %}</h6>
                                     <p class="mb-0 fw-semibold" id="modalProdi">-</p>
                                     
-                                    <h6 class="text-muted text-uppercase small mt-3 mb-2">Jenjang/Semester</h6>
+                                    <h6 class="text-muted text-uppercase small mt-3 mb-2">{% trans "Level/Semester" %}</h6>
                                     <p class="mb-0 fw-semibold" id="modalJenjangSemester">-</p>
                                 </div>
                                 
@@ -322,11 +323,11 @@
                                 <!-- Tanggal Pendaftaran & Status -->
                                 <div class="row">
                                     <div class="col-6">
-                                        <h6 class="text-muted text-uppercase small mb-2">Tanggal Pendaftaran</h6>
+                                        <h6 class="text-muted text-uppercase small mb-2">{% trans "Registration Date" %}</h6>
                                         <p class="mb-0 fw-semibold" id="modalTanggalDaftar">-</p>
                                     </div>
                                     <div class="col-6">
-                                        <h6 class="text-muted text-uppercase small mb-2">Status</h6>
+                                        <h6 class="text-muted text-uppercase small mb-2">{% trans "Status" %}</h6>
                                         <p class="mb-0">
                                             <span class="badge" id="modalStatusBadge">-</span>
                                         </p>
@@ -335,13 +336,13 @@
                                 
                                 <!-- Total Foto -->
                                 <div class="mt-4">
-                                    <h6 class="text-muted text-uppercase small mb-2">Total Foto</h6>
+                                    <h6 class="text-muted text-uppercase small mb-2">{% trans "Total Photos" %}</h6>
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-sm rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2">
                                             <i class="fas fa-image"></i>
                                         </div>
                                         <h4 class="mb-0 fw-bold" id="modalTotalFoto">0</h4>
-                                        <span class="ms-2 text-muted">Foto</span>
+                                        <span class="ms-2 text-muted">{% trans "Photos" %}</span>
                                     </div>
                                 </div>
                                 
@@ -351,7 +352,7 @@
                                        class="btn btn-success w-100 d-flex align-items-center justify-content-center py-3"
                                        id="modalDownloadBtn">
                                         <i class="fas fa-download me-2"></i>
-                                        Download Semua Foto
+                                        {% trans "Download All Photos" %}
                                     </a>
                                 </div>
                             </div>
@@ -363,8 +364,8 @@
                                 <!-- Gallery Header -->
                                 <div class="d-flex justify-content-between align-items-center mb-4">
                                     <div>
-                                        <h5 class="mb-0 fw-bold" id="modalGalleryTitle">Galeri Foto Wajah</h5>
-                                        <small class="text-muted" id="modalFotoCount">0 foto</small>
+                                        <h5 class="mb-0 fw-bold" id="modalGalleryTitle">{% trans "Face Photo Gallery" %}</h5>
+                                        <small class="text-muted" id="modalFotoCount">0 {% trans "photos" %}</small>
                                     </div>
                                 </div>
                                 
@@ -377,8 +378,8 @@
                                 <div id="emptyGallery" class="text-center py-5" style="display: none;">
                                     <div class="py-5">
                                         <i class="fas fa-images fa-3x text-muted mb-3 opacity-25"></i>
-                                        <h5 class="text-muted">Belum ada foto tersimpan</h5>
-                                        <p class="text-muted">Mahasiswa ini belum mengupload foto wajah</p>
+                                        <h5 class="text-muted">{% trans "No photos stored yet" %}</h5>
+                                        <p class="text-muted">{% trans "This student has not uploaded any face photos" %}</p>
                                     </div>
                                 </div>
                             </div>
@@ -545,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Populate student info
                     document.getElementById('modalNama').textContent = data.mahasiswa.nama_lengkap;
                     document.getElementById('modalNRP').textContent = data.mahasiswa.nrp;
-                    document.getElementById('modalProdi').textContent = data.mahasiswa.jurusan || 'Tidak ada data';
+                    document.getElementById('modalProdi').textContent = data.mahasiswa.jurusan || '{% trans "No data" %}';
                     document.getElementById('modalJenjangSemester').textContent = 
                         `${data.mahasiswa.jenjang} - ${data.mahasiswa.semester}`;
                     document.getElementById('modalTanggalDaftar').textContent = data.mahasiswa.date_joined;
@@ -557,8 +558,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Total foto
                     document.getElementById('modalTotalFoto').textContent = data.total_fotos;
-                    document.getElementById('modalGalleryTitle').textContent = 'Galeri Foto Wajah';
-                    document.getElementById('modalFotoCount').textContent = `(${data.total_fotos} foto)`;
+                    document.getElementById('modalGalleryTitle').textContent = '{% trans "Face Photo Gallery" %}';
+                    document.getElementById('modalFotoCount').textContent = `(${data.total_fotos} {% trans "photos" %})`;
                     
                     // Download button
                     const downloadBtn = document.getElementById('modalDownloadBtn');
@@ -577,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="photo-card h-100">
                                     <div class="photo-img-container">
                                         <img src="${foto.url}" 
-                                             alt="Foto ${index + 1}" 
+                                             alt="{% trans 'Photo' %} ${index + 1}" 
                                              class="photo-img"
                                              onerror="this.src='{% static 'img/default-photo.jpg' %}'">
                                     </div>
@@ -588,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         </div>
                                         ${foto.keterangan ? 
                                             `<p class="photo-desc">${foto.keterangan}</p>` : 
-                                            `<p class="photo-desc text-muted">Foto registrasi ke-${index + 1}</p>`
+                                            `<p class="photo-desc text-muted">{% trans "Registration photo" %} ${index + 1}</p>`
                                         }
                                     </div>
                                 </div>
@@ -611,14 +612,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadingSpinner.innerHTML = `
                     <div class="alert alert-danger m-4">
                         <i class="fas fa-exclamation-circle me-2"></i>
-                        Gagal memuat data. Silakan coba lagi.
+                        {% trans "Failed to load data. Please try again." %}
                     </div>
                 `;
             });
     }
-    
-    // Rest of your existing JavaScript code...
-    // [Keep all other JavaScript functions from previous code]
 });
 </script>
 {% endblock %}

@@ -1,10 +1,11 @@
+{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran - Upload Foto</title>
+    <title>{% trans "Registration - Upload Photos" %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
@@ -101,7 +102,7 @@
             margin-right: 8px;
         }
         
-        /* Catatan Penting dengan styling khusus */
+        /* Important note with special styling */
         .important-note {
             background-color: #FEFCEA;
             border: 1px solid #FCF193;
@@ -122,7 +123,7 @@
             margin-bottom: 4px;
         }
         
-        /* Login link plain text tanpa background */
+        /* Login link plain text without background */
         .login-link-text {
             text-align: center;
             margin-top: 20px;
@@ -130,11 +131,11 @@
         }
         
         .login-link-text p {
-            color: #000000; /* Hitam */
+            color: #000000; /* Black */
         }
         
         .login-link-text a {
-            color: #4b5cf2; /* Ungu */
+            color: #4b5cf2; /* Purple */
             font-weight: bold;
             text-decoration: none;
         }
@@ -152,13 +153,13 @@
         <div class="col-lg-8 col-md-10">
             
             <div class="text-center mb-4">
-                <h3 class="fw-bold">Pendaftaran Akun Mahasiswa</h3>
-                <p class="text-muted">Sistem Manajemen Presensi & SKS - Face Recognition</p>
+                <h3 class="fw-bold">{% trans "Student Account Registration" %}</h3>
+                <p class="text-muted">{% trans "Attendance & Credit Management System - Face Recognition" %}</p>
             </div>
 
             <div class="mb-4">
                 <div class="d-flex justify-content-between mb-1">
-                    <small class="fw-bold text-dark">Langkah 3 dari 3</small>
+                    <small class="fw-bold text-dark">{% trans "Step 3 of 3" %}</small>
                     <small class="fw-bold text-dark">100%</small>
                 </div>
                 <div class="progress mb-4" style="height: 8px;">
@@ -168,15 +169,15 @@
                 <div class="d-flex justify-content-between px-2">
                     <div class="d-flex align-items-center">
                         <div class="step-circle step-done"><i class="bi bi-check"></i></div> 
-                        <span class="fw-bold text-primary">Akun</span>
+                        <span class="fw-bold text-primary">{% trans "Account" %}</span>
                     </div>
                     <div class="d-flex align-items-center">
                         <div class="step-circle step-done"><i class="bi bi-check"></i></div>
-                        <span class="fw-bold text-primary">Akademik</span>
+                        <span class="fw-bold text-primary">{% trans "Academic" %}</span>
                     </div>
                     <div class="d-flex align-items-center">
                         <div class="step-circle step-active">3</div>
-                        <span class="fw-bold text-primary">Foto</span>
+                        <span class="fw-bold text-primary">{% trans "Photos" %}</span>
                     </div>
                 </div>
             </div>
@@ -184,7 +185,7 @@
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4 p-md-5">
                     
-                    <h5 class="fw-bold mb-1">Upload Foto Wajah :</h5>
+                    <h5 class="fw-bold mb-1">{% trans "Upload Face Photos" %} :</h5>
                     {% if messages %}
                         <div class="messages-container mb-4">
                             {% for message in messages %}
@@ -195,11 +196,11 @@
                             {% endfor %}
                         </div>
                     {% endif %}
-                    <p class="text-muted small mb-4">Upload foto wajah untuk sistem presensi face recognition</p>
+                    <p class="text-muted small mb-4">{% trans "Upload face photos for face recognition attendance system" %}</p>
                     
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger" role="alert">
-                             <p class="fw-bold mb-0">Kesalahan Validasi:</p>
+                             <p class="fw-bold mb-0">{% trans "Validation Error" %}:</p>
                              {% for error in form.non_field_errors %}
                                  <p class="mb-0 small">{{ error }}</p>
                              {% endfor %}
@@ -210,13 +211,13 @@
                         {% csrf_token %}
                         
                         <div class="mb-4">
-                            <h6 class="fw-bold mb-2">Panduan Kualitas Foto:</h6>
+                            <h6 class="fw-bold mb-2">{% trans "Photo Quality Guidelines" %}:</h6>
                             <ul class="guideline-list text-muted small">
-                                <li>Latarbelakang polos (disarankan putih/abu-abu)</li>
-                                <li>Pencahayaan cukup, wajah terlihat jelas</li>
-                                <li>Tidak menggunakan kacamata hitam, topi, atau masker</li>
-                                <li>Upload minimal 10 foto dengan sudut dan ekspresi berbeda</li>
-                                <li>Format: JPG, PNG, maksimal 5MB per file</li>
+                                <li>{% trans "Plain background (preferably white/gray)" %}</li>
+                                <li>{% trans "Good lighting, face clearly visible" %}</li>
+                                <li>{% trans "No sunglasses, hats, or masks" %}</li>
+                                <li>{% trans "Upload at least 10 photos with different angles and expressions" %}</li>
+                                <li>{% trans "Format: JPG, PNG, maximum 5MB per file" %}</li>
                             </ul>
                         </div>
 
@@ -225,8 +226,8 @@
                                 <div class="mb-3">
                                     <i class="bi bi-cloud-arrow-up-fill text-primary" style="font-size: 48px;"></i>
                                 </div>
-                                <h5 class="mb-2">Klik untuk upload foto atau drag & drop</h5>
-                                <p class="text-muted mb-0">JPG, PNG (Max. 5MB per file)</p>
+                                <h5 class="mb-2">{% trans "Click to upload photos or drag & drop" %}</h5>
+                                <p class="text-muted mb-0">JPG, PNG ({% trans "Max. 5MB per file" %})</p>
                                 
                                 <input type="file" 
                                        id="id_file_path" 
@@ -240,20 +241,19 @@
                             <div class="alert alert-primary bg-light border-0 d-flex align-items-center mt-3">
                                 <i class="bi bi-info-circle-fill text-primary me-2"></i>
                                 <span class="text-primary fw-bold small">
-                                    <span id="photo-count">0</span> dari 10 foto terupload
+                                    <span id="photo-count">0</span> {% trans "of 10 photos uploaded" %}
                                 </span>
                             </div>
                         </div>
 
-                        <!-- Catatan Penting dengan styling baru -->
+                        <!-- Important note with new styling -->
                         <div class="important-note mb-4">
                             <div class="d-flex align-items-start">
                                 <span class="photo-counter">!</span>
                                 <div class="ms-2">
-                                    <p class="note-title mb-1">Catatan Penting:</p>
+                                    <p class="note-title mb-1">{% trans "Important Note" %}:</p>
                                     <p class="note-content mb-0">
-                                        Sistem akan membutuhkan minimal 10 foto dengan sudut dan ekspresi berbeda 
-                                        untuk akurasi terbaik dalam pengenalan wajah.
+                                        {% trans "The system requires at least 10 photos with different angles and expressions for the best accuracy in face recognition." %}
                                     </p>
                                 </div>
                             </div>
@@ -268,10 +268,10 @@
                         <hr class="my-4">
 
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'register_step' step=2 %}" class="btn btn-outline-secondary px-4"> &larr; Kembali</a>
+                            <a href="{% url 'register_step' step=2 %}" class="btn btn-outline-secondary px-4"> &larr; {% trans "Back" %}</a>
                             
                             <button type="submit" class="btn btn-dark-custom fw-bold text-white px-4" id="submit-btn" disabled>
-                                Kirim Data & Ajukan Persetujuan
+                                {% trans "Submit Data & Request Approval" %}
                             </button>
                         </div>
                         
@@ -284,13 +284,11 @@
         </div>
     </div>
     <div class="login-link-text">
-                            <p class="small">
-                                Sudah punya akun? <a href="{% url 'login' %}">Login di sini</a>
-                            </p>
-                        </div>
+        <p class="small">
+            {% trans "Already have an account?" %} <a href="{% url 'login' %}">{% trans "Login here" %}</a>
+        </p>
+    </div>
 </div>
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -351,13 +349,13 @@ document.addEventListener("DOMContentLoaded", function() {
             
             // Validate file type
             if (!file.type.match('image.*')) {
-                alert(`File "${file.name}" bukan gambar. Hanya JPG, PNG yang diperbolehkan.`);
+                alert(`{% trans 'File' %} "${file.name}" {% trans 'is not an image. Only JPG, PNG are allowed.' %}`);
                 continue;
             }
             
             // Validate file size (5MB)
             if (file.size > 5 * 1024 * 1024) {
-                alert(`File "${file.name}" terlalu besar. Maksimal 5MB.`);
+                alert(`{% trans 'File' %} "${file.name}" {% trans 'is too large. Maximum 5MB.' %}`);
                 continue;
             }
             
@@ -381,7 +379,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 photoItem.className = 'photo-item';
                 
                 photoItem.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <img src="${e.target.result}" alt="{% trans 'Preview' %} ${index + 1}">
                     <div class="photo-remove" onclick="removePhoto(${index})">
                         <i class="bi bi-x"></i>
                     </div>
@@ -400,8 +398,8 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // Update message based on count
         const message = files.length >= MIN_PHOTOS 
-            ? `<span class="text-success">${files.length} dari 10 foto terupload ✓</span>`
-            : `${files.length} dari 10 foto terupload`;
+            ? `<span class="text-success">${files.length} {% trans 'of 10 photos uploaded' %} ✓</span>`
+            : `${files.length} {% trans 'of 10 photos uploaded' %}`;
         
         photoCount.innerHTML = message;
     }
@@ -428,8 +426,6 @@ document.addEventListener("DOMContentLoaded", function() {
     };
     
     // Form submission
-    // Di dalam script, tambahkan sebelum form submission:
-
     const form = document.getElementById('upload-form');
     form.addEventListener('submit', function(e) {
         console.log('Form submit triggered');
@@ -437,7 +433,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         if (files.length < MIN_PHOTOS) {
             e.preventDefault();
-            alert(`Minimal ${MIN_PHOTOS} foto diperlukan. Anda baru mengupload ${files.length} foto.`);
+            alert(`{% trans 'Minimum' %} ${MIN_PHOTOS} {% trans 'photos required. You have only uploaded' %} ${files.length} {% trans 'photos.' %}`);
             return;
         }
         
@@ -446,9 +442,9 @@ document.addEventListener("DOMContentLoaded", function() {
         files.forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
         
-        // Tampilkan loading
+        // Show loading
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Sending..." %}';
     });
     
     // Initialize
