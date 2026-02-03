@@ -1,24 +1,23 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n static filters %}   {# 'filters' sesuai nama file filters.py tanpa .py #}
 
 {% block page_title %}{% trans "Admin Dashboard" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <!-- Left Column - Statistics -->
+        <!-- Left Column -->
         <div class="col-lg-8">
-            <!-- Statistics Cards -->
+            <!-- Stats Cards -->
             <div class="row mb-4">
-                <!-- Card 1: Today's Attendance -->
                 <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="card-subtitle mb-2 text-muted">{% trans "Today's Attendance" %}</h6>
-                                    <h2 class="card-title mb-0" style="color: #f59e0b;">11</h2>
-                                    <small class="text-muted">{% trans "From 45 students" %}</small>
+                                    <h2 class="card-title mb-0" style="color: #f59e0b;">{{ today_present_count|default:0 }}</h2>
+                                    <small class="text-muted">{% trans "From" %} {{ today_total_students|default:0 }} {% trans "students" %}</small>
                                 </div>
                                 <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
                                     <i class="bi bi-calendar-check fs-4 text-warning"></i>
@@ -28,17 +27,16 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Average Attendance -->
                 <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="card-subtitle mb-2 text-muted">{% trans "Average Attendance" %}</h6>
-                                    <h2 class="card-title mb-2" style="color: #8b5cf6;">74%</h2>
+                                    <h2 class="card-title mb-2" style="color: #8b5cf6;">{{ avg_attendance_week|default:0 }}%</h2>
                                     <div class="d-flex align-items-center mt-2">
                                         <div class="progress flex-grow-1 me-2" style="height: 6px;">
-                                            <div class="progress-bar" style="width: 74%; background-color: #8b5cf6;"></div>
+                                            <div class="progress-bar" style="width: {{ avg_attendance_week|default:0 }}%; background-color: #8b5cf6;"></div>
                                         </div>
                                         <small class="text-muted">{% trans "This week" %}</small>
                                     </div>
@@ -51,18 +49,17 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Semester -->
                 <div class="col-md-4 mb-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="card-subtitle mb-2 text-muted">{% trans "Semester" %}</h6>
-                                    <h5 class="card-title mb-3">{% trans "Odd 2025/2026" %}</h5>
+                                    <h5 class="card-title mb-3">{{ current_semester_name|default:"-" }}</h5>
                                     <div class="progress mb-2" style="height: 6px;">
-                                        <div class="progress-bar bg-primary" style="width: 75%"></div>
+                                        <div class="progress-bar bg-primary" style="width: {{ semester_progress|default:0 }}%;"></div>
                                     </div>
-                                    <small class="text-muted">{% trans "8 weeks remaining" %}</small>
+                                    <small class="text-muted">{{ weeks_remaining|default:0 }} {% trans "weeks remaining" %}</small>
                                 </div>
                                 <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
                                     <i class="bi bi-calendar-week fs-4 text-primary"></i>
@@ -72,178 +69,76 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Weekly Attendance Chart (tetap sama) -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title mb-4">{% trans "Weekly Attendance per Program:" %}</h5>
-                    
-                    <!-- Chart Container -->
-                    <div class="chart-container mb-4">
-                        <div class="d-flex justify-content-between align-items-end mb-3" style="height: 200px;">
-                            <!-- Monday -->
-                            <div class="day-column text-center" style="flex: 1;">
-                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
-                                    <div class="bar-group d-flex align-end h-100">
-                                        <!-- D3 -->
-                                        <div class="bar bg-primary mx-1" style="height: 60%; width: 15px;" 
-                                             data-bs-toggle="tooltip" title="D3: {% trans '12 present' %}"></div>
-                                        <!-- D4 -->
-                                        <div class="bar bg-info mx-1" style="height: 80%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: {% trans '16 present' %}"></div>
-                                        <!-- LJ -->
-                                        <div class="bar bg-success mx-1" style="height: 40%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: {% trans '8 present' %}"></div>
-                                        <!-- S2 -->
-                                        <div class="bar bg-warning mx-1" style="height: 70%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: {% trans '14 present' %}"></div>
+                <div class="chart-container mb-4">
+                    <div class="d-flex justify-content-between align-items-end mb-3" style="height: 200px;">
+                        {% for weekday_num, entries in sorted_weekly %}
+                        <div class="day-column text-center" style="flex: 1;"
+                            data-bs-toggle="tooltip"
+                            title="{{ day_labels|get_item:weekday_num|default:'-' }}"
+                            data-weekday="{{ weekday_num }}">
+                            <div class="bars-container d-flex justify-content-center align-items-end mb-2" style="height: 150px;">
+                                <div class="bar-group d-flex align-items-end h-100">
+                                    {% for entry in entries %}
+                                    <div class="bar {{ entry.color }} mx-1"
+                                        style="height: {{ entry.height }}%; width: 15px; min-height: 3px !important;"
+                                        data-bs-toggle="tooltip"
+                                        title="{{ entry.jenjang }}: {{ entry.hadir }} hadir ({{ entry.percentage }}%)">
                                     </div>
+                                    {% empty %}
+                                    <div class="bar bg-light mx-1" style="height: 0%; width: 15px;"></div>
+                                    {% endfor %}
                                 </div>
-                                <div class="day-label fw-bold">{% trans "Monday" %}</div>
-                                <small class="text-muted">{% trans "Total:" %} 50</small>
                             </div>
-
-                            <!-- Tuesday -->
-                            <div class="day-column text-center" style="flex: 1;">
-                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
-                                    <div class="bar-group d-flex align-end h-100">
-                                        <div class="bar bg-primary mx-1" style="height: 70%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: {% trans '14 present' %}"></div>
-                                        <div class="bar bg-info mx-1" style="height: 85%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: {% trans '17 present' %}"></div>
-                                        <div class="bar bg-success mx-1" style="height: 45%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: {% trans '9 present' %}"></div>
-                                        <div class="bar bg-warning mx-1" style="height: 65%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: {% trans '13 present' %}"></div>
-                                    </div>
-                                </div>
-                                <div class="day-label fw-bold">{% trans "Tuesday" %}</div>
-                                <small class="text-muted">{% trans "Total:" %} 53</small>
-                            </div>
-
-                            <!-- Wednesday -->
-                            <div class="day-column text-center" style="flex: 1;">
-                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
-                                    <div class="bar-group d-flex align-end h-100">
-                                        <div class="bar bg-primary mx-1" style="height: 65%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: {% trans '13 present' %}"></div>
-                                        <div class="bar bg-info mx-1" style="height: 90%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: {% trans '18 present' %}"></div>
-                                        <div class="bar bg-success mx-1" style="height: 50%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: {% trans '10 present' %}"></div>
-                                        <div class="bar bg-warning mx-1" style="height: 60%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: {% trans '12 present' %}"></div>
-                                    </div>
-                                </div>
-                                <div class="day-label fw-bold">{% trans "Wednesday" %}</div>
-                                <small class="text-muted">{% trans "Total:" %} 53</small>
-                            </div>
-
-                            <!-- Thursday -->
-                            <div class="day-column text-center" style="flex: 1;">
-                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
-                                    <div class="bar-group d-flex align-end h-100">
-                                        <div class="bar bg-primary mx-1" style="height: 75%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: {% trans '15 present' %}"></div>
-                                        <div class="bar bg-info mx-1" style="height: 75%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: {% trans '15 present' %}"></div>
-                                        <div class="bar bg-success mx-1" style="height: 50%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: {% trans '10 present' %}"></div>
-                                        <div class="bar bg-warning mx-1" style="height: 60%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: {% trans '12 present' %}"></div>
-                                    </div>
-                                </div>
-                                <div class="day-label fw-bold">{% trans "Thursday" %}</div>
-                                <small class="text-muted">{% trans "Total:" %} 52</small>
-                            </div>
-
-                            <!-- Friday -->
-                            <div class="day-column text-center" style="flex: 1;">
-                                <div class="bars-container d-flex justify-content-center align-end mb-2" style="height: 150px;">
-                                    <div class="bar-group d-flex align-end h-100">
-                                        <div class="bar bg-primary mx-1" style="height: 55%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D3: {% trans '11 present' %}"></div>
-                                        <div class="bar bg-info mx-1" style="height: 70%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="D4: {% trans '14 present' %}"></div>
-                                        <div class="bar bg-success mx-1" style="height: 35%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="LJ: {% trans '7 present' %}"></div>
-                                        <div class="bar bg-warning mx-1" style="height: 50%; width: 15px;"
-                                             data-bs-toggle="tooltip" title="S2: {% trans '10 present' %}"></div>
-                                    </div>
-                                </div>
-                                <div class="day-label fw-bold">{% trans "Friday" %}</div>
-                                <small class="text-muted">{% trans "Total:" %} 42</small>
-                            </div>
+                            <div class="day-label fw-bold">{{ day_labels|get_item:weekday_num }}</div>
                         </div>
+                        {% endfor %}
                     </div>
+                </div>
 
                     <!-- Legend -->
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-center mb-4">
                         <div class="d-flex flex-wrap justify-content-center gap-3">
+                            {% for level in weekly_summary %}
                             <div class="d-flex align-items-center">
-                                <div class="color-box bg-primary me-2" style="width: 15px; height: 15px;"></div>
-                                <span>D3</span>
+                                <div class="color-box {{ level.color }} me-2" style="width: 15px; height: 15px;"></div>
+                                <span>{{ level.code }}</span>
                             </div>
-                            <div class="d-flex align-items-center">
-                                <div class="color-box bg-info me-2" style="width: 15px; height: 15px;"></div>
-                                <span>D4</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="color-box bg-success me-2" style="width: 15px; height: 15px;"></div>
-                                <span>LJ</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="color-box bg-warning me-2" style="width: 15px; height: 15px;"></div>
-                                <span>S2</span>
-                            </div>
+                            {% endfor %}
                         </div>
                     </div>
 
-                    <!-- Detail Table -->
+                    <!-- Weekly Summary Table -->
                     <div class="mt-4">
                         <h6>{% trans "This Week's Attendance Details:" %}</h6>
                         <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
                                     <tr>
                                         <th>{% trans "Level" %}</th>
-                                        <th>{% trans "Present Count" %}</th>
-                                        <th>{% trans "Total Students" %}</th>
-                                        <th>{% trans "Percentage" %}</th>
+                                        <th class="text-center">{% trans "Present Count" %}</th>
+                                        <th class="text-center">{% trans "Total Students" %}</th>
+                                        <th class="text-center">{% trans "Percentage" %}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% for level in weekly_summary %}
                                     <tr>
-                                        <td><span class="badge bg-primary">D3</span></td>
-                                        <td>15</td>
-                                        <td>20</td>
-                                        <td>75%</td>
+                                        <td><span class="badge bg-{{ level.badge }}">{{ level.code }}</span></td>
+                                        <td class="text-center">{{ level.present }}</td>
+                                        <td class="text-center">{{ level.total }}</td>
+                                        <td class="text-center">{{ level.percentage }}%</td>
                                     </tr>
-                                    <tr>
-                                        <td><span class="badge bg-info">D4</span></td>
-                                        <td>15</td>
-                                        <td>20</td>
-                                        <td>75%</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge bg-success">LJ</span></td>
-                                        <td>10</td>
-                                        <td>15</td>
-                                        <td>67%</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge bg-warning">S2</span></td>
-                                        <td>12</td>
-                                        <td>15</td>
-                                        <td>80%</td>
-                                    </tr>
+                                    {% endfor %}
                                 </tbody>
-                                <tfoot>
-                                    <tr class="fw-bold">
+                                <tfoot class="table-active fw-bold">
+                                    <tr>
                                         <td>{% trans "Total" %}</td>
-                                        <td>52</td>
-                                        <td>70</td>
-                                        <td>74%</td>
+                                        <td class="text-center">{{ weekly_total.present|default:0 }}</td>
+                                        <td class="text-center">{{ weekly_total.total|default:0 }}</td>
+                                        <td class="text-center">{{ weekly_total.percentage|default:0 }}%</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -253,94 +148,33 @@
             </div>
         </div>
 
-        <!-- Right Column - Recent Activity & Quick Actions -->
+        <!-- Right Column -->
         <div class="col-lg-4">
             <!-- Recent Activity -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title mb-3">{% trans "Recent Activity" %}</h5>
                     <p class="text-muted small mb-4">{% trans "Real-time updates of student activities" %}</p>
-                    
                     <div class="activity-list">
-                        <div class="activity-item mb-3">
+                        {% for activity in recent_activities %}
+                        <div class="activity-item {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
                             <div class="d-flex">
-                                <div class="avatar-sm me-3 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                    <span class="text-primary fw-bold">AR</span>
+                                <div class="avatar-sm me-3 bg-{{ activity.color }} bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                    <span class="text-{{ activity.color }} fw-bold">{{ activity.initials }}</span>
                                 </div>
-                                <div>
-                                    <h6 class="mb-0">Ahmad Rizki</h6>
-                                    <small class="text-muted">{% trans "Student ID:" %} 75087000001</small>
-                                    <p class="mb-0 small">{% trans "Final Project D4 - Check-in" %}</p>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ activity.nama }}</h6>
+                                    <small class="text-muted d-block">{% trans "Student ID:" %} {{ activity.nim }}</small>
+                                    <p class="mb-0 small">{{ activity.action }}</p>
                                 </div>
                                 <div class="ms-auto text-end">
-                                    <small class="text-muted">08:30</small>
+                                    <small class="text-muted">{{ activity.time_ago }}</small>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="activity-item mb-3">
-                            <div class="d-flex">
-                                <div class="avatar-sm me-3 bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                    <span class="text-success fw-bold">SM</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Siti Mulyani</h6>
-                                    <small class="text-muted">{% trans "Student ID:" %} 75087000002</small>
-                                    <p class="mb-0 small">{% trans "Tridi Project 52 - Check-out" %}</p>
-                                </div>
-                                <div class="ms-auto text-end">
-                                    <small class="text-muted">09:15</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item mb-3">
-                            <div class="d-flex">
-                                <div class="avatar-sm me-3 bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                    <span class="text-info fw-bold">RS</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Rizki Saputra</h6>
-                                    <small class="text-muted">{% trans "Student ID:" %} 75087000003</small>
-                                    <p class="mb-0 small">{% trans "Final Project 2 D4 - File upload" %}</p>
-                                </div>
-                                <div class="ms-auto text-end">
-                                    <small class="text-muted">08:45</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item mb-3">
-                            <div class="d-flex">
-                                <div class="avatar-sm me-3 bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                    <span class="text-warning fw-bold">RD</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Rina Devi</h6>
-                                    <small class="text-muted">{% trans "Student ID:" %} 75087000004</small>
-                                    <p class="mb-0 small">{% trans "Final Project 03 - Check-in" %}</p>
-                                </div>
-                                <div class="ms-auto text-end">
-                                    <small class="text-muted">08:00</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-item">
-                            <div class="d-flex">
-                                <div class="avatar-sm me-3 bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
-                                    <span class="text-danger fw-bold">MI</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Muhammad Iqbal</h6>
-                                    <small class="text-muted">{% trans "Student ID:" %} 75087000005</small>
-                                    <p class="mb-0 small">{% trans "Tridi Project 123 - Report submission" %}</p>
-                                </div>
-                                <div class="ms-auto text-end">
-                                    <small class="text-muted">07:45</small>
-                                </div>
-                            </div>
-                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted py-4">{% trans "No recent activity" %}</div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -349,29 +183,29 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-3">{% trans "Quick Actions:" %}</h5>
-                    <div class="row g-2">
+                    <div class="row g-3">
                         <div class="col-6">
-                            <a href="{% url 'approval_pendaftaran' %}" class="btn btn-outline-primary w-100 d-flex flex-column align-items-center py-3">
+                            <a href="{% url 'approval_pendaftaran' %}" class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center">
                                 <i class="bi bi-check-circle fs-4 mb-2"></i>
-                                <span>{% trans "Registration Approval" %}</span>
+                                {% trans "Registration Approval" %}
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{% url 'data_mahasiswa' %}" class="btn btn-outline-success w-100 d-flex flex-column align-items-center py-3">
+                            <a href="{% url 'data_mahasiswa' %}" class="btn btn-outline-success w-100 py-3 d-flex flex-column align-items-center">
                                 <i class="bi bi-people fs-4 mb-2"></i>
-                                <span>{% trans "Student Data" %}</span>
+                                {% trans "Student Data" %}
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{% url 'monitor_durasi' %}" class="btn btn-outline-info w-100 d-flex flex-column align-items-center py-3">
+                            <a href="{% url 'monitor_durasi' %}" class="btn btn-outline-info w-100 py-3 d-flex flex-column align-items-center">
                                 <i class="bi bi-clock fs-4 mb-2"></i>
-                                <span>{% trans "Duration Monitor" %}</span>
+                                {% trans "Duration Monitor" %}
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{% url 'kamera_presensi_mhs' %}" class="btn btn-outline-warning w-100 d-flex flex-column align-items-center py-3">
+                            <a href="{% url 'kamera_presensi_mhs' %}" class="btn btn-outline-warning w-100 py-3 d-flex flex-column align-items-center">
                                 <i class="bi bi-camera-video fs-4 mb-2"></i>
-                                <span>{% trans "Attendance Camera" %}</span>
+                                {% trans "Attendance Camera" %}
                             </a>
                         </div>
                     </div>
@@ -381,13 +215,13 @@
     </div>
 </div>
 
-<!-- Modal for Day Details -->
-<div class="modal fade" id="dayDetailModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Modal Day Details -->
+<div class="modal fade" id="dayDetailModal" tabindex="-1" aria-labelledby="dayDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{% trans "Attendance Details - " %}<span id="modalDay"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="dayDetailModalLabel">{% trans "Attendance Details - " %}<span id="modalDay"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
@@ -395,14 +229,12 @@
                         <thead>
                             <tr>
                                 <th>{% trans "Level" %}</th>
-                                <th>{% trans "Present Count" %}</th>
-                                <th>{% trans "Total Students" %}</th>
-                                <th>{% trans "Percentage" %}</th>
+                                <th class="text-center">{% trans "Present" %}</th>
+                                <th class="text-center">{% trans "Total" %}</th>
+                                <th class="text-center">{% trans "%" %}</th>
                             </tr>
                         </thead>
-                        <tbody id="modalDetailBody">
-                            <!-- Data will be populated by JavaScript -->
-                        </tbody>
+                        <tbody id="modalDetailBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -410,227 +242,48 @@
     </div>
 </div>
 
+<!-- Styles & Scripts -->
 <style>
-    .card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    .avatar-sm {
-        width: 40px;
-        height: 40px;
-        font-size: 14px;
-    }
-    
-    .activity-item {
-        padding-bottom: 12px;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    
-    .activity-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-    
-    .progress {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    
-    .progress-bar {
-        border-radius: 10px;
-    }
-    
-    /* Chart Styles */
-    .day-column {
-        cursor: pointer;
-        transition: all 0.2s ease;
-        padding: 10px 5px;
-        border-radius: 8px;
-    }
-    
-    .day-column:hover {
-        background-color: rgba(0, 0, 0, 0.03);
-    }
-    
-    .day-column.active {
-        background-color: rgba(37, 99, 235, 0.1);
-    }
-    
-    .bars-container {
-        position: relative;
-    }
-    
-    .bar {
-        border-radius: 4px 4px 0 0;
-        transition: all 0.3s ease;
-    }
-    
-    .bar:hover {
-        opacity: 0.8;
-        transform: scaleY(1.05);
-    }
-    
-    .day-label {
-        font-size: 14px;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .chart-container .d-flex {
-            flex-direction: column;
-            height: auto !important;
-        }
-        
-        .day-column {
-            margin-bottom: 20px;
-            flex: none !important;
-            width: 100%;
-        }
-        
-        .bars-container {
-            height: 100px !important;
-        }
-        
-        .activity-item .d-flex {
-            flex-direction: column;
-            align-items: flex-start !important;
-        }
-        
-        .activity-item .ms-auto {
-            margin-left: 0 !important;
-            margin-top: 8px;
-            width: 100%;
-            text-align: left !important;
-        }
-        
-        .btn-outline-primary, .btn-outline-success, .btn-outline-info, .btn-outline-warning {
-            padding: 12px 8px !important;
-        }
-        
-        .btn-outline-primary span, 
-        .btn-outline-success span, 
-        .btn-outline-info span, 
-        .btn-outline-warning span {
-            font-size: 12px;
-        }
-    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.08)!important; }
+    .day-column { cursor: pointer; transition: all 0.2s; }
+    .day-column:hover { background: rgba(0,123,255,0.05); transform: scale(1.02); }
+    .bar:hover { transform: scaleY(1.08); opacity: 0.9; }
+    @media (max-width: 992px) { .chart-container .d-flex { flex-wrap: wrap; gap: 10px; } .day-column { flex: 1 1 45%; } }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-        
-        // Data for each day (this would normally come from backend)
-        const dayData = {
-            '{% trans "Monday" %}': [
-                { jenjang: 'D3', hadir: 12, total: 20, percentage: 60 },
-                { jenjang: 'D4', hadir: 16, total: 20, percentage: 80 },
-                { jenjang: 'LJ', hadir: 8, total: 15, percentage: 53 },
-                { jenjang: 'S2', hadir: 14, total: 15, percentage: 93 }
-            ],
-            '{% trans "Tuesday" %}': [
-                { jenjang: 'D3', hadir: 14, total: 20, percentage: 70 },
-                { jenjang: 'D4', hadir: 17, total: 20, percentage: 85 },
-                { jenjang: 'LJ', hadir: 9, total: 15, percentage: 60 },
-                { jenjang: 'S2', hadir: 13, total: 15, percentage: 87 }
-            ],
-            '{% trans "Wednesday" %}': [
-                { jenjang: 'D3', hadir: 13, total: 20, percentage: 65 },
-                { jenjang: 'D4', hadir: 18, total: 20, percentage: 90 },
-                { jenjang: 'LJ', hadir: 10, total: 15, percentage: 67 },
-                { jenjang: 'S2', hadir: 12, total: 15, percentage: 80 }
-            ],
-            '{% trans "Thursday" %}': [
-                { jenjang: 'D3', hadir: 15, total: 20, percentage: 75 },
-                { jenjang: 'D4', hadir: 15, total: 20, percentage: 75 },
-                { jenjang: 'LJ', hadir: 10, total: 15, percentage: 67 },
-                { jenjang: 'S2', hadir: 12, total: 15, percentage: 80 }
-            ],
-            '{% trans "Friday" %}': [
-                { jenjang: 'D3', hadir: 11, total: 20, percentage: 55 },
-                { jenjang: 'D4', hadir: 14, total: 20, percentage: 70 },
-                { jenjang: 'LJ', hadir: 7, total: 15, percentage: 47 },
-                { jenjang: 'S2', hadir: 10, total: 15, percentage: 67 }
-            ]
-        };
-        
-        // Get modal elements
-        const modal = new bootstrap.Modal(document.getElementById('dayDetailModal'));
-        const modalDayTitle = document.getElementById('modalDay');
-        const modalDetailBody = document.getElementById('modalDetailBody');
-        
-        // Add click event to day columns
-        document.querySelectorAll('.day-column').forEach(column => {
-            const day = column.querySelector('.day-label').textContent;
-            
-            column.addEventListener('click', function() {
-                // Remove active class from all columns
-                document.querySelectorAll('.day-column').forEach(col => {
-                    col.classList.remove('active');
-                });
-                
-                // Add active class to clicked column
-                this.classList.add('active');
-                
-                // Update modal title
-                modalDayTitle.textContent = day;
-                
-                // Populate modal with data
-                const data = dayData[day];
-                let html = '';
-                let totalHadir = 0;
-                let totalMahasiswa = 0;
-                
-                data.forEach(item => {
-                    html += `
-                        <tr>
-                            <td><span class="badge bg-${getBadgeColor(item.jenjang)}">${item.jenjang}</span></td>
-                            <td>${item.hadir}</td>
-                            <td>${item.total}</td>
-                            <td>${item.percentage}%</td>
-                        </tr>
-                    `;
-                    totalHadir += item.hadir;
-                    totalMahasiswa += item.total;
-                });
-                
-                // Add total row
-                const totalPercentage = totalMahasiswa > 0 ? Math.round((totalHadir / totalMahasiswa) * 100) : 0;
-                html += `
-                    <tr class="fw-bold">
-                        <td>{% trans "Total" %}</td>
-                        <td>${totalHadir}</td>
-                        <td>${totalMahasiswa}</td>
-                        <td>${totalPercentage}%</td>
-                    </tr>
-                `;
-                
-                modalDetailBody.innerHTML = html;
-                
-                // Show modal
-                modal.show();
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    // Realtime modal data
+    const dayData = {{ day_data_json|safe }};// key: "0", "1", ..., "6"
+    const modal = new bootstrap.Modal(document.getElementById('dayDetailModal'));
+    const modalDay = document.getElementById('modalDay');
+    const modalBody = document.getElementById('modalDetailBody');
+
+    document.querySelectorAll('.day-column').forEach(col => {
+        col.addEventListener('click', function() {
+            const weekday = this.dataset.weekday;  // ambil dari data-weekday
+            const dayName = this.querySelector('.day-label').textContent.trim();
+            modalDay.textContent = dayName;
+
+            const data = dayData[weekday] || [];
+            let html = '', totHadir = 0, totMhs = 0;
+
+            data.forEach(d => {
+                html += `<tr><td><span class="badge bg-${d.badge}">${d.jenjang}</span></td><td class="text-center">${d.hadir}</td><td class="text-center">${d.total}</td><td class="text-center">${d.percentage}%</td></tr>`;
+                totHadir += d.hadir;
+                totMhs += d.total;
             });
+
+            const totPerc = totMhs ? Math.round(totHadir / totMhs * 100) : 0;
+            html += `<tr class="table-active fw-bold"><td>Total</td><td class="text-center">${totHadir}</td><td class="text-center">${totMhs}</td><td class="text-center">${totPerc}%</td></tr>`;
+
+            modalBody.innerHTML = html || '<tr><td colspan="4" class="text-center py-3">{% trans "No data" %}</td></tr>';
+            modal.show();
         });
-        
-        // Helper function to get badge color based on jenjang
-        function getBadgeColor(jenjang) {
-            switch(jenjang) {
-                case 'D3': return 'primary';
-                case 'D4': return 'info';
-                case 'LJ': return 'success';
-                case 'S2': return 'warning';
-                default: return 'secondary';
-            }
-        }
     });
+});
 </script>
 {% endblock %}

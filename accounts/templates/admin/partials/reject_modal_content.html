@@ -1,10 +1,11 @@
+{% load i18n %}
 <p class="mb-3">{% trans "Provide the reason for rejecting this registration" %}</p>
 <div class="alert alert-warning bg-opacity-10 border border-warning border-opacity-25 mb-4">
     <h6 class="text-warning mb-2">{% trans "Registration will be rejected:" %}</h6>
     <div class="d-flex align-items-center">
         <div class="flex-shrink-0">
-            <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center" 
-                 style="width: 40px; height: 40px;">
+            <div class="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center"
+                style="width: 40px; height: 40px;">
                 <i class="fas fa-user text-warning"></i>
             </div>
         </div>
@@ -17,9 +18,9 @@
 
 <div class="mb-3">
     <label for="alasanPenolakan" class="form-label fw-semibold">{% trans "Rejection Reason" %} *</label>
-    <textarea class="form-control" id="alasanPenolakan" name="alasan_penolakan" rows="3" 
-              placeholder="{% trans 'Enter the reason for rejection (example: Unclear photo, Invalid data, etc.)' %}" 
-              required></textarea>
+    <textarea class="form-control" id="alasanPenolakan" name="alasan_penolakan" rows="3"
+        placeholder="{% trans 'Enter the reason for rejection (example: Unclear photo, Invalid data, etc.)' %}"
+        required></textarea>
     <div class="invalid-feedback">{% trans "Rejection reason must be filled" %}</div>
     <small class="text-muted mt-1">{% trans "The rejection reason will be sent to the student's email." %}</small>
 </div>

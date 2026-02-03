@@ -7,6 +7,13 @@ from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django import forms
+from django.db.models import Sum, F, FloatField, ExpressionWrapper
+from django.db.models.functions import Coalesce
+from django.utils.translation import gettext_lazy as _
+import math
+from django.db.models import Sum, F, Case, When, Value
+from django.db.models.functions import Coalesce
+from django.utils.safestring import mark_safe
 from datetime import datetime, date, timedelta 
 from .forms import Step1Form, Step2Form, Step3Form
 from .models import (
@@ -19,6 +26,7 @@ from django.db.models import Sum, F, Case, When, Value
 from django.db.models.functions import Coalesce
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.utils import translation
 import zipfile
 import io
 import os
@@ -29,11 +37,13 @@ from django.db.models import Q, Count
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 import json
+from django.utils.safestring import mark_safe
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 from datetime import datetime
 import logging
+from liveness_detection import process_frame_liveness, init_liveness_detection, reset_detection_state
 
 def register_wizard(request, step=1):
     # Gunakan Custom User Model
@@ -86,7 +96,7 @@ def register_wizard(request, step=1):
                 'dosen_pembimbing2': Dosen.objects.filter(id=step2_data.get('dosen_pembimbing2')).first(),
                 'dosen_pembimbing3': Dosen.objects.filter(id=step2_data.get('dosen_pembimbing3')).first(),
             }
-            # Untuk ManyToMany field
+
             if step2_data.get('kegiatan_pa_diambil'):
                 kegiatan_ids = step2_data['kegiatan_pa_diambil']
                 initial_data['kegiatan_pa_diambil'] = Kegiatan_PA.objects.filter(id__in=kegiatan_ids)
@@ -485,12 +495,98 @@ def hapus_semua_foto(request):
     
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-
+@login_required
 def riwayat_presensi(request):
-    return render(request, 'mahasiswa/riwayat_presensi.html')
-
-def progress_sks(request):
-    return render(request, 'mahasiswa/progress_sks.html')
+    try:
+        mahasiswa = Mahasiswa.objects.get(user=request.user)
+        
+        # Ambil semua presensi mahasiswa ini (tanpa filter kegiatan_pa)
+        presensi_qs = Presensi.objects.filter(
+            mahasiswa=mahasiswa
+        ).order_by('-tanggal_presensi', '-jam_checkin')
+        
+        presensi_list = []
+        
+        for p in presensi_qs:
+            # Hitung durasi jika ada checkin dan checkout
+            durasi_text = "-"
+            if p.jam_checkin and p.jam_checkout:
+                try:
+                    # Gabungkan tanggal dengan waktu
+                    checkin_datetime = datetime.combine(p.tanggal_presensi, p.jam_checkin)
+                    checkout_datetime = datetime.combine(p.tanggal_presensi, p.jam_checkout)
+                    
+                    # Jika checkout lebih kecil dari checkin (lewat tengah malam)
+                    if checkout_datetime < checkin_datetime:
+                        checkout_datetime += timedelta(days=1)
+                    
+                    # Hitung selisih
+                    delta = checkout_datetime - checkin_datetime
+                    total_seconds = delta.total_seconds()
+                    hours = int(total_seconds // 3600)
+                    minutes = int((total_seconds % 3600) // 60)
+                    
+                    # Format durasi
+                    if hours > 0:
+                        durasi_text = f"{hours}j {minutes}m"
+                    elif minutes > 0:
+                        durasi_text = f"{minutes}m"
+                    else:
+                        durasi_text = "0m"
+                        
+                except Exception as e:
+                    durasi_text = "Error"
+                    print(f"ERROR hitung durasi: {e}")
+            
+            # Tambahkan ke list
+            presensi_list.append({
+                'tanggal': p.tanggal_presensi,
+                'check_in': p.jam_checkin,
+                'check_out': p.jam_checkout,
+                'durasi': durasi_text,
+                'foto_checkin': p.foto_checkin.url if p.foto_checkin else None,
+                'foto_checkout': p.foto_checkout.url if p.foto_checkout else None,
+            })
+        
+        # Hitung total SKS dari kegiatan PA yang diambil
+        total_sks = sum(k.jumlah_sks for k in mahasiswa.kegiatan_pa.all())
+        total_target_jam = sum(k.target_jam for k in mahasiswa.kegiatan_pa.all())
+        
+        # Ambil nama semester
+        semester_nama = mahasiswa.semester.nama_semester if mahasiswa.semester else "-"
+        
+        # Hitung total durasi yang sudah dikerjakan
+        total_durasi = 0
+        for p in presensi_list:
+            if p['durasi'] != '-' and p['durasi'] != 'Error':
+                # Parse durasi teks menjadi jam
+                try:
+                    if 'j' in p['durasi']:
+                        hours = int(p['durasi'].split('j')[0].strip())
+                        total_durasi += hours
+                except:
+                    pass
+        
+        context = {
+            'presensi_list': presensi_list,
+            'total_sks': total_sks,
+            'total_target_jam': total_target_jam,
+            'total_durasi': total_durasi,
+            'semester_nama': semester_nama,
+            'mahasiswa': mahasiswa,
+            'kegiatan_pa_list': mahasiswa.kegiatan_pa.all(),
+            'total_kegiatan': mahasiswa.kegiatan_pa.count(),
+        }
+        
+        return render(request, 'mahasiswa/riwayat_presensi.html', context)
+        
+    except Mahasiswa.DoesNotExist:
+        messages.error(request, 'Data mahasiswa tidak ditemukan')
+        return redirect('profil_mahasiswa')
+    except Exception as e:
+        print(f"ERROR in riwayat_presensi: {str(e)}")
+        messages.error(request, 'Terjadi kesalahan saat mengambil data presensi')
+        return redirect('profil_mahasiswa')
 
 def logout_view(request):
     logout(request) 
@@ -587,18 +683,10 @@ def checkin_presensi(request):
                     'message': 'Mahasiswa belum check-out dari sesi sebelumnya'
                 })
             
-            # Ambil kegiatan PA pertama (bisa disesuaikan dengan kebutuhan)
-            kegiatan_pa = Kegiatan_PA.objects.first()
-            if not kegiatan_pa:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Tidak ada kegiatan PA yang tersedia'
-                })
-            
-            # Buat presensi baru
+            # SIMPLIFIKASI: Buat presensi TANPA kegiatan_pa (karena agregat)
             presensi = Presensi.objects.create(
                 mahasiswa=mahasiswa,
-                kegiatan_pa=kegiatan_pa,
+                kegiatan_pa=None,  # NULL karena sistem agregat
                 tanggal_presensi=date.today(),
                 jam_checkin=datetime.now().time(),
                 foto_checkin=foto_data
@@ -629,102 +717,325 @@ def checkin_presensi(request):
     return JsonResponse({'success': False, 'message': 'Method not allowed'})
 
 @login_required
-def update_jam_tercapai_from_durasi(request):
-    """
-    Fungsi untuk mengupdate jam_tercapai di Status_Pemenuhan_SKS 
-    berdasarkan total durasi dari tabel Durasi
-    """
+def debug_presensi_data(request):
+    """Fungsi untuk debugging data presensi"""
     try:
-        # 1. Ambil semua data durasi yang terkait dengan presensi
-        durasi_list = Durasi.objects.select_related(
-            'presensi__mahasiswa',
-            'presensi__kegiatan_pa'
-        ).all()
+        mahasiswa = Mahasiswa.objects.get(user=request.user)
         
-        # 2. Kelompokkan durasi berdasarkan mahasiswa dan kegiatan PA
-        durasi_by_mahasiswa_kegiatan = {}
+        # Ambil semua presensi
+        presensi_list = Presensi.objects.filter(
+            mahasiswa=mahasiswa,
+            jam_checkin__isnull=False,
+            jam_checkout__isnull=False
+        ).order_by('-tanggal_presensi')
         
-        for durasi in durasi_list:
-            mahasiswa_id = durasi.presensi.mahasiswa.id
-            kegiatan_pa_id = durasi.presensi.kegiatan_pa.id
-            key = f"{mahasiswa_id}_{kegiatan_pa_id}"
-            
-            if key not in durasi_by_mahasiswa_kegiatan:
-                durasi_by_mahasiswa_kegiatan[key] = {
-                    'mahasiswa_id': mahasiswa_id,
-                    'kegiatan_pa_id': kegiatan_pa_id,
-                    'total_durasi_seconds': 0
-                }
-            
-            # Hitung total durasi dalam detik
-            durasi_by_mahasiswa_kegiatan[key]['total_durasi_seconds'] += durasi.waktu_durasi.total_seconds()
+        data = []
+        total_hours = 0
         
-        # 3. Update Status_Pemenuhan_SKS berdasarkan total durasi
-        updated_count = 0
-        for key, data in durasi_by_mahasiswa_kegiatan.items():
-            # Konversi detik ke jam (dibulatkan ke bawah)
-            total_jam = int(data['total_durasi_seconds'] // 3600)
+        for presensi in presensi_list:
+            checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+            checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
             
-            # Update atau buat Status_Pemenuhan_SKS
-            status_sks, created = Status_Pemenuhan_SKS.objects.update_or_create(
-                mahasiswa_id=data['mahasiswa_id'],
-                kegiatan_pa_id=data['kegiatan_pa_id'],
-                defaults={
-                    'jam_tercapai': total_jam
-                }
-            )
+            if checkout_dt < checkin_dt:
+                checkout_dt += timedelta(days=1)
             
-            # Update status pemenuhan berdasarkan jam_tercapai vs jam_target
-            if status_sks.jam_tercapai >= status_sks.jam_target:
-                status_sks.status_pemenuhan = 'memenuhi'
-            else:
-                status_sks.status_pemenuhan = 'belum memenuhi'
+            durasi = checkout_dt - checkin_dt
+            hours = durasi.total_seconds() / 3600
+            total_hours += hours
             
-            status_sks.save()
-            updated_count += 1
-        
-        # 4. Untuk mahasiswa yang tidak memiliki durasi, set jam_tercapai = 0
-        # (Opsional, tergantung kebutuhan)
-        all_status_sks = Status_Pemenuhan_SKS.objects.filter(jam_tercapai__gt=0)
-        for status in all_status_sks:
-            if not Durasi.objects.filter(
-                presensi__mahasiswa=status.mahasiswa,
-                presensi__kegiatan_pa=status.kegiatan_pa
-            ).exists():
-                status.jam_tercapai = 0
-                status.status_pemenuhan = 'belum memenuhi'
-                status.save()
-                updated_count += 1
+            data.append({
+                'tanggal': presensi.tanggal_presensi,
+                'checkin': presensi.jam_checkin,
+                'checkout': presensi.jam_checkout,
+                'durasi': str(durasi),
+                'hours': round(hours, 2)
+            })
         
         return JsonResponse({
             'success': True,
-            'message': f'Berhasil mengupdate {updated_count} data Status_Pemenuhan_SKS',
-            'updated_count': updated_count
+            'total_presensi': len(data),
+            'total_hours': round(total_hours, 2),
+            'data': data,
+            'mahasiswa': {
+                'nama': mahasiswa.user.nama_lengkap,
+                'nim': mahasiswa.nim
+            }
         })
         
     except Exception as e:
         return JsonResponse({
             'success': False,
-            'message': f'Error: {str(e)}'
+            'error': str(e)
         })
 
-# Fungsi untuk menghitung total durasi per mahasiswa per kegiatan
-def calculate_total_duration(mahasiswa_id, kegiatan_pa_id):
+@csrf_exempt
+def detect_liveness_frame(request):
     """
-    Menghitung total durasi dalam jam untuk mahasiswa dan kegiatan PA tertentu
+    API endpoint untuk liveness detection - VERSI AGREGAT (SIMPLE)
     """
-    total_seconds = Durasi.objects.filter(
-        presensi__mahasiswa_id=mahasiswa_id,
-        presensi__kegiatan_pa_id=kegiatan_pa_id
-    ).aggregate(total=Sum('waktu_durasi'))['total'] or 0
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            frame_base64 = data.get('frame')
+            mahasiswa_id = data.get('mahasiswa_id')
+            action = data.get('action')
+            
+            if not frame_base64:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'No frame provided',
+                    'status': 'ERROR'
+                })
+            
+            # Process frame dengan liveness detection (import dari modul liveness)
+            from liveness_detection import process_frame_liveness
+            result = process_frame_liveness(frame_base64)
+            
+            # AUTO-SAVE PRESENSI HANYA JIKA STATUS = REAL
+            if result.get('status') == 'REAL' and mahasiswa_id and action:
+                try:
+                    mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
+                    today = datetime.now().date()
+                    
+                    if action == 'checkin':
+                        # Cek apakah sudah ada presensi yang belum check-out hari ini
+                        existing_presensi = Presensi.objects.filter(
+                            mahasiswa=mahasiswa,
+                            tanggal_presensi=today,
+                            jam_checkout__isnull=True
+                        ).first()
+                        
+                        if existing_presensi:
+                            result['message'] = 'Masih ada sesi yang belum check-out'
+                            return JsonResponse(result)
+                        
+                        # Simpan foto check-in
+                        format_ext = frame_base64.split(';base64,')[0].split('/')[-1] if ';base64,' in frame_base64 else 'jpg'
+                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        filename = f'checkin_{mahasiswa_id}_{timestamp}.{format_ext}'
+                        
+                        imgstr = frame_base64.split(';base64,')[1] if ';base64,' in frame_base64 else frame_base64
+                        foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
+                        
+                        # Buat presensi baru tanpa kegiatan_pa
+                        presensi = Presensi.objects.create(
+                            mahasiswa=mahasiswa,
+                            kegiatan_pa=None,  # NULL karena agregat
+                            tanggal_presensi=today,
+                            jam_checkin=datetime.now().time(),
+                            foto_checkin=foto_data
+                        )
+                        
+                        result['presensi_id'] = presensi.id
+                        result['saved'] = True
+                        result['action'] = 'checkin'
+                        
+                    elif action == 'checkout':
+                        # Update foto check-out
+                        presensi = Presensi.objects.filter(
+                            mahasiswa=mahasiswa,
+                            tanggal_presensi=today,
+                            jam_checkout__isnull=True
+                        ).first()
+                        
+                        if presensi:
+                            format_ext = frame_base64.split(';base64,')[0].split('/')[-1] if ';base64,' in frame_base64 else 'jpg'
+                            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                            filename = f'checkout_{mahasiswa_id}_{timestamp}.{format_ext}'
+                            
+                            imgstr = frame_base64.split(';base64,')[1] if ';base64,' in frame_base64 else frame_base64
+                            foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
+                            
+                            presensi.jam_checkout = datetime.now().time()
+                            presensi.foto_checkout = foto_data
+                            presensi.save()
+                            
+                            result['presensi_id'] = presensi.id
+                            result['saved'] = True
+                            result['action'] = 'checkout'
+                
+                except Exception as save_error:
+                    print(f"[ERROR] Failed to save presensi: {save_error}")
+                    result['save_error'] = str(save_error)
+            
+            return JsonResponse(result)
+            
+        except Exception as e:
+            print(f"[ERROR] detect_liveness_frame: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e),
+                'status': 'ERROR'
+            })
     
-    # Jika total_seconds adalah timedelta, konversi ke total detik
-    if hasattr(total_seconds, 'total_seconds'):
-        total_seconds = total_seconds.total_seconds()
+    return JsonResponse({'success': False, 'error': 'Method not allowed'})
+
+def calculate_aggregate_progress(mahasiswa):
+    """
+    Menghitung progress AGREGAT (total gabungan) dari semua kegiatan PA
+    """
+    # 1. Hitung total target dari semua kegiatan PA yang diambil
+    kegiatan_pa_list = mahasiswa.kegiatan_pa.all()
+    
+    total_target_jam = 0
+    total_sks = 0
+    
+    for kegiatan in kegiatan_pa_list:
+        total_target_jam += kegiatan.target_jam
+        total_sks += kegiatan.jumlah_sks
+    
+    # 2. Hitung total durasi dari SEMUA presensi (AGREGAT - tanpa filter kegiatan_pa)
+    presensi_list = Presensi.objects.filter(
+        mahasiswa=mahasiswa,
+        jam_checkin__isnull=False,
+        jam_checkout__isnull=False
+    )
+    
+    total_durasi_detik = 0
+    
+    for presensi in presensi_list:
+        if presensi.jam_checkin and presensi.jam_checkout:
+            try:
+                # Buat datetime untuk checkin dan checkout
+                checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+                checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
+                
+                # Jika checkout lebih kecil dari checkin (lewat tengah malam)
+                if checkout_dt < checkin_dt:
+                    checkout_dt += timedelta(days=1)
+                
+                # Hitung selisih dalam detik
+                durasi = checkout_dt - checkin_dt
+                total_durasi_detik += durasi.total_seconds()
+                
+                # Debug log
+                print(f"DEBUG - Presensi {presensi.id}: {durasi.total_seconds()} detik")
+                
+            except Exception as e:
+                print(f"Error menghitung durasi presensi {presensi.id}: {e}")
     
     # Konversi detik ke jam
-    total_hours = int(total_seconds // 3600)
-    return total_hours
+    total_durasi_jam = total_durasi_detik / 3600
+    
+    # Bulatkan ke 1 angka desimal
+    total_durasi_jam = round(total_durasi_jam, 1)
+    
+    # 3. Hitung progress persentase
+    progress_percentage = 0
+    if total_target_jam > 0:
+        progress_percentage = (total_durasi_jam / total_target_jam) * 100
+    
+    # Bulatkan progress ke 1 angka desimal
+    progress_percentage = round(progress_percentage, 1)
+    
+    # 4. Debug info
+    print(f"\n=== DEBUG AGGREGATE PROGRESS ===")
+    print(f"Mahasiswa: {mahasiswa.user.nama_lengkap}")
+    print(f"Jumlah Kegiatan: {len(kegiatan_pa_list)}")
+    print(f"Total Target Jam: {total_target_jam} jam")
+    print(f"Total Durasi: {total_durasi_jam} jam ({total_durasi_detik} detik)")
+    print(f"Progress: {progress_percentage}%")
+    print(f"Presensi ditemukan: {presensi_list.count()}")
+    print(f"===============================\n")
+    
+    return {
+        'total_target_jam': total_target_jam,
+        'total_durasi_jam': total_durasi_jam,
+        'total_sks': total_sks,
+        'progress_percentage': progress_percentage,
+        'sisa_jam': max(0, total_target_jam - total_durasi_jam),
+        'kegiatan_count': len(kegiatan_pa_list),
+        'detail_kegiatan': [
+            {
+                'nama': kegiatan.nama_kegiatan,
+                'sks': kegiatan.jumlah_sks,
+                'target_jam': kegiatan.target_jam,
+                'jumlah_presensi': Presensi.objects.filter(
+                    mahasiswa=mahasiswa,
+                    kegiatan_pa=kegiatan,
+                    jam_checkin__isnull=False,
+                    jam_checkout__isnull=False
+                ).count()
+            }
+            for kegiatan in kegiatan_pa_list
+        ]
+    }
+
+@csrf_exempt
+@login_required
+def checkout_presensi(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            mahasiswa_id = data.get('mahasiswa_id')
+            foto_base64 = data.get('foto')
+
+            if foto_base64:
+                format, imgstr = foto_base64.split(';base64,')
+                ext = format.split('/')[-1]
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f'checkout_{mahasiswa_id}_{timestamp}.{ext}'
+                foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
+
+            mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
+
+            presensi = Presensi.objects.filter(
+                mahasiswa=mahasiswa,
+                tanggal_presensi=date.today(),
+                jam_checkout__isnull=True
+            ).order_by('-jam_checkin').first()
+
+            if not presensi:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Tidak ada sesi check-in yang aktif'
+                })
+
+            presensi.jam_checkout = datetime.now().time()
+
+            if foto_base64:
+                presensi.foto_checkout = foto_data
+
+            presensi.save()
+
+            # Hitung dan simpan durasi (tetap pakai Durasi untuk riwayat)
+            if presensi.jam_checkin and presensi.jam_checkout:
+                checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+                checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
+                if checkout_dt < checkin_dt:
+                    checkout_dt += timedelta(days=1)
+                durasi = checkout_dt - checkin_dt
+
+                Durasi.objects.update_or_create(
+                    presensi=presensi,
+                    defaults={'waktu_durasi': durasi}
+                )
+
+            if foto_base64:
+                FotoWajah.objects.create(
+                    mahasiswa=mahasiswa,
+                    file_path=foto_data,
+                    keterangan=f'Check-out {datetime.now().strftime("%d/%m/%Y %H:%M")}'
+                )
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Check-out berhasil',
+                'data': {
+                    'jam_checkout': presensi.jam_checkout.strftime('%H:%M'),
+                    'presensi_id': presensi.id
+                }
+            })
+
+        except Exception as e:
+            import traceback
+            return JsonResponse({
+                'success': False,
+                'message': f'Error: {str(e)}',
+                'trace': traceback.format_exc()
+            })
+
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
 
 # Modifikasi fungsi checkout_presensi untuk langsung update jam_tercapai
 @csrf_exempt
@@ -773,23 +1084,42 @@ def checkout_presensi(request):
                 
             presensi.save()
             
-            # Hitung durasi
+            # Hitung durasi - FIX INI: Gunakan datetime yang benar
             if presensi.jam_checkin and presensi.jam_checkout:
-                checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
-                checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
-                durasi = checkout_dt - checkin_dt
-                
-                # Simpan durasi
-                Durasi.objects.create(
-                    presensi=presensi,
-                    waktu_durasi=durasi
+                checkin_dt = datetime.combine(
+                    presensi.tanggal_presensi, 
+                    presensi.jam_checkin
+                )
+                checkout_dt = datetime.combine(
+                    presensi.tanggal_presensi, 
+                    presensi.jam_checkout
                 )
                 
-                # PERBAIKAN: Update Status_Pemenuhan_SKS berdasarkan TOTAL durasi
-                # 1. Hitung total durasi untuk mahasiswa ini di kegiatan PA ini
+                # Jika checkout lebih kecil dari checkin (lewat tengah malam)
+                if checkout_dt < checkin_dt:
+                    checkout_dt += timedelta(days=1)
+                
+                durasi = checkout_dt - checkin_dt
+                
+                # Debug: Cetak durasi
+                print(f"DEBUG checkout_presensi - Durasi dihitung: {durasi}")
+                print(f"DEBUG - Checkin: {checkin_dt}, Checkout: {checkout_dt}")
+                
+                # Simpan durasi - PERBAIKAN: Buat atau update Durasi
+                Durasi.objects.update_or_create(
+                    presensi=presensi,
+                    defaults={'waktu_durasi': durasi}
+                )
+                
+                print(f"DEBUG - Durasi berhasil disimpan untuk presensi {presensi.id}")
+                
+                # PERBAIKAN: Hitung total durasi untuk update Status_Pemenuhan_SKS
                 total_hours = calculate_total_duration(mahasiswa.id, presensi.kegiatan_pa.id)
                 
-                # 2. Update atau buat Status_Pemenuhan_SKS
+                # Debug
+                print(f"DEBUG - Total hours setelah checkout: {total_hours}")
+                
+                # Update Status_Pemenuhan_SKS
                 status_sks, created = Status_Pemenuhan_SKS.objects.get_or_create(
                     mahasiswa=mahasiswa,
                     kegiatan_pa=presensi.kegiatan_pa,
@@ -800,17 +1130,18 @@ def checkout_presensi(request):
                     }
                 )
                 
-                # 3. Jika sudah ada, update jam_tercapai
                 if not created:
                     status_sks.jam_tercapai = total_hours
                 
-                # 4. Cek apakah sudah memenuhi target
+                # Cek apakah sudah memenuhi target
                 if status_sks.jam_tercapai >= status_sks.jam_target:
                     status_sks.status_pemenuhan = 'memenuhi'
                 else:
                     status_sks.status_pemenuhan = 'belum memenuhi'
                 
                 status_sks.save()
+                
+                print(f"DEBUG - Status SKS updated: {status_sks.jam_tercapai} jam tercapai")
             
             # Simpan juga ke FotoWajah untuk dataset
             if foto_base64:
@@ -840,58 +1171,105 @@ def checkout_presensi(request):
     
     return JsonResponse({'success': False, 'message': 'Method not allowed'})
 
-# Fungsi untuk sinkronisasi manual (bisa dipanggil dari admin)
 @login_required
-def sync_all_durasi_to_status_sks(request):
+def fix_missing_durations(request):
     """
-    Sinkronisasi semua data durasi ke Status_Pemenuhan_SKS
-    Hanya bisa diakses oleh admin
+    Fungsi untuk membuat Durasi dari presensi yang sudah ada
+    tapi tidak memiliki Durasi (hanya memperbaiki tabel Durasi saja).
+    Tidak lagi update Status_Pemenuhan_SKS karena sistem sekarang agregat.
     """
     if not (request.user.role == 'admin' or request.user.is_superuser):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
     try:
-        # 1. Ambil semua mahasiswa yang memiliki presensi
-        mahasiswa_list = Mahasiswa.objects.filter(
-            presensi__isnull=False
-        ).distinct()
+        # Cari semua presensi yang sudah check-in & check-out tapi belum punya Durasi
+        presensi_without_duration = Presensi.objects.filter(
+            jam_checkin__isnull=False,
+            jam_checkout__isnull=False
+        ).exclude(
+            durasi__isnull=False  # Exclude yang sudah punya Durasi
+        )
         
-        updated_count = 0
+        fixed_count = 0
         
-        for mahasiswa in mahasiswa_list:
-            # 2. Ambil semua kegiatan PA yang diikuti mahasiswa ini
-            kegiatan_pa_list = Kegiatan_PA.objects.filter(
-                presensi__mahasiswa=mahasiswa
-            ).distinct()
+        for presensi in presensi_without_duration:
+            # Hitung durasi
+            checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+            checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
             
-            for kegiatan_pa in kegiatan_pa_list:
-                # 3. Hitung total durasi untuk pasangan (mahasiswa, kegiatan_pa)
-                total_hours = calculate_total_duration(mahasiswa.id, kegiatan_pa.id)
-                
-                # 4. Update atau buat Status_Pemenuhan_SKS
-                status_sks, created = Status_Pemenuhan_SKS.objects.update_or_create(
-                    mahasiswa=mahasiswa,
-                    kegiatan_pa=kegiatan_pa,
-                    defaults={
-                        'jam_target': kegiatan_pa.target_jam,
-                        'jumlah_sks': kegiatan_pa.jumlah_sks,
-                        'jam_tercapai': total_hours
-                    }
-                )
-                
-                # 5. Update status pemenuhan
-                if status_sks.jam_tercapai >= status_sks.jam_target:
-                    status_sks.status_pemenuhan = 'memenuhi'
-                else:
-                    status_sks.status_pemenuhan = 'belum memenuhi'
-                
-                status_sks.save()
-                updated_count += 1
+            if checkout_dt < checkin_dt:
+                checkout_dt += timedelta(days=1)
+            
+            durasi = checkout_dt - checkin_dt
+            
+            # Buat record Durasi
+            Durasi.objects.create(
+                presensi=presensi,
+                waktu_durasi=durasi
+            )
+            
+            print(f"Fixed: Presensi {presensi.id} - Durasi: {durasi}")
+            fixed_count += 1
         
         return JsonResponse({
             'success': True,
-            'message': f'Berhasil sinkronisasi {updated_count} data Status_Pemenuhan_SKS',
-            'updated_count': updated_count
+            'message': f'Berhasil memperbaiki {fixed_count} data Durasi yang hilang',
+            'fixed_count': fixed_count
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
+
+@login_required
+def check_duration_status(request):
+    """
+    Cek status Durasi untuk debugging
+    """
+    try:
+        mahasiswa = Mahasiswa.objects.get(user=request.user)
+        
+        # Cek semua presensi mahasiswa
+        presensi_list = Presensi.objects.filter(
+            mahasiswa=mahasiswa
+        ).select_related('kegiatan_pa')
+        
+        result = []
+        
+        for presensi in presensi_list:
+            has_duration = hasattr(presensi, 'durasi')
+            durasi_value = presensi.durasi.waktu_durasi if has_duration else None
+            
+            result.append({
+                'id': presensi.id,
+                'tanggal': presensi.tanggal_presensi,
+                'kegiatan': presensi.kegiatan_pa.nama_kegiatan,
+                'checkin': presensi.jam_checkin,
+                'checkout': presensi.jam_checkout,
+                'has_duration': has_duration,
+                'duration_value': str(durasi_value) if durasi_value else None,
+            })
+        
+        # Debug info
+        total_presensi = len(result)
+        presensi_with_duration = sum(1 for r in result if r['has_duration'])
+        
+        print(f"DEBUG check_duration_status - Total presensi: {total_presensi}")
+        print(f"DEBUG - Presensi dengan Durasi: {presensi_with_duration}")
+        print(f"DEBUG - Presensi tanpa Durasi: {total_presensi - presensi_with_duration}")
+        
+        return JsonResponse({
+            'success': True,
+            'data': result,
+            'summary': {
+                'total_presensi': total_presensi,
+                'with_duration': presensi_with_duration,
+                'without_duration': total_presensi - presensi_with_duration
+            }
         })
         
     except Exception as e:
@@ -899,7 +1277,7 @@ def sync_all_durasi_to_status_sks(request):
             'success': False,
             'message': f'Error: {str(e)}'
         })
-    
+
 @login_required
 def get_progress_sks_api(request):
     """API untuk mendapatkan progress SKS berdasarkan durasi"""
@@ -907,9 +1285,10 @@ def get_progress_sks_api(request):
         user = request.user
         mahasiswa = Mahasiswa.objects.get(user=user)
         
-        # Ambil semua status pemenuhan SKS untuk mahasiswa ini
+        # Ambil semua status pemenuhan SKS untuk mahasiswa ini (hanya kegiatan yang diambil)
         status_list = Status_Pemenuhan_SKS.objects.filter(
-            mahasiswa=mahasiswa
+            mahasiswa=mahasiswa,
+            kegiatan_pa__in=mahasiswa.kegiatan_pa.all()
         ).select_related('kegiatan_pa')
         
         progress_data = []
@@ -1195,96 +1574,305 @@ def upload_foto_wajah(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @login_required
-def riwayat_presensi(request):
-    # Data dummy untuk contoh
-    # Ganti dengan data dari database Anda
-    mahasiswa = {
-        'nrp': '2141720001',
-        'nama': 'Ahmad Rizki Pratama',
-        'kelas': 'D3 IT A',
-        'jenjang': 'D3'
-    }
-    
-    # Data presensi dummy
-    presensi_list = [
-        {
-            'mahasiswa': mahasiswa,
-            'tanggal': datetime(2025, 9, 24),
-            'check_in': datetime(2025, 9, 24, 11, 10),
-            'check_out': datetime(2025, 9, 24, 16, 12),
-            'durasi': '5h 2m',
-            'status': 'Hadir'
-        },
-        {
-            'mahasiswa': mahasiswa,
-            'tanggal': datetime(2025, 9, 24),
-            'check_in': datetime(2025, 9, 24, 10, 32),
-            'check_out': datetime(2025, 9, 24, 17, 41),
-            'durasi': '7h 9m',
-            'status': 'Hadir'
-        },
-        {
-            'mahasiswa': mahasiswa,
-            'tanggal': datetime(2025, 9, 24),
-            'check_in': datetime(2025, 9, 24, 10, 20),
-            'check_out': datetime(2025, 9, 24, 17, 30),
-            'durasi': '7h 10m',
-            'status': 'Hadir'
-        }
-    ]
-    
-    # Statistik
-    statistik = {
-        'hadir': 3,
-        'terlambat': 0,
-        'izin': 0,
-        'alpha': 0
-    }
-    
-    context = {
-        'presensi_list': presensi_list,
-        'total_sks': 12,
-        'semester_nama': 'Semester Ganjil 2024/2025',
-        'statistik': statistik
-    }
-    
-    return render(request, 'mahasiswa/riwayat_presensi.html', context)
-
-# Di views.py
-# views.py
-from django.shortcuts import render
-
 def progress_sks(request):
-    context = {
-        'sks': 12,
-        'jam_terselesaikan': 234,
-        'jam_target_total': 344,
-        'jam_sisa': 110,
-        'progress_percentage': 68,
-        'rata_per_minggu': 15.6,
-        'estimasi_selesai': '25 Desember 2024',
-        'sisa_waktu': 45,
-        'rekomendasi_per_hari': 2.44,
-    }
-    return render(request, 'mahasiswa/progress_sks.html', context)
-
+    try:
+        mahasiswa = Mahasiswa.objects.get(user=request.user)
+        
+        # Hitung progress AGREGAT
+        progress_data = calculate_aggregate_progress(mahasiswa)
+        
+        total_target = progress_data['total_target_jam']
+        total_tercapai = progress_data['total_durasi_jam']
+        total_sks = progress_data['total_sks']
+        progress_percentage = progress_data['progress_percentage']
+        jam_sisa = progress_data['sisa_jam']
+        jumlah_kegiatan = progress_data['kegiatan_count']
+        detail_kegiatan = progress_data['detail_kegiatan']
+        
+        # Hitung statistik lainnya
+        rata_per_minggu = 0
+        if total_tercapai > 0:
+            # Hitung jumlah minggu berjalan sejak semester dimulai
+            try:
+                if mahasiswa.semester and mahasiswa.semester.tanggal_mulai:
+                    tanggal_mulai = mahasiswa.semester.tanggal_mulai
+                    hari_berjalan = (date.today() - tanggal_mulai).days
+                    minggu_berjalan = max(1, math.ceil(hari_berjalan / 7))
+                else:
+                    minggu_berjalan = 8  # Default 8 minggu
+                
+                rata_per_minggu = round(total_tercapai / minggu_berjalan, 1)
+            except:
+                rata_per_minggu = round(total_tercapai / 8, 1)  # Fallback
+        
+        estimasi_selesai = ""
+        sisa_waktu = 0
+        rekomendasi_per_hari = 0
+        
+        if rata_per_minggu > 0 and jam_sisa > 0:
+            sisa_minggu = jam_sisa / rata_per_minggu
+            tanggal_estimasi = date.today() + timedelta(days=sisa_minggu * 7)
+            estimasi_selesai = tanggal_estimasi.strftime("%d %B %Y")
+            sisa_waktu = int(sisa_minggu * 7)
+            rekomendasi_per_hari = round(jam_sisa / sisa_waktu, 2) if sisa_waktu > 0 else 0
+        
+        # Data untuk JavaScript
+        js_data = {
+            'progress_percentage': progress_percentage,
+            'jam_terselesaikan': total_tercapai,
+            'jam_sisa': jam_sisa,
+            'total_sks': total_sks,
+            'jam_target_total': total_target,
+            'rata_per_minggu': rata_per_minggu,
+            'sisa_waktu': sisa_waktu,
+            'rekomendasi_per_hari': rekomendasi_per_hari,
+            'estimasi_selesai': estimasi_selesai,
+            'mahasiswa_nama': mahasiswa.user.nama_lengkap,
+            'mahasiswa_nim': mahasiswa.nim,
+            'semester_nama': mahasiswa.semester.nama_semester if mahasiswa.semester else "-",
+            'kegiatan_count': jumlah_kegiatan,
+        }
+        
+        # Debug info ke console
+        print(f"\n=== DEBUG PROGRESS SKS PAGE ===")
+        print(f"Mahasiswa: {mahasiswa.user.nama_lengkap} ({mahasiswa.nim})")
+        print(f"Total Presensi: {Presensi.objects.filter(mahasiswa=mahasiswa).count()}")
+        print(f"Total Durasi: {total_tercapai} jam")
+        print(f"Target: {total_target} jam")
+        print(f"Progress: {progress_percentage}%")
+        print("==============================\n")
+        
+        context = {
+            'mahasiswa': mahasiswa,
+            'total_sks': total_sks,
+            'jam_terselesaikan': total_tercapai,
+            'jam_target_total': total_target,
+            'jam_sisa': jam_sisa,
+            'progress_percentage': progress_percentage,
+            'rata_per_minggu': rata_per_minggu,
+            'estimasi_selesai': estimasi_selesai,
+            'sisa_waktu': sisa_waktu,
+            'rekomendasi_per_hari': rekomendasi_per_hari,
+            'jumlah_kegiatan': jumlah_kegiatan,
+            'detail_kegiatan': detail_kegiatan,
+            'js_data_json': mark_safe(json.dumps(js_data)),
+        }
+        
+        return render(request, 'mahasiswa/progress_sks.html', context)
+        
+    except Mahasiswa.DoesNotExist:
+        messages.error(request, 'Data mahasiswa tidak ditemukan')
+        return redirect('profil_mahasiswa')
+    except Exception as e:
+        print(f"Error in progress_sks: {e}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f'Terjadi kesalahan saat mengambil data progress SKS: {str(e)}')
+        return redirect('profil_mahasiswa')
 
 # --- ADMIN VIEWS ---
-
 @login_required
 def admin_dashboard(request):
-    """View untuk dashboard admin"""
-    # Periksa apakah user adalah admin
     if not (request.user.role == 'admin' or request.user.is_superuser):
-        messages.error(request, 'Akses ditolak. Halaman untuk admin saja.')
         return redirect('login')
-    
-    # Anda bisa menambahkan data statistik atau informasi lain di sini
-    context = {
-        'title': 'Dashboard Admin',
-        'user': request.user,
-        # Tambahkan data lain yang diperlukan untuk dashboard
+
+    today = date.today()
+    week_start = today - timedelta(days=today.weekday())  # Senin minggu ini
+
+    # Nama hari yang diterjemahkan (lazy)
+    DAY_NAMES = [
+        _("Senin"), _("Selasa"), _("Rabu"), _("Kamis"),
+        _("Jumat"), _("Sabtu"), _("Minggu")
+    ]
+    day_labels = {i: str(DAY_NAMES[i]) for i in range(7)}
+
+    # Presensi hari ini
+    today_present = Presensi.objects.filter(
+        tanggal_presensi=today, jam_checkin__isnull=False
+    ).values('mahasiswa_id').distinct().count()
+
+    total_approved_students = Mahasiswa.objects.filter(
+        pengajuan_pendaftaran__status_pengajuan='disetujui'
+    ).count()
+
+    # Mapping warna & badge
+    color_map = {
+        'D3 - Diploma 3': 'bg-primary',
+        'D4 - Diploma 4': 'bg-info',
+        'LJ - Lanjut Jenjang': 'bg-success',
+        'S2 - Magister': 'bg-warning text-dark',
     }
+    badge_map = {
+        'D3 - Diploma 3': 'primary',
+        'D4 - Diploma 4': 'info',
+        'LJ - Lanjut Jenjang': 'success',
+        'S2 - Magister': 'warning',
+    }
+
+    jenjang_list = Jenjang_Pendidikan.objects.all().order_by('nama_jenjang')
+
+    weekly_data = {}  # key: 0-6 (Senin-Minggu)
+    weekly_summary = []
+    total_hadir_week = total_mahasiswa_week = 0
+
+    # Data per hari dalam seminggu
+    for i in range(7):
+        day_date = week_start + timedelta(days=i)
+        weekday_num = day_date.weekday()
+
+        # Max hadir hari itu (untuk scaling bar)
+        max_hadir_hari = Presensi.objects.filter(
+            tanggal_presensi=day_date,
+            jam_checkin__isnull=False
+        ).values('mahasiswa_id').distinct().count() or 1
+
+        day_entries = []
+        for jenjang in jenjang_list:
+            hadir = Presensi.objects.filter(
+                tanggal_presensi=day_date,
+                mahasiswa__jenjang_pendidikan=jenjang,
+                jam_checkin__isnull=False
+            ).values('mahasiswa_id').distinct().count()
+
+            total_mhs = Mahasiswa.objects.filter(
+                jenjang_pendidikan=jenjang,
+                pengajuan_pendaftaran__status_pengajuan='disetujui'
+            ).count()
+
+            perc = round(hadir / total_mhs * 100, 1) if total_mhs > 0 else 0.0
+
+            # Scaling height: lebih aman, hindari height 0% meski ada hadir
+            height_scaled = 0
+            if max_hadir_hari > 0 and hadir > 0:
+                height_scaled = round((hadir / max_hadir_hari) * 100, 1)
+            # Opsional: minimal height 5% kalau ada hadir tapi scaling kecil
+            if hadir > 0 and height_scaled < 5:
+                height_scaled = 5.0
+
+            day_entries.append({
+                'jenjang': jenjang.nama_jenjang,
+                'hadir': hadir,
+                'total': total_mhs,
+                'percentage': perc,
+                'height': height_scaled,
+                'color': color_map.get(jenjang.nama_jenjang, 'bg-primary'),
+                'badge': badge_map.get(jenjang.nama_jenjang, 'primary'),
+            })
+
+        weekly_data[weekday_num] = day_entries
+
+    # Ringkasan mingguan per jenjang
+    for jenjang in jenjang_list:
+        hadir_week = Presensi.objects.filter(
+            tanggal_presensi__gte=week_start,
+            tanggal_presensi__lte=today,
+            mahasiswa__jenjang_pendidikan=jenjang,
+            jam_checkin__isnull=False
+        ).values('mahasiswa_id').distinct().count()
+
+        total_mhs = Mahasiswa.objects.filter(
+            jenjang_pendidikan=jenjang,
+            pengajuan_pendaftaran__status_pengajuan='disetujui'
+        ).count()
+
+        perc_week = round(hadir_week / total_mhs * 100, 1) if total_mhs > 0 else 0.0
+
+        weekly_summary.append({
+            'code': jenjang.nama_jenjang,
+            'present': hadir_week,
+            'total': total_mhs,
+            'percentage': perc_week,
+            'color': color_map.get(jenjang.nama_jenjang, 'bg-primary'),
+            'badge': badge_map.get(jenjang.nama_jenjang, 'primary'),
+        })
+
+        total_hadir_week += hadir_week
+        total_mahasiswa_week += total_mhs
+
+    weekly_total_perc = round(total_hadir_week / total_mahasiswa_week * 100, 1) if total_mahasiswa_week > 0 else 0.0
+
+    # Rata-rata mingguan
+    daily_percentages = []
+    for entries in weekly_data.values():
+        day_hadir = sum(e['hadir'] for e in entries)
+        day_total = sum(e['total'] for e in entries)
+        daily_percentages.append(round(day_hadir / day_total * 100, 1) if day_total > 0 else 0.0)
+    avg_attendance_week = round(sum(daily_percentages) / len(daily_percentages), 1) if daily_percentages else 0.0
+
+    # Semester aktif
+    try:
+        active_ta = Tahun_Ajaran.objects.get(status_aktif='aktif')
+        current_semester_name = active_ta.nama_tahun_ajaran or "Semester Aktif"
+        days_total = (active_ta.tanggal_selesai - active_ta.tanggal_mulai).days
+        days_passed = (today - active_ta.tanggal_mulai).days
+        semester_progress = round(days_passed / days_total * 100) if days_total > 0 else 0
+        weeks_remaining = max(0, round((days_total - days_passed) / 7))
+    except Tahun_Ajaran.DoesNotExist:
+        current_semester_name = "Tidak Ada Semester Aktif"
+        semester_progress = weeks_remaining = 0
+
+    # Recent activities
+    recent_presensi = Presensi.objects.select_related('mahasiswa__user').filter(
+        jam_checkin__isnull=False
+    ).order_by('-tanggal_presensi', '-jam_checkin')[:4]
+
+    recent_activities = []
+    for p in recent_presensi:
+        dt = timezone.localtime(timezone.make_aware(datetime.combine(p.tanggal_presensi, p.jam_checkin)))
+        time_ago = dt.strftime("%H:%M") if p.tanggal_presensi == today else p.tanggal_presensi.strftime("%d %b")
+        initials = ''.join([w[0].upper() for w in (p.mahasiswa.user.nama_lengkap or "").split()[:2]]) or "??"
+
+        recent_activities.append({
+            'nama': p.mahasiswa.user.nama_lengkap or p.mahasiswa.nim,
+            'nim': p.mahasiswa.nim,
+            'action': "Check-out" if p.jam_checkout else "Check-in",
+            'time_ago': time_ago,
+            'color': 'success' if p.jam_checkout else 'primary',
+            'initials': initials,
+        })
+
+    # JSON untuk modal
+    day_data_json = {}
+    for weekday_num, entries in weekly_data.items():
+        day_data_json[str(weekday_num)] = [
+            {
+                'jenjang': e['jenjang'],
+                'hadir': e['hadir'],
+                'total': e['total'],
+                'percentage': e['percentage'],
+                'badge': e['badge']
+            } for e in entries
+        ]
+
+    # Siapkan context
+    context = {
+        'today_present_count': today_present,
+        'today_total_students': total_approved_students,
+        'avg_attendance_week': avg_attendance_week,
+        'current_semester_name': current_semester_name,
+        'semester_progress': semester_progress,
+        'weeks_remaining': weeks_remaining,
+        'weekly_data': weekly_data,
+        'weekly_summary': weekly_summary,
+        'weekly_total': {
+            'present': total_hadir_week,
+            'total': total_mahasiswa_week,
+            'percentage': weekly_total_perc,
+        },
+        'recent_activities': recent_activities,
+        'day_data_json': day_data_json,
+        'day_labels': day_labels,
+    }
+
+    # Pastikan semua hari ada (untuk chart lengkap)
+    for i in range(7):
+        if i not in weekly_data:
+            weekly_data[i] = []
+
+    # Sorted untuk urutan Senin-Minggu
+    sorted_weekly = sorted(weekly_data.items(), key=lambda x: x[0])
+    context['sorted_weekly'] = sorted_weekly
+
     return render(request, 'admin/admin_dashboard.html', context)
 
 @login_required
@@ -1294,83 +1882,109 @@ def monitoring_presensi(request):
 
 @login_required
 def status_pemenuhan_sks(request):
-    # Query untuk mendapatkan data mahasiswa yang pengajuannya disetujui
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        messages.error(request, 'Akses ditolak. Halaman ini untuk admin.')
+        return redirect('admin_dashboard')
+
     mahasiswa_setuju = Mahasiswa.objects.filter(
         pengajuan_pendaftaran__status_pengajuan='disetujui'
-    ).select_related('user', 'jenjang_pendidikan')
-    
-    # Ambil semua jenjang pendidikan dari database
+    ).select_related('user', 'jenjang_pendidikan').prefetch_related('kegiatan_pa').distinct()
+
     jenjang_list = Jenjang_Pendidikan.objects.all().order_by('nama_jenjang')
-    
     data_mahasiswa = []
-    
+
     for mahasiswa in mahasiswa_setuju:
-        # DAPATKAN kegiatan yang terkait dengan mahasiswa
-        kegiatan_list = []
-        
-        # Jika mahasiswa memiliki relasi many-to-many ke Kegiatan_PA
-        if hasattr(mahasiswa, 'kegiatan_pa'):
-            kegiatan_pa_set = mahasiswa.kegiatan_pa.all()
-        else:
-            # Atau jika melalui Status_Pemenuhan_SKS
-            kegiatan_pa_set = Status_Pemenuhan_SKS.objects.filter(
-                mahasiswa=mahasiswa
-            ).select_related('kegiatan_pa')
-        
-        for kegiatan_rel in kegiatan_pa_set:
-            # DAPATKAN data SKS yang benar
-            if isinstance(kegiatan_rel, Kegiatan_PA):
-                kegiatan = kegiatan_rel
-                # Dapatkan status pemenuhan SKS untuk kegiatan ini
-                status_sks = Status_Pemenuhan_SKS.objects.filter(
-                    mahasiswa=mahasiswa,
-                    kegiatan_pa=kegiatan
-                ).first()
-                
-                sks_value = kegiatan.jumlah_sks if kegiatan.jumlah_sks > 0 else 0
-                jam_target_value = kegiatan.target_jam if kegiatan.target_jam > 0 else 0
-                jam_tercapai = status_sks.jam_tercapai if status_sks else 0
+        # Hitung TOTAL agregat (sama seperti halaman mahasiswa)
+        total_jam_ditempuh = calculate_total_duration_all(mahasiswa.id)
+
+        kegiatan_pa_set = mahasiswa.kegiatan_pa.all()
+        total_jam_target = sum(k.target_jam for k in kegiatan_pa_set)
+        total_sks = sum(k.jumlah_sks for k in kegiatan_pa_set)
+
+        status_overall = 'Memenuhi' if total_jam_ditempuh >= total_jam_target else 'Belum Memenuhi'
+
+        progress_percentage = 0
+        progress_class = 'bg-secondary'
+        if total_jam_target > 0:
+            progress_percentage = (total_jam_ditempuh / total_jam_target) * 100
+            if total_jam_ditempuh >= total_jam_target:
+                progress_class = 'bg-success'
+            elif total_jam_ditempuh >= total_jam_target * 0.7:
+                progress_class = 'bg-primary'
+            elif total_jam_ditempuh >= total_jam_target * 0.4:
+                progress_class = 'bg-warning'
             else:
-                # Jika langsung dari Status_Pemenuhan_SKS
-                kegiatan = kegiatan_rel.kegiatan_pa
-                sks_value = kegiatan_rel.jumlah_sks if kegiatan_rel.jumlah_sks > 0 else 0
-                jam_target_value = kegiatan_rel.jam_target if kegiatan_rel.jam_target > 0 else 0
-                jam_tercapai = kegiatan_rel.jam_tercapai
-            
+                progress_class = 'bg-danger'
+
+        sisa_jam = max(0, total_jam_target - total_jam_ditempuh)
+        persentase_40 = total_jam_target * 0.4
+        persentase_70 = total_jam_target * 0.7
+
+        # Breakdown per kegiatan (proporsional untuk tampilan saja)
+        kegiatan_list = []
+        for kegiatan in kegiatan_pa_set:
+            proporsi = kegiatan.target_jam / total_jam_target if total_jam_target > 0 else 0
+            jam_tercapai_proporsional = round(total_jam_ditempuh * proporsi, 1)
+
             kegiatan_list.append({
                 'nama_kegiatan': kegiatan.nama_kegiatan,
-                'sks': sks_value,
-                'jam_per_minggu': kegiatan.total_jam_minggu if hasattr(kegiatan, 'total_jam_minggu') else 0,
-                'jam_target': jam_target_value,
-                'jam_tercapai': jam_tercapai
+                'sks': kegiatan.jumlah_sks,
+                'jam_per_minggu': getattr(kegiatan, 'total_jam_minggu', 0),
+                'jam_target': kegiatan.target_jam,
+                'jam_tercapai': jam_tercapai_proporsional,
+                'status_per_kegiatan': 'Memenuhi' if jam_tercapai_proporsional >= kegiatan.target_jam else 'Belum Memenuhi'
             })
-        
-        # Hitung total
-        total_jam_ditempuh = sum(k['jam_tercapai'] for k in kegiatan_list)
-        total_jam_target = sum(k['jam_target'] for k in kegiatan_list)
-        
-        # Tentukan status overall
-        status_overall = 'Memenuhi' if total_jam_ditempuh >= total_jam_target else 'Belum Memenuhi'
-        
+
         data_mahasiswa.append({
             'nama': mahasiswa.user.nama_lengkap or mahasiswa.user.username,
             'jenjang': mahasiswa.jenjang_pendidikan.nama_jenjang if mahasiswa.jenjang_pendidikan else '-',
             'kegiatan_list': kegiatan_list,
-            'total_jam_ditempuh': total_jam_ditempuh,
-            'total_jam_target': total_jam_target,
+            'total_jam_ditempuh': round(total_jam_ditempuh, 1),
+            'total_jam_target': round(total_jam_target, 1),
+            'total_sks': total_sks,
+            'progress_percentage': round(progress_percentage, 1),
+            'progress_class': progress_class,
+            'sisa_jam': round(sisa_jam, 1),
+            'persentase_40': round(persentase_40, 1),
+            'persentase_70': round(persentase_70, 1),
             'status_overall': status_overall
         })
-    
+
+    data_mahasiswa.sort(key=lambda x: x['nama'].lower())
+
+    total_memenuhi = sum(1 for m in data_mahasiswa if m['status_overall'] == 'Memenuhi')
+    total_belum_memenuhi = sum(1 for m in data_mahasiswa if m['status_overall'] == 'Belum Memenuhi')
+    total_sks_all = sum(m['total_sks'] for m in data_mahasiswa)
+
     context = {
         'data_mahasiswa': data_mahasiswa,
         'total_mahasiswa': len(data_mahasiswa),
-        'total_sks_all': sum(sum(k['sks'] for k in m['kegiatan_list']) for m in data_mahasiswa),
-        'total_memenuhi': sum(1 for m in data_mahasiswa if m['status_overall'] == 'Memenuhi'),
-        'total_belum_memenuhi': sum(1 for m in data_mahasiswa if m['status_overall'] == 'Belum Memenuhi'),
-        'jenjang_list': jenjang_list,  # VARIABEL YANG DIPAKAI ADALAH jenjang_list
+        'total_sks_all': total_sks_all,
+        'total_memenuhi': total_memenuhi,
+        'total_belum_memenuhi': total_belum_memenuhi,
+        'jenjang_list': jenjang_list,
     }
-    
     return render(request, 'admin/status_pemenuhan_sks.html', context)
+
+def calculate_total_duration_all(mahasiswa_id):
+    """Total jam dari SEMUA presensi mahasiswa, tanpa peduli kegiatan_pa"""
+    presensi_list = Presensi.objects.filter(
+        mahasiswa_id=mahasiswa_id,
+        jam_checkin__isnull=False,
+        jam_checkout__isnull=False
+    )
+    
+    total_seconds = 0
+    for presensi in presensi_list:
+        if presensi.jam_checkin and presensi.jam_checkout:
+            checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+            checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
+            if checkout_dt < checkin_dt:
+                checkout_dt += timedelta(days=1)
+            delta = checkout_dt - checkin_dt
+            total_seconds += delta.total_seconds()
+    
+    return round(total_seconds / 3600, 1)
 
 @login_required
 def monitor_durasi(request):

@@ -3,15 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-14 02:12+0700\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2026-02-03 14:14+0700\n"
+"PO-Revision-Date: 2026-02-03 14:27+0700\n"
+"Last-Translator: Admin <admin@example.com>\n"
+"Language-Team: Indonesian <id@li.org>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,8 +42,8 @@ msgstr "Nama"
 #: .\accounts\templates\admin\data_sks.html:372
 #: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:93
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:65
-#: .\accounts\templates\admin\rekap_presensi.html:29
-#: .\accounts\templates\admin\rekap_presensi.html:64
+#: .\accounts\templates\admin\rekap_presensi.html:27
+#: .\accounts\templates\admin\rekap_presensi.html:62
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:52
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:170
 #: .\accounts\templates\mahasiswa\register_step2.html:102
@@ -63,14 +62,14 @@ msgstr "Nama Tahun Akademik"
 #: .\accounts\models.py:27 .\accounts\templates\admin\data_sks.html:213
 #: .\accounts\templates\admin\data_sks.html:447
 #: .\accounts\templates\admin\data_sks.html:483
-#: .\accounts\templates\admin\rekap_presensi.html:21
+#: .\accounts\templates\admin\rekap_presensi.html:19
 msgid "Start Date"
 msgstr "Tanggal Mulai"
 
 #: .\accounts\models.py:28 .\accounts\templates\admin\data_sks.html:214
 #: .\accounts\templates\admin\data_sks.html:451
 #: .\accounts\templates\admin\data_sks.html:487
-#: .\accounts\templates\admin\rekap_presensi.html:25
+#: .\accounts\templates\admin\rekap_presensi.html:23
 msgid "End Date"
 msgstr "Tanggal Selesai"
 
@@ -78,7 +77,6 @@ msgstr "Tanggal Selesai"
 #: .\accounts\templates\admin\data_mahasiswa.html:185
 #: .\accounts\templates\admin\data_sks.html:241
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:50
-#: .\accounts\templates\mahasiswa\progress_sks.html:131
 msgid "Active"
 msgstr "Aktif"
 
@@ -114,7 +112,7 @@ msgstr "Nama Semester"
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:78
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:70
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:186
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:129
+#: .\accounts\templates\mahasiswa\progress_sks.html:40
 msgid "Semester"
 msgstr "Semester"
 
@@ -122,7 +120,7 @@ msgstr "Semester"
 msgid "Semesters"
 msgstr "Semester"
 
-#: .\accounts\models.py:55 .\accounts\templates\login.html:277
+#: .\accounts\models.py:55 .\accounts\templates\login.html:276
 msgid "NRP"
 msgstr "NRP"
 
@@ -131,7 +129,9 @@ msgid "Admin"
 msgstr "Admin"
 
 #: .\accounts\models.py:59 .\accounts\models.py:101
-#: .\accounts\templates\admin\partials\approve_modal_content.html:3
+#: .\accounts\templates\admin\partials\approve_modal_content.html:4
+#: .\accounts\templates\mahasiswa\progress_sks.html:36
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:25
 msgid "Student"
 msgstr "Mahasiswa"
 
@@ -149,12 +149,12 @@ msgstr "Status Akun"
 #: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:68
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:17
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:155
-#: .\accounts\templates\mahasiswa\register_step1.html:70
+#: .\accounts\templates\mahasiswa\register_step1.html:72
 msgid "Full Name"
 msgstr "Nama Lengkap"
 
 #: .\accounts\models.py:75
-#: .\accounts\templates\mahasiswa\register_step1.html:40
+#: .\accounts\templates\mahasiswa\register_step1.html:42
 #: .\accounts\templates\mahasiswa\register_step2.html:70
 #: .\accounts\templates\mahasiswa\register_step3.html:172
 msgid "Account"
@@ -175,11 +175,10 @@ msgstr "Akun"
 #: .\accounts\templates\admin\master_data_wajah.html:130
 #: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:72
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:27
-#: .\accounts\templates\admin\partials\reject_modal_content.html:13
-#: .\accounts\templates\admin\rekap_presensi.html:62
+#: .\accounts\templates\admin\partials\reject_modal_content.html:14
+#: .\accounts\templates\admin\rekap_presensi.html:60
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:36
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:159
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:55
 msgid "Student ID"
 msgstr "ID Mahasiswa"
 
@@ -190,8 +189,7 @@ msgstr "ID Mahasiswa"
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:91
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:62
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:182
-#: .\accounts\templates\mahasiswa\register_step1.html:91
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:57
+#: .\accounts\templates\mahasiswa\register_step1.html:93
 msgid "Class"
 msgstr "Kelas"
 
@@ -269,12 +267,7 @@ msgstr "Nama Kegiatan"
 #: .\accounts\templates\admin\status_pemenuhan_sks.html:181
 #: .\accounts\templates\admin\status_pemenuhan_sks.html:216
 #: .\accounts\templates\mahasiswa\progress_sks.html:22
-#: .\accounts\templates\mahasiswa\progress_sks.html:33
-#: .\accounts\templates\mahasiswa\progress_sks.html:128
-#: .\accounts\templates\mahasiswa\progress_sks.html:316
 #: .\accounts\templates\mahasiswa\register_step2.html:286
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:22
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:44
 msgid "Credits"
 msgstr "SKS"
 
@@ -284,7 +277,7 @@ msgstr "Total Jam per Minggu"
 
 #: .\accounts\models.py:143 .\accounts\models.py:156
 #: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:186
-#: .\accounts\templates\mahasiswa\progress_sks.html:60
+#: .\accounts\templates\mahasiswa\progress_sks.html:69
 msgid "Target Hours"
 msgstr "Target Jam"
 
@@ -361,8 +354,8 @@ msgstr "Presensi"
 msgid "Attendances"
 msgstr "Presensi"
 
-#: .\accounts\models.py:193 .\accounts\templates\admin\rekap_presensi.html:68
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:61
+#: .\accounts\models.py:193 .\accounts\templates\admin\rekap_presensi.html:66
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:83
 #: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1868
 msgid "Duration"
 msgstr "Durasi"
@@ -380,7 +373,6 @@ msgid "File Path"
 msgstr "Lokasi File"
 
 #: .\accounts\models.py:205
-#: .\accounts\templates\mahasiswa\progress_sks.html:116
 msgid "Description"
 msgstr "Deskripsi"
 
@@ -423,7 +415,7 @@ msgid "Submission Status"
 msgstr "Status Pengajuan"
 
 #: .\accounts\models.py:227
-#: .\accounts\templates\admin\partials\reject_modal_content.html:19
+#: .\accounts\templates\admin\partials\reject_modal_content.html:20
 msgid "Rejection Reason"
 msgstr "Alasan Penolakan"
 
@@ -577,7 +569,6 @@ msgstr "Detail Presensi Minggu Ini:"
 #: .\accounts\templates\admin\data_sks.html:89
 #: .\accounts\templates\admin\master_data_wajah.html:132
 #: .\accounts\templates\admin\status_pemenuhan_sks.html:151
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:58
 msgid "Level"
 msgstr "Jenjang"
 
@@ -620,7 +611,7 @@ msgstr "Pembaruan real-time aktivitas mahasiswa"
 #: .\accounts\templates\admin\admin_dashboard.html:304
 #: .\accounts\templates\admin\admin_dashboard.html:320
 #: .\accounts\templates\admin\admin_dashboard.html:336
-#: .\accounts\templates\admin\partials\approve_modal_content.html:13
+#: .\accounts\templates\admin\partials\approve_modal_content.html:14
 msgid "Student ID:"
 msgstr "ID Mahasiswa:"
 
@@ -725,7 +716,7 @@ msgstr "Program"
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:38
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:44
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:165
-#: .\accounts\templates\mahasiswa\register_step1.html:105
+#: .\accounts\templates\mahasiswa\register_step1.html:107
 msgid "Email"
 msgstr "Email"
 
@@ -737,9 +728,6 @@ msgstr "Email"
 #: .\accounts\templates\admin\master_data_wajah.html:135
 #: .\accounts\templates\admin\master_data_wajah.html:330
 #: .\accounts\templates\admin\status_pemenuhan_sks.html:156
-#: .\accounts\templates\mahasiswa\progress_sks.html:118
-#: .\accounts\templates\mahasiswa\progress_sks.html:321
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:62
 msgid "Status"
 msgstr "Status"
 
@@ -820,7 +808,7 @@ msgstr "Konfirmasi Persetujuan"
 #: .\accounts\templates\admin\data_sks.html:457
 #: .\accounts\templates\admin\data_sks.html:493
 #: .\accounts\templates\admin\data_sks.html:514
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:207
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:214
 #: .\accounts\templates\admin\partials\edit_mahasiswa_modal.html:156
 #: .\accounts\templates\mahasiswa\data_wajah.html:176
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:233
@@ -878,7 +866,7 @@ msgid "Network error occurred"
 msgstr "Terjadi kesalahan jaringan"
 
 #: .\accounts\templates\admin\approval_pendaftaran.html:796
-#: .\accounts\templates\admin\partials\reject_modal_content.html:23
+#: .\accounts\templates\admin\partials\reject_modal_content.html:24
 msgid "Rejection reason must be filled"
 msgstr "Alasan penolakan harus diisi"
 
@@ -1045,17 +1033,7 @@ msgstr "Tahun Akademik:"
 #: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:187
 #: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:191
 #: .\accounts\templates\admin\status_pemenuhan_sks.html:192
-#: .\accounts\templates\mahasiswa\progress_sks.html:59
-#: .\accounts\templates\mahasiswa\progress_sks.html:60
-#: .\accounts\templates\mahasiswa\progress_sks.html:141
-#: .\accounts\templates\mahasiswa\progress_sks.html:154
-#: .\accounts\templates\mahasiswa\progress_sks.html:167
-#: .\accounts\templates\mahasiswa\progress_sks.html:212
-#: .\accounts\templates\mahasiswa\progress_sks.html:301
-#: .\accounts\templates\mahasiswa\progress_sks.html:302
-#: .\accounts\templates\mahasiswa\progress_sks.html:317
-#: .\accounts\templates\mahasiswa\progress_sks.html:318
-#: .\accounts\templates\mahasiswa\progress_sks.html:319
+#: .\accounts\templates\mahasiswa\progress_sks.html:68
 #: .\accounts\templates\mahasiswa\register_step2.html:286
 msgid "hours"
 msgstr "jam"
@@ -1079,9 +1057,8 @@ msgstr "Tambah Tahun Akademik"
 
 #: .\accounts\templates\admin\data_sks.html:212
 #: .\accounts\templates\admin\kamera_presensi_mhs.html:26
-#: .\accounts\templates\admin\rekap_presensi.html:63
+#: .\accounts\templates\admin\rekap_presensi.html:61
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:28
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:56
 msgid "Name"
 msgstr "Nama"
 
@@ -1187,9 +1164,8 @@ msgstr "mahasiswa"
 
 #: .\accounts\templates\admin\kamera_presensi_mhs.html:16
 #: .\accounts\templates\admin\kamera_presensi_mhs.html:29
-#: .\accounts\templates\admin\rekap_presensi.html:61
-#: .\accounts\templates\mahasiswa\progress_sks.html:314
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:54
+#: .\accounts\templates\admin\rekap_presensi.html:59
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:74
 msgid "Date"
 msgstr "Tanggal"
 
@@ -1208,23 +1184,23 @@ msgstr "Gambar Check-out"
 
 #: .\accounts\templates\admin\kamera_presensi_mhs.html:92
 #: .\accounts\templates\admin\kamera_presensi_mhs.html:94
-#: .\accounts\templates\admin\rekap_presensi.html:66
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:59
+#: .\accounts\templates\admin\rekap_presensi.html:64
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:77
 msgid "Check-in"
 msgstr "Check-in"
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:101
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:103
-#: .\accounts\templates\admin\rekap_presensi.html:67
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:60
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:102
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:104
+#: .\accounts\templates\admin\rekap_presensi.html:65
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:80
 msgid "Check-out"
 msgstr "Check-out"
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:113
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:114
 msgid "No approved students yet"
 msgstr "Belum ada mahasiswa yang disetujui"
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:114
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:115
 msgid ""
 "All students whose registration approval status has been approved will "
 "appear here"
@@ -1232,11 +1208,11 @@ msgstr ""
 "Semua mahasiswa yang status persetujuan pendaftarannya telah disetujui akan "
 "muncul di sini"
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:116
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:117
 msgid "Go to Registration Approval"
 msgstr "Pergi ke Persetujuan Pendaftaran"
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:129
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:130
 msgid ""
 "Only displays students whose registration approval status has been APPROVED. "
 "Multiple check-ins/outs per day are allowed, must check-out before checking "
@@ -1246,76 +1222,29 @@ msgstr ""
 "DISETUJUI. Beberapa check-in/out per hari diperbolehkan, harus check-out "
 "sebelum check-in kembali. Data direset setiap hari baru."
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:141
-msgid "Take Attendance Photo"
-msgstr "Ambil Foto Presensi"
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:142
+#, fuzzy
+#| msgid "Attendance using Face Recognition"
+msgid "Attendance - Face Liveness Detection"
+msgstr "Presensi menggunakan Pengenalan Wajah"
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:150
-msgid "Live Camera"
-msgstr "Kamera Langsung"
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:151
+msgid "Live Camera - Real-time Detection"
+msgstr ""
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:157
-msgid "Make sure your face is clearly visible"
-msgstr "Pastikan wajah Anda terlihat jelas"
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:162
+msgid "System will auto-detect and save when face is verified as REAL"
+msgstr ""
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:166
-msgid "Take Photo"
-msgstr "Ambil Foto"
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:183
+#, fuzzy
+#| msgid "Student ID"
+msgid "Student Info"
+msgstr "ID Mahasiswa"
 
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:169
-msgid "Retake"
-msgstr "Ambil Ulang"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:177
-#: .\accounts\templates\mahasiswa\register_step3.html:382
-msgid "Preview"
-msgstr "Pratinjau"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:184
-msgid "Photo will appear here"
-msgstr "Foto akan muncul di sini"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:196
-msgid "Photo will be saved as attendance evidence"
-msgstr "Foto akan disimpan sebagai bukti presensi"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:210
-msgid "Confirm & Save"
-msgstr "Konfirmasi & Simpan"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:323
-msgid "Cannot access camera. Please ensure camera permission is granted."
-msgstr "Tidak dapat mengakses kamera. Pastikan izin kamera diberikan."
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:373
-msgid "Action: CHECK-IN"
-msgstr "Aksi: CHECK-IN"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:389
-msgid "Action: CHECK-OUT"
-msgstr "Aksi: CHECK-OUT"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:443
-msgid "No photo taken!"
-msgstr "Tidak ada foto yang diambil!"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:449
-#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:212
-#: .\accounts\templates\login.html:356
-msgid "Processing..."
-msgstr "Memproses..."
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:477
-msgid "CHECK-IN/OUT successful for"
-msgstr "CHECK-IN/OUT berhasil untuk"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:485
-msgid "Failed:"
-msgstr "Gagal:"
-
-#: .\accounts\templates\admin\kamera_presensi_mhs.html:490
-msgid "An error occurred while processing:"
-msgstr "Terjadi kesalahan saat memproses:"
+#: .\accounts\templates\admin\kamera_presensi_mhs.html:203
+msgid "Liveness detection ensures real attendance"
+msgstr ""
 
 #: .\accounts\templates\admin\master_data_wajah.html:5
 msgid "Student Face Data Master"
@@ -1351,7 +1280,7 @@ msgstr "Jumlah Foto"
 
 #: .\accounts\templates\admin\master_data_wajah.html:220
 #: .\accounts\templates\admin\master_data_wajah.html:345
-#: .\accounts\templates\mahasiswa\register_step1.html:48
+#: .\accounts\templates\mahasiswa\register_step1.html:50
 #: .\accounts\templates\mahasiswa\register_step2.html:78
 #: .\accounts\templates\mahasiswa\register_step3.html:180
 msgid "Photos"
@@ -1412,11 +1341,11 @@ msgstr "Tidak ada data"
 msgid "Registration photo"
 msgstr "Foto pendaftaran"
 
-#: .\accounts\templates\admin\partials\approve_modal_content.html:1
+#: .\accounts\templates\admin\partials\approve_modal_content.html:2
 msgid "Are you sure you want to approve this registration?"
 msgstr "Apakah Anda yakin ingin menyetujui pendaftaran ini?"
 
-#: .\accounts\templates\admin\partials\approve_modal_content.html:18
+#: .\accounts\templates\admin\partials\approve_modal_content.html:19
 msgid "The student will get access to the system after approval."
 msgstr "Mahasiswa akan mendapatkan akses ke sistem setelah persetujuan."
 
@@ -1460,6 +1389,11 @@ msgstr "Dosen Pembimbing"
 msgid "Laboratory Courses"
 msgstr "Mata Kuliah Laboratorium"
 
+#: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:212
+#: .\accounts\templates\login.html:355
+msgid "Processing..."
+msgstr "Memproses..."
+
 #: .\accounts\templates\admin\partials\detail_pendaftaran_content.html:235
 msgid "Photo download successfully started"
 msgstr "Unduh foto berhasil dimulai"
@@ -1487,70 +1421,70 @@ msgstr "Menyimpan..."
 msgid "Student data successfully updated!"
 msgstr "Data mahasiswa berhasil diperbarui!"
 
-#: .\accounts\templates\admin\partials\reject_modal_content.html:1
+#: .\accounts\templates\admin\partials\reject_modal_content.html:2
 msgid "Provide the reason for rejecting this registration"
 msgstr "Berikan alasan untuk menolak pendaftaran ini"
 
-#: .\accounts\templates\admin\partials\reject_modal_content.html:3
+#: .\accounts\templates\admin\partials\reject_modal_content.html:4
 msgid "Registration will be rejected:"
 msgstr "Pendaftaran akan ditolak:"
 
-#: .\accounts\templates\admin\partials\reject_modal_content.html:21
+#: .\accounts\templates\admin\partials\reject_modal_content.html:22
 msgid ""
 "Enter the reason for rejection (example: Unclear photo, Invalid data, etc.)"
 msgstr ""
 "Masukkan alasan penolakan (contoh: Foto tidak jelas, Data tidak valid, dll.)"
 
-#: .\accounts\templates\admin\partials\reject_modal_content.html:24
+#: .\accounts\templates\admin\partials\reject_modal_content.html:25
 msgid "The rejection reason will be sent to the student's email."
 msgstr "Alasan penolakan akan dikirim ke email mahasiswa."
 
-#: .\accounts\templates\admin\rekap_presensi.html:5
+#: .\accounts\templates\admin\rekap_presensi.html:4
 msgid "Attendance Recap"
 msgstr "Rekap Presensi"
 
-#: .\accounts\templates\admin\rekap_presensi.html:16
+#: .\accounts\templates\admin\rekap_presensi.html:14
 msgid "Report Filter"
 msgstr "Filter Laporan"
 
-#: .\accounts\templates\admin\rekap_presensi.html:33
+#: .\accounts\templates\admin\rekap_presensi.html:31
 #: .\accounts\templates\admin\status_pemenuhan_sks.html:150
 msgid "Activity"
 msgstr "Kegiatan"
 
-#: .\accounts\templates\admin\rekap_presensi.html:38
+#: .\accounts\templates\admin\rekap_presensi.html:36
 msgid "Apply Filter"
 msgstr "Terapkan Filter"
 
-#: .\accounts\templates\admin\rekap_presensi.html:41
+#: .\accounts\templates\admin\rekap_presensi.html:39
 msgid "Reset Filter"
 msgstr "Reset Filter"
 
-#: .\accounts\templates\admin\rekap_presensi.html:52
+#: .\accounts\templates\admin\rekap_presensi.html:50
 msgid "Attendance Data"
 msgstr "Data Presensi"
 
-#: .\accounts\templates\admin\rekap_presensi.html:65
+#: .\accounts\templates\admin\rekap_presensi.html:63
 msgid "Final Project Activity"
 msgstr "Kegiatan Proyek Akhir"
 
-#: .\accounts\templates\admin\rekap_presensi.html:116
+#: .\accounts\templates\admin\rekap_presensi.html:114
 msgid "Not Checked-out Yet"
 msgstr "Belum Check-out"
 
-#: .\accounts\templates\admin\rekap_presensi.html:130
+#: .\accounts\templates\admin\rekap_presensi.html:128
 msgid "No attendance data found"
 msgstr "Tidak ada data presensi ditemukan"
 
-#: .\accounts\templates\admin\rekap_presensi.html:140
+#: .\accounts\templates\admin\rekap_presensi.html:138
 msgid "No attendance data"
 msgstr "Tidak ada data presensi"
 
-#: .\accounts\templates\admin\rekap_presensi.html:142
+#: .\accounts\templates\admin\rekap_presensi.html:140
 msgid "No attendance data found for the selected filter."
 msgstr "Tidak ada data presensi ditemukan untuk filter yang dipilih."
 
-#: .\accounts\templates\admin\rekap_presensi.html:143
+#: .\accounts\templates\admin\rekap_presensi.html:141
 msgid "Try changing the filter or date range."
 msgstr "Coba ubah filter atau rentang tanggal."
 
@@ -1641,7 +1575,6 @@ msgid "Filter Education Level"
 msgstr "Filter Jenjang Pendidikan"
 
 #: .\accounts\templates\admin\status_pemenuhan_sks.html:119
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:133
 msgid "Export Excel"
 msgstr "Ekspor Excel"
 
@@ -1688,7 +1621,7 @@ msgstr "Fitur ekspor Excel akan diimplementasikan"
 msgid "Attendance & SKS Management System - Face Recognition"
 msgstr "Sistem Manajemen Presensi & SKS - Pengenalan Wajah"
 
-#: .\accounts\templates\base.html:526
+#: .\accounts\templates\base.html:524
 msgid "Student Dashboard"
 msgstr "Dasbor Mahasiswa"
 
@@ -1696,16 +1629,16 @@ msgstr "Dasbor Mahasiswa"
 msgid "Login - Attendance & Credit Management System"
 msgstr "Login - Sistem Manajemen Presensi & SKS"
 
-#: .\accounts\templates\login.html:242
+#: .\accounts\templates\login.html:241
 msgid "Attendance & Credit Management System PA Lab MSECT"
 msgstr "Sistem Manajemen Presensi & SKS PA Lab MSECT"
 
-#: .\accounts\templates\login.html:243
+#: .\accounts\templates\login.html:242
 #: .\accounts\templates\mahasiswa\sidebar_mahasiswa.html:10
 msgid "Face Recognition"
 msgstr "Pengenalan Wajah"
 
-#: .\accounts\templates\login.html:247
+#: .\accounts\templates\login.html:246
 msgid ""
 "Integrated system for attendance management, credit assessment, and final "
 "project student progress monitoring."
@@ -1713,52 +1646,52 @@ msgstr ""
 "Sistem terintegrasi untuk manajemen presensi, penilaian SKS, dan monitoring "
 "progres mahasiswa proyek akhir."
 
-#: .\accounts\templates\login.html:251
+#: .\accounts\templates\login.html:250
 msgid "Attendance using Face Recognition"
 msgstr "Presensi menggunakan Pengenalan Wajah"
 
-#: .\accounts\templates\login.html:252
+#: .\accounts\templates\login.html:251
 msgid "Credit Progress Monitoring"
 msgstr "Monitoring Progres SKS"
 
-#: .\accounts\templates\login.html:253
+#: .\accounts\templates\login.html:252
 msgid "Final Project Activity Management"
 msgstr "Manajemen Kegiatan Proyek Akhir"
 
-#: .\accounts\templates\login.html:259
+#: .\accounts\templates\login.html:258
 msgid "Encrypted & secure system"
 msgstr "Sistem terenkripsi & aman"
 
-#: .\accounts\templates\login.html:269
+#: .\accounts\templates\login.html:268
 msgid "Welcome!"
 msgstr "Selamat Datang!"
 
-#: .\accounts\templates\login.html:270
+#: .\accounts\templates\login.html:269
 msgid "Please login to access your account"
 msgstr "Silakan login untuk mengakses akun Anda"
 
-#: .\accounts\templates\login.html:283
+#: .\accounts\templates\login.html:282
 msgid "Enter NRP"
 msgstr "Masukkan NRP"
 
-#: .\accounts\templates\login.html:290
-#: .\accounts\templates\mahasiswa\register_step1.html:111
+#: .\accounts\templates\login.html:289
+#: .\accounts\templates\mahasiswa\register_step1.html:113
 msgid "Password"
 msgstr "Kata Sandi"
 
-#: .\accounts\templates\login.html:296
+#: .\accounts\templates\login.html:295
 msgid "Enter password"
 msgstr "Masukkan kata sandi"
 
-#: .\accounts\templates\login.html:311
+#: .\accounts\templates\login.html:310
 msgid "Login"
 msgstr "Login"
 
-#: .\accounts\templates\login.html:318
+#: .\accounts\templates\login.html:317
 msgid "Don't have an account?"
 msgstr "Belum punya akun?"
 
-#: .\accounts\templates\login.html:319
+#: .\accounts\templates\login.html:318
 msgid "Register new account"
 msgstr "Daftar akun baru"
 
@@ -1957,52 +1890,52 @@ msgid ""
 "Are you sure you want to delete all photos? This action cannot be undone!"
 msgstr "Apakah Anda yakin ingin menghapus data mahasiswa ini?"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:7
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:9
 msgid "Account Approval - In Process"
 msgstr "Persetujuan Akun - Dalam Proses"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:267
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:269
 msgid "Your Account Approval is in Process"
 msgstr "Persetujuan Akun Anda Sedang Diproses"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:272
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:274
 msgid "Status: Awaiting Admin Verification"
 msgstr "Status: Menunggu Verifikasi Admin"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:283
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:285
 msgid "Your account has been registered!"
 msgstr "Akun Anda telah terdaftar!"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:292
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:294
 msgid "Verification Process"
 msgstr "Proses Verifikasi"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:296
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:298
 msgid "We are verifying your academic data and validating your face photos."
 msgstr ""
 "Kami sedang memverifikasi data akademik Anda dan memvalidasi foto wajah Anda."
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:301
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:303
 msgid "Please wait up to 3×24 hours"
 msgstr "Silakan tunggu hingga 3×24 jam"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:305
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:307
 msgid "You will receive an email notification after approval."
 msgstr "Anda akan menerima notifikasi email setelah persetujuan."
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:306
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:308
 msgid "Please check your email periodically for account status updates."
 msgstr "Silakan periksa email Anda secara berkala untuk pembaruan status akun."
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:312
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:314
 msgid "Notification will be sent to:"
 msgstr "Notifikasi akan dikirim ke:"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:327
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:329
 msgid "Back to Login Page"
 msgstr "Kembali ke Halaman Login"
 
-#: .\accounts\templates\mahasiswa\persetujuandaftar.html:332
+#: .\accounts\templates\mahasiswa\persetujuandaftar.html:334
 msgid "If you don't receive an email within 24 hours, contact"
 msgstr "Jika Anda tidak menerima email dalam 24 jam, hubungi"
 
@@ -2073,7 +2006,7 @@ msgid "Enter new password"
 msgstr "Masukkan kata sandi baru"
 
 #: .\accounts\templates\mahasiswa\profil_mahasiswa.html:225
-#: .\accounts\templates\mahasiswa\register_step1.html:118
+#: .\accounts\templates\mahasiswa\register_step1.html:120
 msgid "Confirm Password"
 msgstr "Konfirmasi Kata Sandi"
 
@@ -2158,214 +2091,161 @@ msgstr "Gagal memperbarui pembimbing!"
 msgid "Credit Progress"
 msgstr "Progres SKS"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:33
-msgid "This Semester's Credit Progress"
-msgstr "Progres SKS Semester Ini"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:33
-#: .\accounts\templates\mahasiswa\progress_sks.html:72
-#: .\accounts\templates\mahasiswa\progress_sks.html:125
-#: .\accounts\templates\mahasiswa\progress_sks.html:316
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:22
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:44
+#: .\accounts\templates\mahasiswa\progress_sks.html:22
+#: .\accounts\templates\mahasiswa\progress_sks.html:82
 msgid "Total Credits"
 msgstr "Total SKS"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:45
-msgid "Overall Semester Progress"
+#: .\accounts\templates\mahasiswa\progress_sks.html:26
+#: .\accounts\templates\mahasiswa\progress_sks.html:115
+#, fuzzy
+#| msgid "PA Activities"
+msgid "Activities"
+msgstr "Kegiatan PA"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:53
+#, fuzzy
+#| msgid "Overall Semester Progress"
+msgid "Overall SKS Progress"
 msgstr "Progres Semester Keseluruhan"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:59
-#: .\accounts\templates\mahasiswa\progress_sks.html:83
-#: .\accounts\templates\mahasiswa\progress_sks.html:137
-#: .\accounts\templates\mahasiswa\progress_sks.html:301
-#: .\accounts\templates\mahasiswa\progress_sks.html:318
+#: .\accounts\templates\mahasiswa\progress_sks.html:54
+#, fuzzy
+#| msgid "PA Activities"
+msgid "activities"
+msgstr "Kegiatan PA"
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:67
+#: .\accounts\templates\mahasiswa\progress_sks.html:93
 msgid "Completed Hours"
 msgstr "Jam Terselesaikan"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:94
-#: .\accounts\templates\mahasiswa\progress_sks.html:150
-#: .\accounts\templates\mahasiswa\progress_sks.html:302
-#: .\accounts\templates\mahasiswa\progress_sks.html:319
+#: .\accounts\templates\mahasiswa\progress_sks.html:104
 msgid "Remaining Hours"
 msgstr "Jam Tersisa"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:108
-msgid "Credit Progress Details"
-msgstr "Detail Progres SKS"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:117
-msgid "Amount"
-msgstr "Jumlah"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:138
-msgid "From 344 target hours"
-msgstr "Dari 344 jam target"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:151
-msgid "To reach target"
-msgstr "Untuk mencapai target"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:157
-msgid "In Progress"
-msgstr "Dalam Proses"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:163
-#: .\accounts\templates\mahasiswa\progress_sks.html:317
-msgid "Total Target Hours"
-msgstr "Total Jam Target"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:164
-msgid "This semester's target"
-msgstr "Target semester ini"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:170
-#: .\accounts\templates\mahasiswa\register_step2.html:286
-msgid "Target"
-msgstr "Target"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:186
-msgid "Progress Status"
-msgstr "Status Progres"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:187
-#: .\accounts\templates\mahasiswa\progress_sks.html:321
-msgid "Excellent"
-msgstr "Sangat Baik"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:191
-msgid "Export Report"
-msgstr "Ekspor Laporan"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:204
+#: .\accounts\templates\mahasiswa\progress_sks.html:141
 msgid "Completion Estimate"
 msgstr "Perkiraan Penyelesaian"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:211
+#: .\accounts\templates\mahasiswa\progress_sks.html:151
 msgid "Average per Week"
 msgstr "Rata-rata per Minggu"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:215
-#: .\accounts\templates\mahasiswa\progress_sks.html:323
+#: .\accounts\templates\mahasiswa\progress_sks.html:161
 msgid "Estimated Completion"
 msgstr "Perkiraan Penyelesaian"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:221
-msgid "Time Remaining"
-msgstr "Waktu Tersisa"
+#: .\accounts\templates\mahasiswa\progress_sks.html:171
+#, fuzzy
+#| msgid "Recommendation/hour"
+msgid "Recommendation per day (hours)"
+msgstr "Rekomendasi/jam"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:222
+#: .\accounts\templates\mahasiswa\progress_sks.html:181
+msgid "Note"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:181
+msgid "Based on your current progress, you need approximately"
+msgstr ""
+
+#: .\accounts\templates\mahasiswa\progress_sks.html:182
 msgid "days"
 msgstr "hari"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:225
-msgid "Recommendation/hour"
-msgstr "Rekomendasi/jam"
+#: .\accounts\templates\mahasiswa\progress_sks.html:183
+#, fuzzy
+#| msgid "Selected PA Activities"
+msgid "to complete all activities."
+msgstr "Kegiatan PA Terpilih"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:226
-msgid "hours/day"
-msgstr "jam/hari"
+#: .\accounts\templates\mahasiswa\progress_sks.html:195
+#, fuzzy
+#| msgid "Student Information"
+msgid "Information"
+msgstr "Informasi Mahasiswa"
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:306
-msgid "Preparing credit progress report..."
-msgstr "Mempersiapkan laporan progres SKS..."
+#: .\accounts\templates\mahasiswa\progress_sks.html:196
+msgid "Start logging your activity hours to see completion estimates."
+msgstr ""
 
-#: .\accounts\templates\mahasiswa\progress_sks.html:312
-msgid "CREDIT PROGRESS REPORT"
-msgstr "LAPORAN PROGRES SKS"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:324
-msgid "Recommendation"
-msgstr "Rekomendasi"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:324
-msgid "hours per day"
-msgstr "jam per hari"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:335
-msgid "Progress report successfully downloaded"
-msgstr "Laporan progres berhasil diunduh"
-
-#: .\accounts\templates\mahasiswa\progress_sks.html:395
-msgid "Progress bar animation started..."
-msgstr "Animasi progress bar dimulai..."
-
-#: .\accounts\templates\mahasiswa\register_step1.html:6
+#: .\accounts\templates\mahasiswa\register_step1.html:8
 msgid "Registration - Step 1"
 msgstr "Pendaftaran - Langkah 1"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:24
+#: .\accounts\templates\mahasiswa\register_step1.html:26
 #: .\accounts\templates\mahasiswa\register_step2.html:54
 #: .\accounts\templates\mahasiswa\register_step3.html:156
 msgid "Student Account Registration"
 msgstr "Pendaftaran Akun Mahasiswa"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:25
+#: .\accounts\templates\mahasiswa\register_step1.html:27
 #: .\accounts\templates\mahasiswa\register_step2.html:55
 #: .\accounts\templates\mahasiswa\register_step3.html:157
 msgid "Attendance & Credit Management System - Face Recognition"
 msgstr "Sistem Manajemen Presensi & SKS - Pengenalan Wajah"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:30
+#: .\accounts\templates\mahasiswa\register_step1.html:32
 msgid "Step 1 of 3"
 msgstr "Langkah 1 dari 3"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:44
+#: .\accounts\templates\mahasiswa\register_step1.html:46
 #: .\accounts\templates\mahasiswa\register_step2.html:74
 #: .\accounts\templates\mahasiswa\register_step3.html:176
 msgid "Academic"
 msgstr "Akademik"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:55
+#: .\accounts\templates\mahasiswa\register_step1.html:57
 msgid "Account & Identity Data"
 msgstr "Data Akun & Identitas"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:56
+#: .\accounts\templates\mahasiswa\register_step1.html:58
 msgid "Please enter your login account data and basic identity information."
 msgstr "Silakan masukkan data akun login Anda dan informasi identitas dasar."
 
-#: .\accounts\templates\mahasiswa\register_step1.html:76
+#: .\accounts\templates\mahasiswa\register_step1.html:78
 msgid "Student ID Number (NRP)"
 msgstr "Nomor ID Mahasiswa (NRP)"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:78
+#: .\accounts\templates\mahasiswa\register_step1.html:80
 msgid "Example: 2345678901 (10-12 digits)"
 msgstr "Contoh: 2345678901 (10-12 digit)"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:84
+#: .\accounts\templates\mahasiswa\register_step1.html:86
 msgid "Department"
 msgstr "Jurusan"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:98
+#: .\accounts\templates\mahasiswa\register_step1.html:100
 msgid "Admission Year"
 msgstr "Tahun Masuk"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:100
+#: .\accounts\templates\mahasiswa\register_step1.html:102
 msgid "Select your year of admission"
 msgstr "Pilih tahun masuk Anda"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:113
+#: .\accounts\templates\mahasiswa\register_step1.html:115
 msgid "Minimum 8 characters, combination of letters and numbers"
 msgstr "Minimal 8 karakter, kombinasi huruf dan angka"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:125
+#: .\accounts\templates\mahasiswa\register_step1.html:127
 msgid "Continue to Academic Data"
 msgstr "Lanjut ke Data Akademik"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:142
-#: .\accounts\templates\mahasiswa\register_step1.html:159
+#: .\accounts\templates\mahasiswa\register_step1.html:144
+#: .\accounts\templates\mahasiswa\register_step1.html:161
 msgid "Select Class"
 msgstr "Pilih Kelas"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:197
+#: .\accounts\templates\mahasiswa\register_step1.html:199
 msgid "Select Department First"
 msgstr "Pilih Jurusan Terlebih Dahulu"
 
-#: .\accounts\templates\mahasiswa\register_step1.html:226
+#: .\accounts\templates\mahasiswa\register_step1.html:228
 msgid "Select Admission Year (e.g.: "
 msgstr "Pilih Tahun Masuk (contoh: "
 
-#: .\accounts\templates\mahasiswa\register_step1.html:254
+#: .\accounts\templates\mahasiswa\register_step1.html:256
 msgid "Please complete all required data before continuing."
 msgstr "Silakan lengkapi semua data yang diperlukan sebelum melanjutkan."
 
@@ -2446,6 +2326,10 @@ msgstr "Lanjut ke Unggah Foto"
 #: .\accounts\templates\mahasiswa\register_step2.html:273
 msgid "No activities available for this level"
 msgstr "Tidak ada kegiatan tersedia untuk jenjang ini"
+
+#: .\accounts\templates\mahasiswa\register_step2.html:286
+msgid "Target"
+msgstr "Target"
 
 #: .\accounts\templates\mahasiswa\register_step2.html:298
 msgid "Error loading activity data"
@@ -2543,6 +2427,10 @@ msgstr "bukan gambar. Hanya JPG, PNG yang diizinkan."
 msgid "is too large. Maximum 5MB."
 msgstr "terlalu besar. Maksimal 5MB."
 
+#: .\accounts\templates\mahasiswa\register_step3.html:382
+msgid "Preview"
+msgstr "Pratinjau"
+
 #: .\accounts\templates\mahasiswa\register_step3.html:436
 msgid "photos required. You have only uploaded"
 msgstr "foto diperlukan. Anda hanya mengunggah"
@@ -2562,75 +2450,35 @@ msgstr "Mengirim..."
 msgid "Attendance History"
 msgstr "Riwayat Presensi"
 
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:26
-msgid "Filter"
-msgstr "Filter"
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:37
+#, fuzzy, python-format
+#| msgid "No PA activities yet"
+msgid "Your PA Activities (%(total)s)"
+msgstr "Belum ada kegiatan PA"
 
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:29
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:247
-msgid "Odd Semester"
-msgstr "Semester Ganjil"
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:51
+#, fuzzy, python-format
+#| msgid "From 344 target hours"
+msgid "Target: %(target)s hours"
+msgstr "Dari 344 jam target"
 
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:30
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:247
-msgid "Even Semester"
-msgstr "Semester Genap"
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:60
+#, fuzzy
+#| msgid "No PA activities yet"
+msgid "No PA activities registered"
+msgstr "Belum ada kegiatan PA"
 
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:32
-msgid "Show All"
-msgstr "Tampilkan Semua"
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:110
+msgid "In Progress"
+msgstr "Dalam Proses"
 
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:44
-msgid "This Semester's Credit Activities"
-msgstr "Kegiatan SKS Semester Ini"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:97
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:145
-msgid "Present"
-msgstr "Hadir"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:99
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:153
-msgid "Late"
-msgstr "Terlambat"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:101
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:161
-msgid "Permission"
-msgstr "Izin"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:103
-msgid "Sick"
-msgstr "Sakit"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:105
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:169
-msgid "Absent"
-msgstr "Absen"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:115
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:130
 msgid "No attendance data available"
 msgstr "Tidak ada data presensi tersedia"
 
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:248
-msgid "Showing"
-msgstr "Menampilkan"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:248
-msgid "attendance data for"
-msgstr "data presensi untuk"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:257
-msgid "Showing all attendance data"
-msgstr "Menampilkan semua data presensi"
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:262
-msgid "Preparing Excel file..."
-msgstr "Mempersiapkan file Excel..."
-
-#: .\accounts\templates\mahasiswa\riwayat_presensi.html:272
-msgid "Excel file successfully downloaded"
-msgstr "File Excel berhasil diunduh"
+#: .\accounts\templates\mahasiswa\riwayat_presensi.html:136
+msgid "You haven't registered for any PA activities yet"
+msgstr ""
 
 #: .\pa_app\settings.py:49
 msgid "Indonesian"
@@ -3970,6 +3818,147 @@ msgstr "Komunitas Django"
 msgid "Connect, get help, or contribute"
 msgstr "Terhubung, dapatkan bantuan, atau berkontribusi"
 
+#~ msgid "Take Attendance Photo"
+#~ msgstr "Ambil Foto Presensi"
+
+#~ msgid "Live Camera"
+#~ msgstr "Kamera Langsung"
+
+#~ msgid "Make sure your face is clearly visible"
+#~ msgstr "Pastikan wajah Anda terlihat jelas"
+
+#~ msgid "Take Photo"
+#~ msgstr "Ambil Foto"
+
+#~ msgid "Retake"
+#~ msgstr "Ambil Ulang"
+
+#~ msgid "Photo will appear here"
+#~ msgstr "Foto akan muncul di sini"
+
+#~ msgid "Photo will be saved as attendance evidence"
+#~ msgstr "Foto akan disimpan sebagai bukti presensi"
+
+#~ msgid "Confirm & Save"
+#~ msgstr "Konfirmasi & Simpan"
+
+#~ msgid "Cannot access camera. Please ensure camera permission is granted."
+#~ msgstr "Tidak dapat mengakses kamera. Pastikan izin kamera diberikan."
+
+#~ msgid "Action: CHECK-IN"
+#~ msgstr "Aksi: CHECK-IN"
+
+#~ msgid "Action: CHECK-OUT"
+#~ msgstr "Aksi: CHECK-OUT"
+
+#~ msgid "No photo taken!"
+#~ msgstr "Tidak ada foto yang diambil!"
+
+#~ msgid "CHECK-IN/OUT successful for"
+#~ msgstr "CHECK-IN/OUT berhasil untuk"
+
+#~ msgid "Failed:"
+#~ msgstr "Gagal:"
+
+#~ msgid "An error occurred while processing:"
+#~ msgstr "Terjadi kesalahan saat memproses:"
+
+#~ msgid "This Semester's Credit Progress"
+#~ msgstr "Progres SKS Semester Ini"
+
+#~ msgid "Credit Progress Details"
+#~ msgstr "Detail Progres SKS"
+
+#~ msgid "Amount"
+#~ msgstr "Jumlah"
+
+#~ msgid "To reach target"
+#~ msgstr "Untuk mencapai target"
+
+#~ msgid "Total Target Hours"
+#~ msgstr "Total Jam Target"
+
+#~ msgid "This semester's target"
+#~ msgstr "Target semester ini"
+
+#~ msgid "Progress Status"
+#~ msgstr "Status Progres"
+
+#~ msgid "Excellent"
+#~ msgstr "Sangat Baik"
+
+#~ msgid "Export Report"
+#~ msgstr "Ekspor Laporan"
+
+#~ msgid "Time Remaining"
+#~ msgstr "Waktu Tersisa"
+
+#~ msgid "hours/day"
+#~ msgstr "jam/hari"
+
+#~ msgid "Preparing credit progress report..."
+#~ msgstr "Mempersiapkan laporan progres SKS..."
+
+#~ msgid "CREDIT PROGRESS REPORT"
+#~ msgstr "LAPORAN PROGRES SKS"
+
+#~ msgid "Recommendation"
+#~ msgstr "Rekomendasi"
+
+#~ msgid "hours per day"
+#~ msgstr "jam per hari"
+
+#~ msgid "Progress report successfully downloaded"
+#~ msgstr "Laporan progres berhasil diunduh"
+
+#~ msgid "Progress bar animation started..."
+#~ msgstr "Animasi progress bar dimulai..."
+
+#~ msgid "Filter"
+#~ msgstr "Filter"
+
+#~ msgid "Odd Semester"
+#~ msgstr "Semester Ganjil"
+
+#~ msgid "Even Semester"
+#~ msgstr "Semester Genap"
+
+#~ msgid "Show All"
+#~ msgstr "Tampilkan Semua"
+
+#~ msgid "This Semester's Credit Activities"
+#~ msgstr "Kegiatan SKS Semester Ini"
+
+#~ msgid "Present"
+#~ msgstr "Hadir"
+
+#~ msgid "Late"
+#~ msgstr "Terlambat"
+
+#~ msgid "Permission"
+#~ msgstr "Izin"
+
+#~ msgid "Sick"
+#~ msgstr "Sakit"
+
+#~ msgid "Absent"
+#~ msgstr "Absen"
+
+#~ msgid "Showing"
+#~ msgstr "Menampilkan"
+
+#~ msgid "attendance data for"
+#~ msgstr "data presensi untuk"
+
+#~ msgid "Showing all attendance data"
+#~ msgstr "Menampilkan semua data presensi"
+
+#~ msgid "Preparing Excel file..."
+#~ msgstr "Mempersiapkan file Excel..."
+
+#~ msgid "Excel file successfully downloaded"
+#~ msgstr "File Excel berhasil diunduh"
+
 #~ msgid "Sistem Manajemen Presensi & SKS"
 #~ msgstr "Sistem Manajemen Presensi & SKS"
 
@@ -3999,3 +3988,239 @@ msgstr "Terhubung, dapatkan bantuan, atau berkontribusi"
 
 #~ msgid "Rekap Presensi"
 #~ msgstr "Rekap Presensi"
+
+# Missing translations from templates
+msgid "Face Dataset for Face Recognition"
+msgstr "Dataset Wajah untuk Pengenalan Wajah"
+
+msgid "Dataset Complete"
+msgstr "Dataset Lengkap"
+
+msgid "Dataset Incomplete"
+msgstr "Dataset Belum Lengkap"
+
+msgid "Upload photos of your face from various angles and expressions to improve the accuracy of the face recognition attendance system."
+msgstr "Unggah foto wajah Anda dari berbagai sudut dan ekspresi untuk meningkatkan akurasi sistem presensi pengenalan wajah."
+
+msgid "Number of Photos:"
+msgstr "Jumlah Foto:"
+
+msgid "You have met the minimum required photos. The face recognition system is ready for attendance."
+msgstr "Anda telah memenuhi jumlah foto minimum yang diperlukan. Sistem pengenalan wajah siap untuk presensi."
+
+msgid "You have not met the minimum required photos. Upload at least 10 face photos."
+msgstr "Anda belum memenuhi jumlah foto minimum yang diperlukan. Unggah setidaknya 10 foto wajah."
+
+msgid "Click to upload photo"
+msgstr "Klik untuk mengunggah foto"
+
+msgid "Format: JPG, PNG (Max Size: 5MB)"
+msgstr "Format: JPG, PNG (Ukuran Maks: 5MB)"
+
+msgid "Recommendation: Upload photos with various expressions (smile, neutral) and angles (front, left, right)"
+msgstr "Rekomendasi: Unggah foto dengan berbagai ekspresi (senyum, netral) dan sudut (depan, kiri, kanan)"
+
+msgid "Photo Gallery"
+msgstr "Galeri Foto"
+
+msgid "No face photos yet"
+msgstr "Belum ada foto wajah"
+
+msgid "Upload your first photo to get started"
+msgstr "Unggah foto pertama Anda untuk memulai"
+
+msgid "Important:"
+msgstr "Penting:"
+
+msgid "Face photos are used only for the face recognition attendance system. Make sure your photos are clear and your face is clearly visible."
+msgstr "Foto wajah hanya digunakan untuk sistem presensi pengenalan wajah. Pastikan foto Anda jelas dan wajah Anda terlihat dengan jelas."
+
+msgid "Select Photo"
+msgstr "Pilih Foto"
+
+msgid "Supported formats: JPG, PNG. Maximum size: 5MB."
+msgstr "Format yang didukung: JPG, PNG. Ukuran maksimum: 5MB."
+
+msgid "Description (Optional)"
+msgstr "Deskripsi (Opsional)"
+
+msgid "Example: Smiling photo, left angle photo"
+msgstr "Contoh: Foto tersenyum, foto sudut kiri"
+
+msgid "Upload"
+msgstr "Unggah"
+
+msgid "Please select a photo first!"
+msgstr "Silakan pilih foto terlebih dahulu!"
+
+msgid "Photo size maximum 5MB!"
+msgstr "Ukuran foto maksimum 5MB!"
+
+msgid "File format must be JPG or PNG!"
+msgstr "Format file harus JPG atau PNG!"
+
+msgid "Uploading photo..."
+msgstr "Mengunggah foto..."
+
+msgid "An error occurred while uploading"
+msgstr "Terjadi kesalahan saat mengunggah"
+
+msgid "Are you sure you want to delete this photo?"
+msgstr "Apakah Anda yakin ingin menghapus foto ini?"
+
+msgid "An error occurred while deleting"
+msgstr "Terjadi kesalahan saat menghapus"
+
+msgid "Are you sure you want to delete all photos? This action cannot be undone!"
+msgstr "Apakah Anda yakin ingin menghapus semua foto? Tindakan ini tidak dapat dibatalkan!"
+
+#, python-format
+msgid "Your PA Activities (%(total)s)"
+msgstr "Kegiatan PA Anda (%(total)s)"
+
+#, python-format
+msgid "Target: %(target)s hours"
+msgstr "Target: %(target)s jam"
+
+msgid "No PA activities registered"
+msgstr "Tidak ada kegiatan PA terdaftar"
+
+msgid "No attendance data available"
+msgstr "Tidak ada data presensi tersedia"
+
+msgid "You haven't taken any attendance yet for your PA activities"
+msgstr "Anda belum melakukan presensi untuk kegiatan PA Anda"
+
+msgid "You haven't registered for any PA activities yet"
+msgstr "Anda belum mendaftar untuk kegiatan PA apapun"
+
+msgid "Overall SKS Progress"
+msgstr "Progres SKS Keseluruhan"
+
+msgid "activities"
+msgstr "kegiatan"
+
+msgid "Recommendation per day (hours)"
+msgstr "Rekomendasi per hari (jam)"
+
+msgid "Note"
+msgstr "Catatan"
+
+msgid "Based on your current progress, you need approximately"
+msgstr "Berdasarkan progres Anda saat ini, Anda memerlukan sekitar"
+
+msgid "to complete all activities."
+msgstr "untuk menyelesaikan semua kegiatan."
+
+msgid "Information"
+msgstr "Informasi"
+
+
+msgid "Start logging your activity hours to see completion estimates."
+msgstr "Mulai catat jam kegiatan Anda untuk melihat perkiraan penyelesaian."
+
+# Additional translations for data_wajah.html
+msgid "Face Dataset for Face Recognition"
+msgstr "Dataset Wajah untuk Pengenalan Wajah"
+
+msgid "Dataset Complete"
+msgstr "Dataset Lengkap"
+
+msgid "Dataset Incomplete"
+msgstr "Dataset Belum Lengkap"
+
+msgid "Upload photos of your face from various angles and expressions to improve the accuracy of the face recognition attendance system."
+msgstr "Unggah foto wajah Anda dari berbagai sudut dan ekspresi untuk meningkatkan akurasi sistem presensi pengenalan wajah."
+
+msgid "Number of Photos:"
+msgstr "Jumlah Foto:"
+
+msgid "You have met the minimum required photos. The face recognition system is ready for attendance."
+msgstr "Anda telah memenuhi jumlah foto minimum yang diperlukan. Sistem pengenalan wajah siap untuk presensi."
+
+msgid "You have not met the minimum required photos. Upload at least 10 face photos."
+msgstr "Anda belum memenuhi jumlah foto minimum yang diperlukan. Unggah setidaknya 10 foto wajah."
+
+msgid "Upload Face Photo"
+msgstr "Unggah Foto Wajah"
+
+msgid "Click to upload photo"
+msgstr "Klik untuk mengunggah foto"
+
+msgid "Format: JPG, PNG (Max Size: 5MB)"
+msgstr "Format: JPG, PNG (Ukuran Maks: 5MB)"
+
+msgid "Upload Photo"
+msgstr "Unggah Foto"
+
+msgid "Recommendation: Upload photos with various expressions (smile, neutral) and angles (front, left, right)"
+msgstr "Rekomendasi: Unggah foto dengan berbagai ekspresi (senyum, netral) dan sudut (depan, kiri, kanan)"
+
+msgid "Photo Gallery"
+msgstr "Galeri Foto"
+
+msgid "Delete All"
+msgstr "Hapus Semua"
+
+msgid "Default Photo"
+msgstr "Foto Default"
+
+msgid "No face photos yet"
+msgstr "Belum ada foto wajah"
+
+msgid "Upload your first photo to get started"
+msgstr "Unggah foto pertama Anda untuk memulai"
+
+msgid "Important:"
+msgstr "Penting:"
+
+msgid "Face photos are used only for the face recognition attendance system. Make sure your photos are clear and your face is clearly visible."
+msgstr "Foto wajah hanya digunakan untuk sistem presensi pengenalan wajah. Pastikan foto Anda jelas dan wajah Anda terlihat dengan jelas."
+
+msgid "Select Photo"
+msgstr "Pilih Foto"
+
+msgid "Supported formats: JPG, PNG. Maximum size: 5MB."
+msgstr "Format yang didukung: JPG, PNG. Ukuran maksimum: 5MB."
+
+msgid "Description (Optional)"
+msgstr "Deskripsi (Opsional)"
+
+msgid "Example: Smiling photo, left angle photo"
+msgstr "Contoh: Foto senyum, foto sudut kiri"
+
+msgid "Upload"
+msgstr "Unggah"
+
+msgid "Please select a photo first!"
+msgstr "Silakan pilih foto terlebih dahulu!"
+
+msgid "Photo size maximum 5MB!"
+msgstr "Ukuran foto maksimum 5MB!"
+
+msgid "File format must be JPG or PNG!"
+msgstr "Format file harus JPG atau PNG!"
+
+msgid "Uploading photo..."
+msgstr "Mengunggah foto..."
+
+msgid "An error occurred while uploading"
+msgstr "Terjadi kesalahan saat mengunggah"
+
+msgid "Are you sure you want to delete this photo?"
+msgstr "Apakah Anda yakin ingin menghapus foto ini?"
+
+msgid "An error occurred while deleting"
+msgstr "Terjadi kesalahan saat menghapus"
+
+msgid "Are you sure you want to delete all photos? This action cannot be undone!"
+msgstr "Apakah Anda yakin ingin menghapus semua foto? Tindakan ini tidak dapat dibatalkan!"
+
+# Additional translations for riwayat_presensi.html
+#, python-format
+msgid "Your PA Activities (%(total)s)"
+msgstr "Kegiatan PA Anda (%(total)s)"
+
+#, python-format
+msgid "Target: %(target)s hours"
+msgstr "Target: %(target)s jam"

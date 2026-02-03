@@ -174,7 +174,7 @@ class Status_Pemenuhan_SKS(models.Model):
 
 class Presensi(models.Model):
     mahasiswa = models.ForeignKey(Mahasiswa, on_delete=models.CASCADE)
-    kegiatan_pa = models.ForeignKey(Kegiatan_PA, on_delete=models.CASCADE)
+    kegiatan_pa = models.ForeignKey(Kegiatan_PA, on_delete=models.SET_NULL, null=True, blank=True)  # UBAH: nullable
     tanggal_presensi = models.DateField(_("Attendance Date"))
     jam_checkin = models.TimeField(_("Check-in Time"), null=True, blank=True)
     jam_checkout = models.TimeField(_("Check-out Time"), null=True, blank=True)

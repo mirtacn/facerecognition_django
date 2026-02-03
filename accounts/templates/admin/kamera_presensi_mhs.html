@@ -11,7 +11,8 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">{% trans "Student Attendance List" %}</h5>
-                    <span class="badge bg-secondary">{% trans "Total" %}: {{ total_mahasiswa }} {% trans "students" %}</span>
+                    <span class="badge bg-secondary">{% trans "Total" %}: {{ total_mahasiswa }} {% trans "students"
+                        %}</span>
                 </div>
                 <small class="text-muted">{% trans "Date" %}: {{ today|date:"d/m/Y" }}</small>
             </div>
@@ -36,32 +37,39 @@
                             {% for data in presensi_data %}
                             <tr id="row-{{ data.mahasiswa.id }}">
                                 <td>{{ forloop.counter }}</td>
-                               <td>
+                                <td>
                                     {% if data.presensi and data.presensi.foto_checkin %}
-                                        <img src="{{ data.presensi.foto_checkin.url }}" 
-                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
-                                            alt="{% trans 'Check-in Photo' %}" 
-                                            class="img-thumbnail">
+                                    <img src="{{ data.presensi.foto_checkin.url }}"
+                                        style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+                                        alt="{% trans 'Check-in Photo' %}" class="img-thumbnail">
                                     {% else %}
-                                        <div class="avatar-circle">
-                                        {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
-                                        </div>
+                                    <div class="avatar-circle">
+                                        {% if data.mahasiswa.user.nama_lengkap %}
+                                            {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
+                                        {% else %}
+                                            {{ data.mahasiswa.user.username|slice:":1"|upper }}
+                                        {% endif %}
+                                    </div>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if data.presensi and data.presensi.foto_checkout %}
-                                        <img src="{{ data.presensi.foto_checkout.url }}" 
-                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" 
-                                            alt="{% trans 'Check-out Photo' %}" 
-                                            class="img-thumbnail">
+                                    <img src="{{ data.presensi.foto_checkout.url }}"
+                                        style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"
+                                        alt="{% trans 'Check-out Photo' %}" class="img-thumbnail">
                                     {% else %}
-                                        <div class="avatar-circle">
-                                        {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
-                                        </div>
+                                    <div class="avatar-circle">
+                                        <!-- PERBAIKAN: Ambil inisial dari nama lengkap -->
+                                        {% if data.mahasiswa.user.nama_lengkap %}
+                                            {{ data.mahasiswa.user.nama_lengkap|slice:":1"|upper }}
+                                        {% else %}
+                                            {{ data.mahasiswa.user.username|slice:":1"|upper }}
+                                        {% endif %}
+                                    </div>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <strong>{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.nama_lengkap }}</strong>
+                                    <strong>{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}</strong>
                                 </td>
                                 <td>
                                     <span class="badge bg-info">{{ data.mahasiswa.user.nrp|default:"-" }}</span>
@@ -70,35 +78,36 @@
                                 <td>{{ today|date:"d/m/Y" }}</td>
                                 <td id="checkin-{{ data.mahasiswa.id }}">
                                     {% if data.presensi and data.presensi.jam_checkin %}
-                                        <span class="badge bg-success">{{ data.presensi.jam_checkin|time:"H:i" }}</span>
+                                    <span class="badge bg-success">{{ data.presensi.jam_checkin|time:"H:i" }}</span>
                                     {% else %}
-                                        <span class="text-muted">-</span>
+                                    <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
                                 <td id="checkout-{{ data.mahasiswa.id }}">
                                     {% if data.presensi and data.presensi.jam_checkout %}
-                                        <span class="badge bg-warning">{{ data.presensi.jam_checkout|time:"H:i" }}</span>
+                                    <span class="badge bg-warning">{{ data.presensi.jam_checkout|time:"H:i" }}</span>
                                     {% else %}
-                                        <span class="text-muted">-</span>
+                                    <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <button type="button" 
-                                                class="btn {% if data.is_checked_in %}btn-outline-secondary disabled{% else %}btn-success{% endif %} btn-checkin"
-                                                data-mahasiswa-id="{{ data.mahasiswa.id }}"
-                                                data-mahasiswa-nama="{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}"
-                                                {% if data.is_checked_in %}disabled{% endif %}
-                                                title="{% trans 'Check-in' %}">
+                                        <button type="button"
+                                            class="btn {% if data.is_checked_in %}btn-outline-secondary disabled{% else %}btn-success{% endif %} btn-checkin"
+                                            data-mahasiswa-id="{{ data.mahasiswa.id }}"
+                                            data-mahasiswa-nama="{% if data.mahasiswa.user.nama_lengkap %}{{ data.mahasiswa.user.nama_lengkap }}{% else %}{{ data.mahasiswa.user.username }}{% endif %}"
+                                            {% if data.is_checked_in %}disabled{% endif %}
+                                            title="{% trans 'Check-in' %}">
                                             <i class="fas fa-sign-in-alt"></i>
                                             <span class="d-none d-md-inline"> {% trans "Check-in" %}</span>
                                         </button>
-                                        <button type="button" 
-                                                class="btn {% if not data.is_checked_in %}btn-outline-secondary disabled{% else %}btn-warning{% endif %} btn-checkout"
-                                                data-mahasiswa-id="{{ data.mahasiswa.id }}"
-                                                data-mahasiswa-nama="{{ data.mahasiswa.user.nama_lengkap|default:data.mahasiswa.user.username }}"
-                                                {% if not data.is_checked_in %}disabled{% endif %}
-                                                title="{% trans 'Check-out' %}">
+                                        <button type="button"
+                                            class="btn {% if not data.is_checked_in %}btn-outline-secondary disabled{% else %}btn-warning{% endif %} btn-checkout"
+                                            data-mahasiswa-id="{{ data.mahasiswa.id }}"
+                                            data-mahasiswa-nama="{% if data.mahasiswa.user.nama_lengkap %}{{ data.mahasiswa.user.nama_lengkap }}{% else %}{{ data.mahasiswa.user.username }}{% endif %}"
+                                            data-presensi-id="{% if data.presensi %}{{ data.presensi.id }}{% endif %}"
+                                            {% if not data.is_checked_in %}disabled{% endif %}
+                                            title="{% trans 'Check-out' %}">
                                             <i class="fas fa-sign-out-alt"></i>
                                             <span class="d-none d-md-inline"> {% trans "Check-out" %}</span>
                                         </button>
@@ -107,13 +116,15 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="9" class="text-center py-5">
+                                <td colspan="10" class="text-center py-5">
                                     <div class="text-muted">
                                         <i class="fas fa-user-check fa-3x mb-3 opacity-25"></i>
                                         <h5 class="mb-2">{% trans "No approved students yet" %}</h5>
-                                        <p>{% trans "All students whose registration approval status has been approved will appear here" %}</p>
+                                        <p>{% trans "All students whose registration approval status has been approved
+                                            will appear here" %}</p>
                                         <a href="{% url 'approval_pendaftaran' %}" class="btn btn-outline-primary mt-2">
-                                            <i class="fas fa-clipboard-check"></i> {% trans "Go to Registration Approval" %}
+                                            <i class="fas fa-clipboard-check"></i> {% trans "Go to Registration
+                                            Approval" %}
                                         </a>
                                     </div>
                                 </td>
@@ -125,20 +136,22 @@
             </div>
             <div class="card-footer">
                 <small class="text-muted">
-                    <i class="fas fa-info-circle"></i> 
-                    {% trans "Only displays students whose registration approval status has been APPROVED. Multiple check-ins/outs per day are allowed, must check-out before checking in again. Data is reset every new day." %}
+                    <i class="fas fa-info-circle"></i>
+                    {% trans "Only displays students whose registration approval status has been APPROVED. Multiple
+                    check-ins/outs per day are allowed, must check-out before checking in again. Data is reset every new
+                    day." %}
                 </small>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Kamera -->
+<!-- Modal Kamera dengan Real-time Liveness Detection -->
 <div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="cameraModalLabel">{% trans "Take Attendance Photo" %}</h5>
+                <h5 class="modal-title" id="cameraModalLabel">{% trans "Attendance - Face Liveness Detection" %}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -147,53 +160,62 @@
                         <div class="camera-container mb-3">
                             <div class="card">
                                 <div class="card-header bg-dark text-white py-2">
-                                    <i class="fas fa-video"></i> {% trans "Live Camera" %}
+                                    <i class="fas fa-video"></i> {% trans "Live Camera - Real-time Detection" %}
                                 </div>
-                                <div class="card-body p-0">
-                                    <video id="cameraPreview" autoplay playsinline 
-                                           style="width: 100%; height: 300px; object-fit: cover; background-color: #000;"></video>
+                                <div class="card-body p-0" style="position: relative; background-color: #000;">
+                                    <div style="position: relative; display: inline-block; width: 100%;">
+                                        <video id="cameraPreview" autoplay playsinline
+                                            style="width: 100%; height: 400px; object-fit: cover; background-color: #000; display: block;"></video>
+                                        <canvas id="cameraCanvas"
+                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 400px; display: block; cursor: none;"></canvas>
+                                    </div>
                                     <div class="text-center bg-dark py-2">
                                         <div class="text-white small">
-                                            <i class="fas fa-lightbulb"></i> {% trans "Make sure your face is clearly visible" %}
+                                            <i class="fas fa-info-circle"></i> {% trans "System will auto-detect and
+                                            save when face is verified as REAL" %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <canvas id="cameraCanvas" style="display: none;"></canvas>
+                            <canvas id="captureCanvas" style="display: none;"></canvas>
                         </div>
-                        <div class="text-center">
-                            <button type="button" class="btn btn-primary btn-lg" id="captureBtn">
-                                <i class="fas fa-camera"></i> {% trans "Take Photo" %}
-                            </button>
-                            <button type="button" class="btn btn-secondary btn-lg" id="retakeBtn" style="display: none;">
-                                <i class="fas fa-redo"></i> {% trans "Retake" %}
-                            </button>
+                        <div class="alert alert-info mt-3">
+                            <strong><i class="fas fa-lightbulb"></i> Instructions:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Position your face clearly in the camera</li>
+                                <li>Blink naturally 2 times</li>
+                                <li>System will auto-save when face is verified</li>
+                                <li>Status will show: VERIFYING → REAL (or SPOOF)</li>
+                            </ul>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="preview-container">
                             <div class="card">
                                 <div class="card-header bg-info text-white py-2">
-                                    <i class="fas fa-image"></i> {% trans "Preview" %}
+                                    <i class="fas fa-user"></i> {% trans "Student Info" %}
                                 </div>
                                 <div class="card-body text-center">
-                                    <img id="photoPreview" src="" 
-                                         style="width: 100%; max-height: 200px; object-fit: cover; border: 2px dashed #ddd; border-radius: 4px; display: none;">
-                                    <div id="noPreview" class="text-muted py-5">
-                                        <i class="fas fa-user-circle fa-3x mb-3"></i>
-                                        <p>{% trans "Photo will appear here" %}</p>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="alert alert-info p-2">
-                                            <i class="fas fa-user"></i> 
-                                            <strong id="mahasiswaInfo"></strong>
+                                    <div class="mt-2">
+                                        <div class="alert alert-info p-2 mb-2">
+                                            <i class="fas fa-user-circle"></i>
+                                            <strong id="mahasiswaInfo">-</strong>
                                         </div>
-                                        <div class="alert alert-warning p-2">
-                                            <i class="fas fa-clock"></i> 
-                                            <strong id="actionType"></strong>
+                                        <div class="alert alert-warning p-2 mb-2">
+                                            <i class="fas fa-clock"></i>
+                                            <strong id="actionType">-</strong>
+                                        </div>
+                                        <div class="alert alert-success p-2 mb-2">
+                                            <i class="fas fa-video"></i>
+                                            <strong>Status:</strong>
+                                            <div id="detectionStatusBox"
+                                                style="margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 4px; font-size: 12px;">
+                                                Waiting for detection...
+                                            </div>
                                         </div>
                                         <div class="alert alert-light p-2">
-                                            <small><i class="fas fa-exclamation-circle"></i> {% trans "Photo will be saved as attendance evidence" %}</small>
+                                            <small><i class="fas fa-shield-alt"></i> {% trans "Liveness detection
+                                                ensures real attendance" %}</small>
                                         </div>
                                     </div>
                                 </div>
@@ -206,9 +228,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i> {% trans "Cancel" %}
                 </button>
-                <button type="button" class="btn btn-success" id="confirmBtn" style="display: none;">
-                    <i class="fas fa-check"></i> {% trans "Confirm & Save" %}
-                </button>
+                <small class="text-muted ms-2">Auto-saves on face verification</small>
             </div>
         </div>
     </div>
@@ -224,16 +244,17 @@
         padding-top: 56px;
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
     }
-    
+
     main {
         padding-top: 70px;
     }
-    
-    .btn-checkin:disabled, .btn-checkout:disabled {
+
+    .btn-checkin:disabled,
+    .btn-checkout:disabled {
         opacity: 0.5;
         cursor: not-allowed;
     }
-    
+
     .avatar-circle {
         width: 40px;
         height: 40px;
@@ -246,439 +267,415 @@
         font-weight: bold;
         font-size: 16px;
     }
-    
+
     .table th {
         background-color: #f8f9fa;
         font-weight: 600;
         border-top: none;
     }
-    
+
     .table td {
         vertical-align: middle;
         padding: 12px 8px;
     }
-    
+
     .table tbody tr:hover {
         background-color: rgba(78, 115, 223, 0.05);
     }
-    
+
     #cameraPreview {
         border-radius: 4px 4px 0 0;
     }
-    
+
     .btn-checkin:not(:disabled):hover {
         background-color: #198754;
         border-color: #198754;
         color: white;
     }
-    
+
     .btn-checkout:not(:disabled):hover {
         background-color: #ffc107;
         border-color: #ffc107;
         color: black;
     }
-</style>
 
-<script>
-// Variabel global
-let currentStream = null;
-let currentMahasiswaId = null;
-let currentMahasiswaNama = null;
-let currentAction = null;
-let capturedPhoto = null;
-
-// Inisialisasi modal kamera
-let cameraModal = null;
-document.addEventListener('DOMContentLoaded', function() {
-    cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
-    
-    // Debug: Cek apakah tombol ada di DOM
-    console.log("Tombol Check-in ditemukan:", document.querySelectorAll('.btn-checkin').length);
-    console.log("Tombol Check-out ditemukan:", document.querySelectorAll('.btn-checkout').length);
-});
-
-// Inisialisasi kamera
-async function startCamera() {
-    try {
-        // Stop stream yang sedang berjalan
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-        }
-        
-        // Dapatkan akses kamera
-        currentStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: 'user',
-                width: { ideal: 640 },
-                height: { ideal: 480 }
-            },
-            audio: false 
-        });
-        
-        const video = document.getElementById('cameraPreview');
-        video.srcObject = currentStream;
-        
-    } catch (err) {
-        console.error('Error accessing camera:', err);
-        showNotification('{% trans "Cannot access camera. Please ensure camera permission is granted." %}', 'danger');
-        if (cameraModal) cameraModal.hide();
+    .camera-container {
+        position: relative;
+        width: 100%;
     }
-}
 
-// Ambil foto dari kamera
-function capturePhoto() {
-    const video = document.getElementById('cameraPreview');
-    const canvas = document.getElementById('cameraCanvas');
-    const preview = document.getElementById('photoPreview');
-    const noPreview = document.getElementById('noPreview');
-    
-    if (!video || !canvas || !preview || !noPreview) {
-        console.error('Elemen kamera tidak ditemukan');
-        return;
-    }
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // Tampilkan preview
-    capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
-    preview.src = capturedPhoto;
-    preview.style.display = 'block';
-    noPreview.style.display = 'none';
-    
-    // Tampilkan tombol konfirmasi dan retake
-    document.getElementById('captureBtn').style.display = 'none';
-    document.getElementById('retakeBtn').style.display = 'inline-block';
-    document.getElementById('confirmBtn').style.display = 'inline-block';
-}
-
-// Event Listeners untuk tombol Check-in/Check-out
-document.addEventListener('click', function(e) {
-    // Debug: Log klik
-    console.log('Element clicked:', e.target);
-    
-    // Tombol Check-in
-    const checkinBtn = e.target.closest('.btn-checkin');
-    if (checkinBtn && !checkinBtn.disabled) {
-        console.log('Check-in button clicked');
-        currentMahasiswaId = checkinBtn.getAttribute('data-mahasiswa-id');
-        currentMahasiswaNama = checkinBtn.getAttribute('data-mahasiswa-nama');
-        currentAction = 'checkin';
-        
-        // Update info di modal
-        document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
-        document.getElementById('actionType').textContent = '{% trans "Action: CHECK-IN" %}';
-        
-        resetCameraModal();
-        if (cameraModal) cameraModal.show();
-    }
-    
-    // Tombol Check-out
-    const checkoutBtn = e.target.closest('.btn-checkout');
-    if (checkoutBtn && !checkoutBtn.disabled) {
-        console.log('Check-out button clicked');
-        currentMahasiswaId = checkoutBtn.getAttribute('data-mahasiswa-id');
-        currentMahasiswaNama = checkoutBtn.getAttribute('data-mahasiswa-nama');
-        currentAction = 'checkout';
-        
-        // Update info di modal
-        document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
-        document.getElementById('actionType').textContent = '{% trans "Action: CHECK-OUT" %}';
-        
-        resetCameraModal();
-        if (cameraModal) cameraModal.show();
-    }
-});
-
-// Reset state modal kamera
-function resetCameraModal() {
-    const preview = document.getElementById('photoPreview');
-    const noPreview = document.getElementById('noPreview');
-    
-    if (preview) {
-        preview.style.display = 'none';
-        preview.src = '';
-    }
-    if (noPreview) {
-        noPreview.style.display = 'block';
-    }
-    
-    document.getElementById('captureBtn').style.display = 'inline-block';
-    document.getElementById('retakeBtn').style.display = 'none';
-    document.getElementById('confirmBtn').style.display = 'none';
-    
-    capturedPhoto = null;
-}
-
-// Event listener untuk modal
-const cameraModalElement = document.getElementById('cameraModal');
-if (cameraModalElement) {
-    cameraModalElement.addEventListener('shown.bs.modal', startCamera);
-    cameraModalElement.addEventListener('hidden.bs.modal', function() {
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-            currentStream = null;
-        }
-        capturedPhoto = null;
-        currentMahasiswaId = null;
-        currentMahasiswaNama = null;
-        currentAction = null;
-    });
-}
-
-// Tombol Ambil Foto
-document.getElementById('captureBtn')?.addEventListener('click', capturePhoto);
-
-// Tombol Ambil Ulang
-document.getElementById('retakeBtn')?.addEventListener('click', function() {
-    resetCameraModal();
-});
-
-// Tombol Konfirmasi
-document.getElementById('confirmBtn')?.addEventListener('click', async function() {
-    if (!capturedPhoto || !currentMahasiswaId) {
-        showNotification('{% trans "No photo taken!" %}', 'warning');
-        return;
-    }
-    
-    const btn = this;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Processing..." %}';
-    btn.disabled = true;
-    
-    try {
-        // Tentukan endpoint berdasarkan action
-        const endpoint = currentAction === 'checkin' ? '{% url "checkin_presensi" %}' : '{% url "checkout_presensi" %}';
-        console.log('Mengirim ke endpoint:', endpoint);
-        
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({
-                mahasiswa_id: currentMahasiswaId,
-                foto: capturedPhoto
-            })
-        });
-        
-        const result = await response.json();
-        console.log('Response dari server:', result);
-        
-        if (result.success) {
-            // Update UI secara real-time
-            updatePresensiUI(currentMahasiswaId, currentAction, result.data);
-            
-            // Tampilkan notifikasi
-            showNotification('{% trans "CHECK-IN/OUT successful for" %} ' + currentMahasiswaNama, 'success');
-            
-            // Tutup modal
-            if (cameraModal) cameraModal.hide();
-            
-            // Refresh data setelah 1 detik
-            setTimeout(refreshPresensiData, 1000);
-        } else {
-            showNotification('{% trans "Failed:" %} ' + result.message, 'danger');
-        }
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('{% trans "An error occurred while processing:" %} ' + error.message, 'danger');
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-});
-
-// Fungsi untuk update UI setelah presensi
-function updatePresensiUI(mahasiswaId, action, data) {
-    const row = document.getElementById(`row-${mahasiswaId}`);
-    if (!row) {
-        console.error('Row tidak ditemukan untuk ID:', mahasiswaId);
-        return;
-    }
-    
-    const checkinCell = document.getElementById(`checkin-${mahasiswaId}`);
-    const checkoutCell = document.getElementById(`checkout-${mahasiswaId}`);
-    const checkinBtn = row.querySelector('.btn-checkin');
-    const checkoutBtn = row.querySelector('.btn-checkout');
-    
-    if (action === 'checkin') {
-        // Update waktu check-in
-        if (checkinCell) {
-            checkinCell.innerHTML = `<span class="badge bg-success">${data.jam_checkin}</span>`;
-        }
-        
-        // Update tombol
-        if (checkinBtn) {
-            checkinBtn.classList.remove('btn-success');
-            checkinBtn.classList.add('btn-outline-secondary');
-            checkinBtn.disabled = true;
-        }
-        
-        if (checkoutBtn) {
-            checkoutBtn.classList.remove('btn-outline-secondary');
-            checkoutBtn.classList.add('btn-warning');
-            checkoutBtn.disabled = false;
-        }
-        
-    } else if (action === 'checkout') {
-        // Update waktu check-out
-        if (checkoutCell) {
-            checkoutCell.innerHTML = `<span class="badge bg-warning">${data.jam_checkout}</span>`;
-        }
-        
-        // Update tombol
-        if (checkoutBtn) {
-            checkoutBtn.classList.remove('btn-warning');
-            checkoutBtn.classList.add('btn-outline-secondary');
-            checkoutBtn.disabled = true;
-        }
-        
-        if (checkinBtn) {
-            checkinBtn.classList.remove('btn-outline-secondary');
-            checkinBtn.classList.add('btn-success');
-            checkinBtn.disabled = false;
-        }
-    }
-}
-
-// Fungsi untuk mendapatkan CSRF token
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-// Fungsi untuk menampilkan notifikasi
-function showNotification(message, type = 'info') {
-    // Hapus notifikasi lama
-    const oldNotifications = document.querySelectorAll('.alert-notification');
-    oldNotifications.forEach(notif => notif.remove());
-    
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-notification alert-dismissible fade show`;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1060;
-        min-width: 300px;
-        animation: slideIn 0.3s ease-out;
-    `;
-    notification.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-            <div>${message}</div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Auto remove setelah 5 detik
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
-}
-
-// Animasi CSS untuk notifikasi
-const style = document.createElement('style');
-style.textContent = `
     @keyframes slideIn {
         from {
-            transform: translateX(100%);
+            transform: translateX(400px);
             opacity: 0;
         }
+
         to {
             transform: translateX(0);
             opacity: 1;
         }
     }
-`;
-document.head.appendChild(style);
+</style>
 
-// Auto-refresh data setiap 30 detik
-function refreshPresensiData() {
-    fetch('{% url "get_presensi_today" %}')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                data.data.forEach(item => {
-                    const row = document.getElementById(`row-${item.id}`);
-                    if (row) {
-                        const checkinCell = document.getElementById(`checkin-${item.id}`);
-                        const checkoutCell = document.getElementById(`checkout-${item.id}`);
-                        const checkinBtn = row.querySelector('.btn-checkin');
-                        const checkoutBtn = row.querySelector('.btn-checkout');
-                        
-                        // Update waktu check-in jika ada data
-                        if (item.presensi_today && item.presensi_today.length > 0) {
-                            const latest = item.presensi_today[0];
-                            if (latest.jam_checkin !== '-') {
-                                checkinCell.innerHTML = `<span class="badge bg-success">${latest.jam_checkin}</span>`;
-                            }
-                            if (latest.jam_checkout !== '-') {
-                                checkoutCell.innerHTML = `<span class="badge bg-warning">${latest.jam_checkout}</span>`;
-                            }
-                        }
-                        
-                        // Update status tombol
-                        if (checkinBtn) {
-                            checkinBtn.disabled = item.is_checked_in;
-                        }
-                        if (checkoutBtn) {
-                            checkoutBtn.disabled = !item.is_checked_in;
-                        }
-                        
-                        if (item.is_checked_in) {
-                            if (checkinBtn) {
-                                checkinBtn.classList.remove('btn-success');
-                                checkinBtn.classList.add('btn-outline-secondary');
-                            }
-                            if (checkoutBtn) {
-                                checkoutBtn.classList.remove('btn-outline-secondary');
-                                checkoutBtn.classList.add('btn-warning');
-                            }
-                        } else {
-                            if (checkinBtn) {
-                                checkinBtn.classList.remove('btn-outline-secondary');
-                                checkinBtn.classList.add('btn-success');
-                            }
-                            if (checkoutBtn) {
-                                checkoutBtn.classList.remove('btn-warning');
-                                checkoutBtn.classList.add('btn-outline-secondary');
-                            }
-                        }
-                    }
-                });
+<script>
+    // Global variables untuk real-time liveness detection
+    let currentStream = null;
+    let currentMahasiswaId = null;
+    let currentMahasiswaNama = null;
+    let currentAction = null;
+    let captureCanvas = null;
+    let drawCanvas = null;
+    let livenessInterval = null;
+    let isLivenessDetected = false;
+    let presensiId = null;
+    let lastDetectionResult = null;
+
+    let cameraModal = null;
+    document.addEventListener('DOMContentLoaded', function () {
+        cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
+        captureCanvas = document.getElementById('captureCanvas');
+        drawCanvas = document.getElementById('cameraCanvas');
+        console.log("Liveness Detection System initialized");
+    });
+
+    // Start camera dan real-time detection
+    async function startCamera() {
+        try {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
             }
-        })
-        .catch(error => console.error('Error refreshing data:', error));
-}
 
-// Jalankan refresh otomatis
-setInterval(refreshPresensiData, 30000); // Refresh setiap 30 detik
+            currentStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+                audio: false
+            });
 
-// Refresh saat halaman dibuka
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Halaman Kamera Presensi Mahasiswa dimuat');
-    refreshPresensiData();
-});
+            const video = document.getElementById('cameraPreview');
+            video.srcObject = currentStream;
+
+            isLivenessDetected = false;
+            updateDetectionStatus('Initializing...', '#6c757d');
+
+            // Mulai detection setelah 500ms
+            setTimeout(startLivenessDetection, 500);
+
+        } catch (err) {
+            console.error('Camera error:', err);
+            showNotification('Cannot access camera!', 'danger');
+            if (cameraModal) cameraModal.hide();
+        }
+    }
+
+    // Real-time liveness detection every 500ms
+    function startLivenessDetection() {
+        if (livenessInterval) clearInterval(livenessInterval);
+
+        livenessInterval = setInterval(async function () {
+            try {
+                const video = document.getElementById('cameraPreview');
+                if (!video || !video.srcObject) return;
+
+                // Capture frame untuk detection
+                captureCanvas.width = video.videoWidth;
+                captureCanvas.height = video.videoHeight;
+                const captureCtx = captureCanvas.getContext('2d');
+                captureCtx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+
+                const frameBase64 = captureCanvas.toDataURL('image/jpeg', 0.8);
+
+                // Setup draw canvas dengan ukuran video
+                drawCanvas.width = video.videoWidth;
+                drawCanvas.height = video.videoHeight;
+
+                // Kirim ke backend
+                const response = await fetch('{% url "detect_liveness_frame" %}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        frame: frameBase64,
+                        mahasiswa_id: currentMahasiswaId,
+                        action: currentAction
+                    })
+                });
+
+                const result = await response.json();
+                lastDetectionResult = result;
+
+                if (result.success) {
+                    // Gambar hasil detection
+                    drawDetectionResult(result);
+                    updateDetectionUI(result);
+
+                    // Auto save ketika REAL terdeteksi & belum disimpan
+                    if (result.status === 'REAL' && !isLivenessDetected && result.verified) {
+                        isLivenessDetected = true;
+                        await autoSubmitPresensi(frameBase64, result);
+                    }
+                }
+            } catch (error) {
+                console.error('Detection error:', error);
+            }
+        }, 500);
+    }
+
+    // Gambar kotak wajah dan status di canvas overlay
+    function drawDetectionResult(result) {
+        const drawCtx = drawCanvas.getContext('2d');
+
+        // Clear canvas
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+        if (!result.face_detected || !result.box) {
+            return;
+        }
+
+        const box = result.box;
+        let boxColor = '#6c757d';
+        let statusText = 'VERIFYING...';
+        let statusColor = '#6c757d';
+
+        // Tentukan warna berdasarkan status
+        if (result.status === 'REAL') {
+            boxColor = '#28a745';
+            statusColor = '#28a745';
+            statusText = 'REAL / LIVE ✓';
+        } else if (result.status === 'SPOOF') {
+            boxColor = '#dc3545';
+            statusColor = '#dc3545';
+            statusText = 'SPOOF ✗';
+        } else if (result.status === 'VERIFYING') {
+            boxColor = '#ffc107';
+            statusColor = '#ffc107';
+            statusText = `VERIFYING (${result.blink_count}/2)`;
+        }
+
+        // Gambar kotak wajah
+        drawCtx.strokeStyle = boxColor;
+        drawCtx.lineWidth = 3;
+        drawCtx.strokeRect(box.x, box.y, box.w, box.h);
+
+        // Gambar background status text
+        const fontSize = 18;
+        const fontFamily = 'Arial';
+        drawCtx.font = `bold ${fontSize}px ${fontFamily}`;
+        const textMetrics = drawCtx.measureText(statusText);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize + 8;
+        const textX = box.x;
+        const textY = box.y - 10;
+
+        // Background box
+        drawCtx.fillStyle = boxColor;
+        drawCtx.fillRect(textX, textY - textHeight, textWidth + 10, textHeight);
+
+        // Text
+        drawCtx.fillStyle = '#fff';
+        drawCtx.fillText(statusText, textX + 5, textY - 5);
+
+        // Info di bawah kotak
+        const infoText = `Score: ${result.spoof_score.toFixed(3)} | Blinks: ${result.blink_count}/2`;
+        drawCtx.font = `12px ${fontFamily}`;
+        drawCtx.fillStyle = boxColor;
+        drawCtx.fillRect(box.x, box.y + box.h + 5, drawCtx.measureText(infoText).width + 10, 20);
+        drawCtx.fillStyle = '#fff';
+        drawCtx.fillText(infoText, box.x + 5, box.y + box.h + 20);
+    }
+
+    // Update detection UI di panel info
+    function updateDetectionUI(result) {
+        let statusText = '';
+        let color = '#6c757d';
+
+        if (result.status === 'REAL') {
+            statusText = `<strong style="color: #28a745;">✓ REAL / LIVE</strong><br/>Face verified successfully<br/><small>Score: ${result.spoof_score.toFixed(3)} | Eyes Open: ${result.eyes_open ? 'Yes' : 'No'}</small>`;
+            color = '#28a745';
+        } else if (result.status === 'SPOOF') {
+            statusText = `<strong style="color: #dc3545;">✗ SPOOF DETECTED</strong><br/>Fake face pattern detected<br/><small>Score: ${result.spoof_score.toFixed(3)}</small>`;
+            color = '#dc3545';
+        } else if (result.status === 'VERIFYING') {
+            statusText = `<strong style="color: #ffc107;">⏳ VERIFYING...</strong><br/>Blinks: ${result.blink_count}/2<br/><small>Score: ${result.spoof_score.toFixed(3)}</small>`;
+            color = '#ffc107';
+        } else if (result.status === 'NO_FACE') {
+            statusText = `<strong style="color: #6c757d;">📹 NO FACE</strong><br/>Position face to camera`;
+            color = '#6c757d';
+        }
+
+        updateDetectionStatus(statusText, color);
+    }
+
+    function updateDetectionStatus(content, color) {
+        const statusBox = document.getElementById('detectionStatusBox');
+        if (statusBox) {
+            statusBox.innerHTML = content;
+            statusBox.style.borderLeft = `4px solid ${color}`;
+            statusBox.style.backgroundColor = color + '15';
+        }
+    }
+
+    // Auto submit presensi
+    async function autoSubmitPresensi(frameBase64, result) {
+        try {
+            if (!frameBase64 || !currentMahasiswaId) return;
+
+            if (livenessInterval) clearInterval(livenessInterval);
+
+            updateDetectionStatus('✓ Saving to database...', '#17a2b8');
+            showNotification('✓ Face verified! Saving attendance...', 'success');
+
+            // Jika backend sudah auto-save melalui detect_liveness_frame
+            if (result.saved) {
+                updateDetectionStatus(`✓ Saved successfully!<br/>ID: ${result.presensi_id}`, '#28a745');
+                showNotification(`✓ ${currentAction.toUpperCase()} saved successfully!`, 'success');
+
+                if (currentAction === 'checkin') {
+                    presensiId = result.presensi_id;
+                    updatePresensiUI(currentMahasiswaId, 'checkin', {
+                        presensi_id: result.presensi_id,
+                        jam_checkin: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                    });
+                } else {
+                    updatePresensiUI(currentMahasiswaId, 'checkout', {
+                        presensi_id: result.presensi_id,
+                        jam_checkout: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                    });
+                }
+
+                setTimeout(() => { if (cameraModal) cameraModal.hide(); }, 1500);
+            } else {
+                // Fallback ke endpoint lama jika belum auto-save
+                const endpoint = currentAction === 'checkin' ? '{% url "checkin_presensi" %}' : '{% url "checkout_presensi" %}';
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        mahasiswa_id: currentMahasiswaId,
+                        foto: frameBase64,
+                        presensi_id: presensiId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    updateDetectionStatus('✓ Saved successfully!', '#28a745');
+                    showNotification('✓ Attendance saved successfully!', 'success');
+
+                    if (currentAction === 'checkin') {
+                        presensiId = data.data.presensi_id;
+                        updatePresensiUI(currentMahasiswaId, 'checkin', data.data);
+                    } else {
+                        updatePresensiUI(currentMahasiswaId, 'checkout', data.data);
+                    }
+
+                    setTimeout(() => { if (cameraModal) cameraModal.hide(); }, 1500);
+                } else {
+                    showNotification('✗ ' + data.message, 'danger');
+                    isLivenessDetected = false;
+                    setTimeout(startLivenessDetection, 1000);
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('✗ Error: ' + error.message, 'danger');
+            isLivenessDetected = false;
+            setTimeout(startLivenessDetection, 1000);
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('click', function (e) {
+        const checkinBtn = e.target.closest('.btn-checkin');
+        if (checkinBtn && !checkinBtn.disabled) {
+            currentMahasiswaId = checkinBtn.getAttribute('data-mahasiswa-id');
+            currentMahasiswaNama = checkinBtn.getAttribute('data-mahasiswa-nama');
+            currentAction = 'checkin';
+            presensiId = null;
+            document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
+            document.getElementById('actionType').textContent = 'CHECK-IN';
+            if (cameraModal) cameraModal.show();
+        }
+
+        const checkoutBtn = e.target.closest('.btn-checkout');
+        if (checkoutBtn && !checkoutBtn.disabled) {
+            currentMahasiswaId = checkoutBtn.getAttribute('data-mahasiswa-id');
+            currentMahasiswaNama = checkoutBtn.getAttribute('data-mahasiswa-nama');
+            currentAction = 'checkout';
+            presensiId = checkoutBtn.getAttribute('data-presensi-id') || null;
+            document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
+            document.getElementById('actionType').textContent = 'CHECK-OUT';
+            if (cameraModal) cameraModal.show();
+        }
+    });
+
+    // Modal events
+    const cameraModalElement = document.getElementById('cameraModal');
+    if (cameraModalElement) {
+        cameraModalElement.addEventListener('shown.bs.modal', startCamera);
+        cameraModalElement.addEventListener('hidden.bs.modal', function () {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            if (livenessInterval) {
+                clearInterval(livenessInterval);
+                livenessInterval = null;
+            }
+            isLivenessDetected = false;
+        });
+    }
+
+    function updatePresensiUI(mahasiswaId, action, data) {
+        const row = document.getElementById(`row-${mahasiswaId}`);
+        if (!row) return;
+
+        const checkinCell = document.getElementById(`checkin-${mahasiswaId}`);
+        const checkoutCell = document.getElementById(`checkout-${mahasiswaId}`);
+        const checkinBtn = row.querySelector('.btn-checkin');
+        const checkoutBtn = row.querySelector('.btn-checkout');
+
+        if (action === 'checkin') {
+            if (checkinCell) checkinCell.innerHTML = `<span class="badge bg-success">${data.jam_checkin}</span>`;
+            if (checkinBtn) { checkinBtn.classList.add('disabled'); checkinBtn.disabled = true; }
+            if (checkoutBtn) {
+                checkoutBtn.classList.remove('disabled');
+                checkoutBtn.disabled = false;
+                checkoutBtn.setAttribute('data-presensi-id', data.presensi_id);
+            }
+        } else if (action === 'checkout') {
+            if (checkoutCell) checkoutCell.innerHTML = `<span class="badge bg-warning">${data.jam_checkout}</span>`;
+            if (checkoutBtn) { checkoutBtn.classList.add('disabled'); checkoutBtn.disabled = true; }
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie) {
+            document.cookie.split(';').forEach(c => {
+                const cookie = c.trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                }
+            });
+        }
+        return cookieValue;
+    }
+
+    function showNotification(message, type = 'info') {
+        document.querySelectorAll('.alert-notification').forEach(n => n.remove());
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-notification alert-dismissible fade show`;
+        notification.style.cssText = `position: fixed; top: 20px; right: 20px; z-index: 1060; min-width: 320px; animation: slideIn 0.3s ease-out;`;
+        notification.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        document.body.appendChild(notification);
+        setTimeout(() => { if (notification.parentNode) notification.remove(); }, 5000);
+    }
+
+    setInterval(() => {
+        fetch('{% url "get_presensi_today" %}').catch(e => console.log('Refresh check'));
+    }, 30000);
 </script>
 {% endblock %}

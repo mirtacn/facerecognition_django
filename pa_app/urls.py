@@ -1,46 +1,82 @@
 from django.conf.urls.i18n import i18n_patterns
 from django.urls import path, include
 from django.contrib import admin
-from django.shortcuts import redirect 
-from accounts.views import (
-    login_view, tambah_kegiatan_sks, get_detail_tahun_ajaran, 
-    hapus_tahun_ajaran, edit_tahun_ajaran, tambah_tahun_ajaran, 
-    aktifkan_tahun_ajaran, edit_kegiatan_sks, get_detail_kegiatan, 
-    hapus_kegiatan_sks, checkin_presensi, get_presensi_today, 
-    get_foto_wajah_detail, download_all_fotos, checkout_presensi, 
-    register_wizard, edit_mahasiswa, hapus_mahasiswa, kamera_presensi_mhs, 
-    admin_dashboard, rekap_presensi, monitoring_presensi, data_sks, management_data, approval_pendaftaran, 
-    master_data_wajah, data_mahasiswa, monitor_durasi, profil_mahasiswa, 
-    data_wajah, riwayat_presensi, progress_sks, edit_profil, 
-    get_kegiatan_pa_by_jenjang, registrasi_complete, edit_dosen_pembimbing, 
-    upload_foto_wajah, hapus_foto_wajah, hapus_semua_foto, logout_view, status_pemenuhan_sks, 
-    update_jam_tercapai_from_durasi, sync_all_durasi_to_status_sks, get_progress_sks_api
-)
+from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
 
-# URL patterns untuk API, media, dan language switching
+from accounts.views import (
+    login_view,
+    tambah_kegiatan_sks,
+    get_detail_tahun_ajaran,
+    hapus_tahun_ajaran,
+    edit_tahun_ajaran,
+    tambah_tahun_ajaran,
+    aktifkan_tahun_ajaran,
+    edit_kegiatan_sks,
+    get_detail_kegiatan,
+    hapus_kegiatan_sks,
+    checkin_presensi,
+    get_presensi_today,
+    get_foto_wajah_detail,
+    download_all_fotos,
+    checkout_presensi,
+    register_wizard,
+    edit_mahasiswa,
+    hapus_mahasiswa,
+    kamera_presensi_mhs,
+    admin_dashboard,
+    rekap_presensi,
+    monitoring_presensi,
+    data_sks,
+    management_data,
+    approval_pendaftaran,
+    master_data_wajah,
+    data_mahasiswa,
+    monitor_durasi,
+    profil_mahasiswa,
+    data_wajah,
+    riwayat_presensi,
+    progress_sks,
+    edit_profil,
+    get_kegiatan_pa_by_jenjang,
+    registrasi_complete,
+    edit_dosen_pembimbing,
+    upload_foto_wajah,
+    hapus_foto_wajah,
+    hapus_semua_foto,
+    logout_view,
+    status_pemenuhan_sks,
+    get_progress_sks_api,
+    detect_liveness_frame,
+)
+
+# =====================================================================
+# URL PATTERNS BARU (NON-PREFIXED i18n) – INI YANG DIREKOMENDASIKAN
+# =====================================================================
+
 urlpatterns = [
-    # URL untuk language switching - HARUS di luar i18n_patterns
+    # 1. Language switcher – WAJIB di root (tanpa prefix)
     path('i18n/', include('django.conf.urls.i18n')),
-    
-    # API endpoints - tanpa prefix bahasa
+
+    # 2. Semua API endpoints (tetap tanpa prefix bahasa)
     path('api/checkin/', checkin_presensi, name='checkin_presensi'),
     path('api/checkout/', checkout_presensi, name='checkout_presensi'),
+    path('api/liveness-detect/', detect_liveness_frame, name='detect_liveness_frame'),
     path('api/presensi-today/', get_presensi_today, name='get_presensi_today'),
     path('api/progress-sks/', get_progress_sks_api, name='api_progress_sks'),
-    path("api/kegiatan-pa-by-jenjang/<int:jenjang_id>/", get_kegiatan_pa_by_jenjang, name="kegiatan_pa_api"),
+    path('api/kegiatan-pa-by-jenjang/<int:jenjang_id>/', get_kegiatan_pa_by_jenjang, name='kegiatan_pa_api'),
     path('api/hapus-foto-wajah/<int:foto_id>/', hapus_foto_wajah, name='hapus_foto_wajah'),
-    path('sync-durasi-sks/', update_jam_tercapai_from_durasi, name='sync_durasi_sks'),
-    path('admin/sync-all-durasi/', sync_all_durasi_to_status_sks, name='sync_all_durasi'),
+
+    # 3. Media files
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# SEMUA URL halaman web dengan dukungan multi-bahasa
-urlpatterns += i18n_patterns(
-    # --- DJANGO ADMIN PANEL ---
-    path('admin-panel/', admin.site.urls),  # Django admin panel
-    
-    # --- URL UNTUK ADMIN APLIKASI (Custom Admin) ---
+# 4. SEMUA HALAMAN UTAMA – TANPA i18n_patterns (tanpa prefix /en/ atau /id/)
+urlpatterns += [
+    # Django Admin Panel
+    path('admin-panel/', admin.site.urls),
+
+    # Custom Admin URLs
     path('admin/dashboard/', admin_dashboard, name='admin_dashboard'),
     path('admin/kamera_presensi_mhs/', kamera_presensi_mhs, name='kamera_presensi_mhs'),
     path('admin/monitor-durasi/', monitor_durasi, name='monitor_durasi'),
@@ -52,29 +88,30 @@ urlpatterns += i18n_patterns(
     path('admin/master-data-wajah/', master_data_wajah, name='master_data_wajah'),
     path('admin/master-data-wajah/<int:mahasiswa_id>/detail/', get_foto_wajah_detail, name='get_foto_wajah_detail'),
     path('admin/master-data-wajah/<int:mahasiswa_id>/download/', download_all_fotos, name='download_all_fotos'),
-    
-    # URLs untuk Data SKS (Admin)
+
+    # Data SKS (Admin)
     path('admin/data-sks/', data_sks, name='data_sks'),
     path('admin/data-sks/tambah/', tambah_kegiatan_sks, name='tambah_kegiatan_sks'),
     path('admin/data-sks/<int:kegiatan_id>/edit/', edit_kegiatan_sks, name='edit_kegiatan_sks'),
     path('admin/data-sks/<int:kegiatan_id>/hapus/', hapus_kegiatan_sks, name='hapus_kegiatan_sks'),
     path('admin/data-sks/<int:kegiatan_id>/detail/', get_detail_kegiatan, name='get_detail_kegiatan'),
-    
-    # URLs untuk Tahun Ajaran (Admin)
+
+    # Tahun Ajaran (Admin)
     path('admin/data-sks/tahun-ajaran/tambah/', tambah_tahun_ajaran, name='tambah_tahun_ajaran'),
     path('admin/data-sks/tahun-ajaran/<int:tahun_id>/edit/', edit_tahun_ajaran, name='edit_tahun_ajaran'),
     path('admin/data-sks/tahun-ajaran/<int:tahun_id>/hapus/', hapus_tahun_ajaran, name='hapus_tahun_ajaran'),
     path('admin/data-sks/tahun-ajaran/<int:tahun_id>/detail/', get_detail_tahun_ajaran, name='get_detail_tahun_ajaran'),
     path('admin/data-sks/tahun-ajaran/aktifkan/', aktifkan_tahun_ajaran, name='aktifkan_tahun_ajaran'),
 
+    # Lainnya (Admin)
     path('admin/monitoring-presensi/', monitoring_presensi, name='monitoring_presensi'),
     path('admin/status_pemenuhan_sks/', status_pemenuhan_sks, name='status_pemenuhan_sks'),
     path('admin/rekap-presensi/', rekap_presensi, name='rekap_presensi'),
-    
-    # --- URL UNTUK MAHASISWA ---
+
+    # Mahasiswa URLs
     path('login/', login_view, name='login'),
-    path('register/step/<int:step>/', register_wizard, name='register_step'), 
-    path('register/', lambda request: redirect('register_step', step=1), name='register'), 
+    path('register/step/<int:step>/', register_wizard, name='register_step'),
+    path('register/', lambda request: redirect('register_step', step=1), name='register'),
     path('registrasi-complete/', registrasi_complete, name='registrasi_complete'),
     path('profil_mahasiswa/', profil_mahasiswa, name='profil_mahasiswa'),
     path('edit_profil/<str:nim>/', edit_profil, name='edit_profil'),
@@ -86,6 +123,6 @@ urlpatterns += i18n_patterns(
     path('progress_sks/', progress_sks, name='progress_sks'),
     path('logout/', logout_view, name='logout'),
 
-    # URL untuk root (redirect ke login)
+    # Root → redirect ke login
     path('', lambda request: redirect('login'), name='home'),
-)
+]

@@ -16,162 +16,134 @@
                         <i class="bi bi-calendar-check me-2"></i>
                         {% trans "Attendance History" %}
                     </h5>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-info text-dark">
-                            <i class="bi bi-book me-1"></i>
-                            {% trans "Total Credits" %}: {{ total_sks }} {% trans "Credits" %}
-                        </span>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-filter me-1"></i> {% trans "Filter" %}
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('ganjil')">{% trans "Odd Semester" %}</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="filterBySemester('genap')">{% trans "Even Semester" %}</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" onclick="showAll()">{% trans "Show All" %}</a></li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
                 <div class="card-body">
-                    
-                    <!-- Credits Info -->
-                    <div class="alert alert-primary mb-4">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            <div>
-                                <strong>{% trans "This Semester's Credit Activities" %}</strong> - {% trans "Total Credits" %}: {{ total_sks }} {% trans "Credits" %}
+                    <!-- Student Info -->
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <strong><i class="bi bi-person-circle me-2"></i>{% trans "Student" %}:</strong>
+                                {{ mahasiswa.user.nama_lengkap|default:mahasiswa.user.username }} ({{ mahasiswa.nim }})
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Your PA Activities Card -->
+                    {% if kegiatan_pa_list %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="bi bi-list-task me-2"></i>
+                                {% blocktrans with total=total_kegiatan %}Your PA Activities ({{ total }}){% endblocktrans %}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for kegiatan in kegiatan_pa_list %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center p-2 border rounded">
+                                        <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                                        <div>
+                                            <strong style="font-size: 14px;">{{ kegiatan.nama_kegiatan }}</strong>
+                                            <div>
+    <span class="badge bg-primary me-2">{{ kegiatan.jumlah_sks }} SKS</span>
+        <span class="badge bg-secondary">
+            {% blocktrans with target=kegiatan.target_jam %}Target: {{ target }} hours{% endblocktrans %}
+        </span>
+    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="col-12 text-center text-muted">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    {% trans "No PA activities registered" %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <!-- Attendance History Table -->
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered" id="presensiTable">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 8%; font-size: 13px;">{% trans "Date" %}</th>
-                                    <th style="width: 10%; font-size: 13px;">{% trans "Student ID" %}</th>
-                                    <th style="width: 15%; font-size: 13px;">{% trans "Name" %}</th>
-                                    <th style="width: 8%; font-size: 13px;">{% trans "Class" %}</th>
-                                    <th style="width: 8%; font-size: 13px;">{% trans "Level" %}</th>
-                                    <th style="width: 8%; font-size: 13px;">{% trans "Check-in" %}</th>
-                                    <th style="width: 8%; font-size: 13px;">{% trans "Check-out" %}</th>
-                                    <th style="width: 8%; font-size: 13px;">{% trans "Duration" %}</th>
-                                    <th style="width: 8%; font-size: 13px;">{% trans "Status" %}</th>
+                                    <th style="width: 15%; font-size: 13px;">
+                                        <i class="bi bi-calendar3 me-1"></i>{% trans "Date" %}
+                                    </th>
+                                    <th style="width: 15%; font-size: 13px;">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>{% trans "Check-in" %}
+                                    </th>
+                                    <th style="width: 15%; font-size: 13px;">
+                                        <i class="bi bi-box-arrow-left me-1"></i>{% trans "Check-out" %}
+                                    </th>
+                                    <th style="width: 20%; font-size: 13px;">
+                                        <i class="bi bi-clock-history me-1"></i>{% trans "Duration" %}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% if presensi_list %}
-                                    {% for presensi in presensi_list %}
-                                    <tr class="{% if presensi.status == 'Hadir' %}table-success{% elif presensi.status == 'Terlambat' %}table-warning{% elif presensi.status == 'Alpha' %}table-danger{% endif %}">
-                                        <td style="font-size: 13px;">{{ presensi.tanggal|date:"d/m/Y" }}</td>
-                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.nrp }}</td>
-                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.nama }}</td>
-                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.kelas }}</td>
-                                        <td style="font-size: 13px;">{{ presensi.mahasiswa.jenjang }}</td>
-                                        <td style="font-size: 13px;">
-                                            {% if presensi.check_in %}
-                                                <span class="badge bg-success bg-opacity-10 text-success">{{ presensi.check_in|time:"H:i" }}</span>
-                                            {% else %}
-                                                <span class="badge bg-danger bg-opacity-10 text-danger">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td style="font-size: 13px;">
-                                            {% if presensi.check_out %}
-                                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ presensi.check_out|time:"H:i" }}</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary bg-opacity-10 text-secondary">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td style="font-size: 13px;">
-                                            {% if presensi.durasi %}
-                                                <span class="badge bg-info bg-opacity-10 text-dark">{{ presensi.durasi }}</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary bg-opacity-10 text-secondary">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td style="font-size: 13px;">
-                                            {% if presensi.status == 'Hadir' %}
-                                                <span class="badge bg-success">{% trans "Present" %}</span>
-                                            {% elif presensi.status == 'Terlambat' %}
-                                                <span class="badge bg-warning text-dark">{% trans "Late" %}</span>
-                                            {% elif presensi.status == 'Izin' %}
-                                                <span class="badge bg-info">{% trans "Permission" %}</span>
-                                            {% elif presensi.status == 'Sakit' %}
-                                                <span class="badge bg-primary">{% trans "Sick" %}</span>
-                                            {% else %}
-                                                <span class="badge bg-danger">{% trans "Absent" %}</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
+                                {% for presensi in presensi_list %}
+                                <tr>
+                                    <td style="font-size: 13px;">
+                                        <strong>{{ presensi.tanggal|date:"d/m/Y" }}</strong>
+                                    </td>
+                                    <td style="font-size: 13px;">
+                                        {% if presensi.check_in %}
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success">
+                                            <i class="bi bi-clock me-1"></i>{{ presensi.check_in|time:"H:i" }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary bg-opacity-25 text-secondary">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="font-size: 13px;">
+                                        {% if presensi.check_out %}
+                                        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary">
+                                            <i class="bi bi-clock me-1"></i>{{ presensi.check_out|time:"H:i" }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-warning bg-opacity-25 text-warning">
+                                            <i class="bi bi-hourglass-split me-1"></i>{% trans "In Progress" %}
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="font-size: 13px;">
+                                        {% if presensi.durasi != "-" %}
+                                        <span class="badge bg-info bg-opacity-25 text-dark border border-info">
+                                            <i class="bi bi-stopwatch me-1"></i>{{ presensi.durasi }}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary bg-opacity-25 text-secondary">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
                                 {% else %}
-                                    <tr>
-                                        <td colspan="9" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="bi bi-calendar-x display-6 mb-3"></i>
-                                                <p>{% trans "No attendance data available" %}</p>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="bi bi-calendar-x display-6 mb-3"></i>
+                                            <p class="mb-2">{% trans "No attendance data available" %}</p>
+                                            <p class="small">
+                                                {% if kegiatan_pa_list %}
+                                                {% trans "You haven't taken any attendance yet for your PA activities"
+                                                %}
+                                                {% else %}
+                                                {% trans "You haven't registered for any PA activities yet" %}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
                                 {% endif %}
                             </tbody>
                         </table>
                     </div>
-                    
-                    <!-- Semester Information -->
-                    <div class="alert alert-secondary mt-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-calendar-date me-2"></i>
-                                <strong>{% trans "Semester" %}:</strong> {{ semester_nama }}
-                            </div>
-                            <div>
-                                <button class="btn btn-outline-primary btn-sm" onclick="exportToExcel()">
-                                    <i class="bi bi-file-earmark-excel me-1"></i> {% trans "Export Excel" %}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Attendance Statistics (Commented out)
-                    <div class="row mt-4">
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card border-primary bg-primary bg-opacity-10">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-1 text-primary">{{ statistik.hadir }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Present" %}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card border-warning bg-warning bg-opacity-10">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-1 text-warning">{{ statistik.terlambat }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Late" %}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card border-info bg-info bg-opacity-10">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-1 text-info">{{ statistik.izin }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Permission" %}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card border-danger bg-danger bg-opacity-10">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-1 text-danger">{{ statistik.alpha }}</h3>
-                                    <p class="mb-0 text-muted" style="font-size: 13px;">{% trans "Absent" %}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-                    
+
                 </div>
             </div>
         </div>
@@ -185,143 +157,42 @@
         background-color: #f8f9fa;
         font-weight: 600;
     }
-    
+
     .table-hover tbody tr:hover {
         background-color: rgba(0, 123, 255, 0.05);
     }
-    
+
     .badge {
         font-size: 11px;
         padding: 4px 8px;
     }
-    
+
     .card-title {
         color: #2d3748;
     }
-    
+
     .table-responsive {
         border-radius: 8px;
         border: 1px solid #e9ecef;
     }
-    
-    /* Style untuk status badge */
-    .bg-success {
-        background-color: #28a745 !important;
-    }
-    
-    .bg-warning {
-        background-color: #ffc107 !important;
-    }
-    
-    .bg-info {
-        background-color: #17a2b8 !important;
-    }
-    
-    .bg-danger {
-        background-color: #dc3545 !important;
+
+    @media print {
+
+        .card-header,
+        .alert,
+        .btn,
+        .dropdown {
+            display: none !important;
+        }
+
+        .card {
+            border: none !important;
+        }
+
+        .table th {
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact;
+        }
     }
 </style>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Function to filter by semester
-    function filterBySemester(semester) {
-        const rows = document.querySelectorAll('#presensiTable tbody tr');
-        let count = 0;
-        
-        rows.forEach(row => {
-            const tanggalCell = row.querySelector('td:nth-child(1)');
-            if (tanggalCell) {
-                const hari = parseInt(tanggalCell.textContent.split('/')[0]);
-                if ((semester === 'ganjil' && hari % 2 === 1) || 
-                    (semester === 'genap' && hari % 2 === 0)) {
-                    row.style.display = '';
-                    count++;
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        });
-        
-        const semesterText = semester === 'ganjil' ? "{% trans 'Odd Semester' %}" : "{% trans 'Even Semester' %}";
-        showNotification("{% trans 'Showing' %} " + count + " {% trans 'attendance data for' %} " + semesterText, 'info');
-    }
-    
-    // Function to show all data
-    function showAll() {
-        const rows = document.querySelectorAll('#presensiTable tbody tr');
-        rows.forEach(row => {
-            row.style.display = '';
-        });
-        showNotification("{% trans 'Showing all attendance data' %}", 'info');
-    }
-    
-    // Function to export to Excel
-    function exportToExcel() {
-        showNotification("{% trans 'Preparing Excel file...' %}", 'info');
-        
-        setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = 'data:application/vnd.ms-excel;base64,' + btoa('Simulated Excel Data');
-            link.download = `attendance_history_${new Date().toISOString().slice(0,10)}.xls`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showNotification("{% trans 'Excel file successfully downloaded' %}", 'success');
-        }, 1500);
-    }
-    
-    // Function to show notification
-    function showNotification(message, type) {
-        const oldAlerts = document.querySelectorAll('.alert.position-fixed');
-        oldAlerts.forEach(alert => alert.remove());
-        
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alert.style.cssText = `
-            z-index: 1060;
-            top: 20px;
-            right: 20px;
-            min-width: 300px;
-            max-width: 400px;
-        `;
-        
-        const icon = type === 'success' ? 'bi-check-circle-fill' : 
-                     type === 'info' ? 'bi-info-circle-fill' : 
-                     type === 'warning' ? 'bi-exclamation-triangle-fill' : 
-                     'bi-exclamation-circle-fill';
-        
-        alert.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="bi ${icon} me-2 fs-5"></i>
-                <div class="flex-grow-1">${message}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        document.body.appendChild(alert);
-        
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.remove();
-            }
-        }, 3000);
-    }
-    
-    // Initialize DataTable (if using DataTables library)
-    document.addEventListener('DOMContentLoaded', function() {
-        // If using DataTables, uncomment code below
-        /*
-        $('#presensiTable').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
-            },
-            "order": [[0, "desc"]],
-            "pageLength": 10
-        });
-        */
-    });
-</script>
 {% endblock %}

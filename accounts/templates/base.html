@@ -525,21 +525,24 @@
                 </div>
                 <div class="user-info-header">
                     <!-- Language Switcher -->
+                    <!-- Language Switcher (GANTI SELURUH BAGIAN INI) -->
                     <div class="header-language-switcher">
                         <form action="{% url 'set_language' %}" method="post">
                             {% csrf_token %}
-                            <input name="next" type="hidden" value="{{ request.get_full_path }}">
-                            <select name="language" onchange="this.form.submit()">
-                                <option value="id" {% if LANGUAGE_CODE == 'id' %}selected{% endif %}>
+                            <!-- Parameter 'next' WAJIB ada supaya redirect kembali ke halaman yang sama dengan prefix baru -->
+                            <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
+                            
+                            <select name="language" onchange="this.form.submit()" class="form-select form-select-sm">
+                                <option value="id" {% if request.LANGUAGE_CODE == 'id' %}selected{% endif %}>
                                     Bahasa Indonesia
                                 </option>
-                                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>
+                                <option value="en" {% if request.LANGUAGE_CODE == 'en' %}selected{% endif %}>
                                     English
                                 </option>
                             </select>
                         </form>
                     </div>
-                    
+                                        
                     <!-- User Profile -->
                     <div class="d-flex align-items-center gap-2">
                         <div class="user-avatar">

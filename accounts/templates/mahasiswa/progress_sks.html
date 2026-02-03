@@ -19,22 +19,30 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-primary">
                             <i class="bi bi-book me-1"></i>
-                            {% trans "Credits" %}: 12 {% trans "Credits" %}
+                            {% trans "Total Credits" %}: {{ total_sks }} {% trans "Credits" %}
+                        </span>
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-list-check me-1"></i>
+                            {% trans "Activities" %}: {{ jumlah_kegiatan }}
                         </span>
                     </div>
                 </div>
                 <div class="card-body">
-                    
-                    <!-- Credit Info -->
-                    <div class="alert alert-primary mb-4">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            <div>
-                                <strong>{% trans "This Semester's Credit Progress" %}</strong> - {% trans "Total Credits" %}: 12 {% trans "Credits" %}
+
+                    <!-- Student Info -->
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-person-circle me-2"></i>{% trans "Student" %}:</strong>
+                                {{ mahasiswa.user.nama_lengkap }} ({{ mahasiswa.nim }})
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-calendar3 me-2"></i>{% trans "Semester" %}:</strong>
+                                {{ mahasiswa.semester.nama_semester|default:"-" }}
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Progress Bar and Statistics -->
                     <div class="row mb-4">
                         <!-- Main Progress Bar -->
@@ -42,159 +50,88 @@
                             <div class="card">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="mb-0">{% trans "Overall Semester Progress" %}</h6>
-                                        <span class="badge bg-success">68%</span>
+                                        <h6 class="mb-0">{% trans "Overall SKS Progress" %} 
+                                            <small class="text-muted">({{ jumlah_kegiatan }} {% trans "activities" %})</small>
+                                        </h6>
+                                        <span class="badge bg-success">{{ progress_percentage|floatformat:2 }}%</span>
                                     </div>
                                     <div class="progress mb-3" style="height: 25px;">
-                                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
-                                             role="progressbar" 
-                                             style="width: 68%"
-                                             aria-valuenow="68" 
-                                             aria-valuemin="0" 
-                                             aria-valuemax="100">
-                                            68%
+                                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                                            role="progressbar" data-progress="{{ progress_percentage }}"
+                                            aria-valuenow="{{ progress_percentage }}" aria-valuemin="0"
+                                            aria-valuemax="100">
+                                            {{ progress_percentage|floatformat:2 }}%
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-between">
-                                        <small class="text-muted">{% trans "Completed Hours" %}: 234 {% trans "hours" %}</small>
-                                        <small class="text-muted">{% trans "Target Hours" %}: 344 {% trans "hours" %}</small>
+                                        <small class="text-muted">{% trans "Completed Hours" %}: {{ jam_terselesaikan }}
+                                            {% trans "hours" %}</small>
+                                        <small class="text-muted">{% trans "Target Hours" %}: {{ jam_target_total }} {%
+                                            trans "hours" %}</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Statistics Card -->
-                        <div class="col-md-4 mb-3">
+
+                        <!-- Statistics Cards -->
+                        <div class="col-md-3 mb-3">
                             <div class="card border-primary bg-primary bg-opacity-10">
                                 <div class="card-body text-center">
-                                    <h2 class="mb-1 text-primary">12</h2>
+                                    <h2 class="mb-1 text-primary">{{ total_sks }}</h2>
                                     <p class="mb-0 text-muted" style="font-size: 14px;">
-                                        <i class="bi bi-tools me-1"></i> {% trans "Total Credits" %}
+                                        <i class="bi bi-book me-1"></i> {% trans "Total Credits" %}
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="col-md-4 mb-3">
+
+                        <div class="col-md-3 mb-3">
                             <div class="card border-success bg-success bg-opacity-10">
                                 <div class="card-body text-center">
-                                    <h2 class="mb-1 text-success">234</h2>
+                                    <h2 class="mb-1 text-success">{{ jam_terselesaikan }}</h2>
                                     <p class="mb-0 text-muted" style="font-size: 14px;">
-                                        <i class="bi bi-clock-history me-1"></i> {% trans "Completed Hours" %}
+                                        <i class="bi bi-check-circle me-1"></i> {% trans "Completed Hours" %}
                                     </p>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-info bg-info bg-opacity-10">
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-warning bg-warning bg-opacity-10">
                                 <div class="card-body text-center">
-                                    <h2 class="mb-1 text-info">110</h2>
+                                    <h2 class="mb-1 text-warning">{{ jam_sisa }}</h2>
                                     <p class="mb-0 text-muted" style="font-size: 14px;">
                                         <i class="bi bi-clock me-1"></i> {% trans "Remaining Hours" %}
                                     </p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Progress Details -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h6 class="mb-0">
-                                        <i class="bi bi-bar-chart me-2"></i>
-                                        {% trans "Credit Progress Details" %}
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>{% trans "Description" %}</th>
-                                                    <th class="text-center">{% trans "Amount" %}</th>
-                                                    <th class="text-center">{% trans "Status" %}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <i class="bi bi-tools me-2"></i>
-                                                        <strong>{% trans "Total Credits" %}</strong>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-primary">12 {% trans "Credits" %}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-info">{% trans "Active" %}</span>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <i class="bi bi-clock-history me-2"></i>
-                                                        <strong>{% trans "Completed Hours" %}</strong>
-                                                        <p class="mb-0 text-muted small">{% trans "From 344 target hours" %}</p>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-success">234 {% trans "hours" %}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-success">68%</span>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <i class="bi bi-clock me-2"></i>
-                                                        <strong>{% trans "Remaining Hours" %}</strong>
-                                                        <p class="mb-0 text-muted small">{% trans "To reach target" %}</p>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-warning text-dark">110 {% trans "hours" %}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-warning text-dark">{% trans "In Progress" %}</span>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <i class="bi bi-target me-2"></i>
-                                                        <strong>{% trans "Total Target Hours" %}</strong>
-                                                        <p class="mb-0 text-muted small">{% trans "This semester's target" %}</p>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-primary">344 {% trans "hours" %}</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-primary">{% trans "Target" %}</span>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-info bg-info bg-opacity-10">
+                                <div class="card-body text-center">
+                                    <h2 class="mb-1 text-info">{{ jumlah_kegiatan }}</h2>
+                                    <p class="mb-0 text-muted" style="font-size: 14px;">
+                                        <i class="bi bi-list-check me-1"></i> {% trans "Activities" %}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Summary -->
-                    <div class="alert alert-success mt-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <strong>{% trans "Progress Status" %}:</strong> 
-                                <span class="text-success">{% trans "Excellent" %}</span>
-                            </div>
-                            <div>
-                                <button class="btn btn-outline-primary btn-sm" onclick="exportProgressReport()">
-                                    <i class="bi bi-file-earmark-pdf me-1"></i> {% trans "Export Report" %}
-                                </button>
-                            </div>
-                        </div>
+
+                    <!-- Debug Info (Optional - bisa dihapus setelah testing) -->
+                    {% if debug_mode %}
+                    <div class="alert alert-warning">
+                        <h6>Debug Info:</h6>
+                        <p>Total SKS: {{ total_sks }}</p>
+                        <p>Target Hours: {{ jam_target_total }}</p>
+                        <p>Completed Hours: {{ jam_terselesaikan }}</p>
+                        <p>Progress Percentage: {{ progress_percentage|floatformat:2 }}%</p>
                     </div>
-                    
+                    {% endif %}
+
                     <!-- Completion Estimate -->
+                    {% if estimasi_selesai %}
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="card">
@@ -205,38 +142,70 @@
                                     </h6>
                                 </div>
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <p class="mb-1">
-                                                <strong>{% trans "Average per Week" %}:</strong> 
-                                                <span class="text-success">15.6 {% trans "hours" %}</span>
-                                            </p>
-                                            <p class="mb-0">
-                                                <strong>{% trans "Estimated Completion" %}:</strong> 
-                                                <span class="text-primary">25 December 2024</span>
-                                            </p>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-light">
+                                                <div class="card-body text-center">
+                                                    <h4 class="mb-1 text-primary">{{ rata_per_minggu }}</h4>
+                                                    <p class="mb-0 text-muted">
+                                                        <i class="bi bi-speedometer2 me-1"></i> {% trans "Average per Week" %}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-end">
-                                            <p class="mb-1">
-                                                <strong>{% trans "Time Remaining" %}:</strong> 
-                                                <span class="text-warning">45 {% trans "days" %}</span>
-                                            </p>
-                                            <p class="mb-0">
-                                                <strong>{% trans "Recommendation/hour" %}:</strong> 
-                                                <span class="text-info">2.44 {% trans "hours/day" %}</span>
-                                            </p>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-light">
+                                                <div class="card-body text-center">
+                                                    <h4 class="mb-1 text-success">{{ estimasi_selesai }}</h4>
+                                                    <p class="mb-0 text-muted">
+                                                        <i class="bi bi-calendar-date me-1"></i> {% trans "Estimated Completion" %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-light">
+                                                <div class="card-body text-center">
+                                                    <h4 class="mb-1 text-warning">{{ rekomendasi_per_hari }}</h4>
+                                                    <p class="mb-0 text-muted">
+                                                        <i class="bi bi-lightbulb me-1"></i> {% trans "Recommendation per day (hours)" %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-light mt-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                <strong>{% trans "Note" %}:</strong> {% trans "Based on your current progress, you need approximately" %}
+                                                <span class="text-warning">{{ sisa_waktu }} {% trans "days" %}</span>
+                                                {% trans "to complete all activities." %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+                    {% else %}
+                    <!-- Jika belum ada estimasi, tampilkan info -->
+                    <div class="alert alert-warning mt-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>{% trans "Information" %}:</strong> 
+                        {% trans "Start logging your activity hours to see completion estimates." %}
+                    </div>
+                    {% endif %}
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Hidden data untuk JavaScript -->
+<div id="js-data" data-js="{{ js_data_json }}" style="display: none;"></div>
+
 {% endblock %}
 
 {% block extra_css %}
@@ -245,45 +214,45 @@
         background-color: #f8f9fa;
         font-weight: 600;
     }
-    
+
     .progress {
         border-radius: 10px;
     }
-    
+
     .progress-bar {
         border-radius: 10px;
         font-weight: 600;
-        font-size: 14px;
-        line-height: 25px;
+        font-size: 12px;
+        line-height: 20px;
     }
-    
+
     .card-title {
         color: #2d3748;
     }
-    
+
     .badge {
         font-size: 12px;
         padding: 5px 10px;
     }
-    
+
     .table-responsive {
         border-radius: 8px;
         border: 1px solid #e9ecef;
     }
-    
+
     /* Style for statistics cards */
     .card.border-primary .card-body h2 {
         color: #0d6efd;
     }
-    
+
     .card.border-success .card-body h2 {
         color: #198754;
     }
-    
+
     .card.border-info .card-body h2 {
         color: #0dcaf0;
     }
-    
+
     .card.border-warning .card-body h2 {
         color: #ffc107;
     }
@@ -292,107 +261,24 @@
 
 {% block extra_js %}
 <script>
-    // Static data (hardcoded) to avoid errors
-    const progressPercentage = 68; // (234/344)*100 = 68%
-    const jamTerselesaikan = 234;
-    const jamSisa = 110; // 344 - 234
-    
-    console.log('Progress:', progressPercentage + '%');
-    console.log('{% trans "Completed Hours" %}:', jamTerselesaikan + ' {% trans "hours" %}');
-    console.log('{% trans "Remaining Hours" %}:', jamSisa + ' {% trans "hours" %}');
-    
-    // Function to export report
-    function exportProgressReport() {
-        showNotification("{% trans 'Preparing credit progress report...' %}", 'info');
-        
-        // Simulate download delay
-        setTimeout(() => {
-            // Create report content
-            const reportContent = `
-                {% trans "CREDIT PROGRESS REPORT" %}
-                ====================
-                {% trans "Date" %}: ${new Date().toLocaleDateString('id-ID')}
-                
-                {% trans "Total Credits" %}: 12 {% trans "Credits" %}
-                {% trans "Total Target Hours" %}: 344 {% trans "hours" %}
-                {% trans "Completed Hours" %}: 234 {% trans "hours" %} (68%)
-                {% trans "Remaining Hours" %}: 110 {% trans "hours" %}
-                
-                {% trans "Status" %}: {% trans "Excellent" %}
-                
-                {% trans "Estimated Completion" %}: 25 December 2024
-                {% trans "Recommendation" %}: 2.44 {% trans "hours per day" %}
-            `;
-            
-            // Simulate file download
-            const link = document.createElement('a');
-            link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportContent);
-            link.download = `credit_progress_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showNotification("{% trans 'Progress report successfully downloaded' %}", 'success');
-        }, 1500);
-    }
-    
-    // Function to show notification
-    function showNotification(message, type) {
-        // Remove old notifications
-        const oldAlerts = document.querySelectorAll('.alert.position-fixed');
-        oldAlerts.forEach(alert => alert.remove());
-        
-        // Create new notification
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alert.style.cssText = `
-            z-index: 1060;
-            top: 20px;
-            right: 20px;
-            min-width: 300px;
-            max-width: 400px;
-        `;
-        
-        const icon = type === 'success' ? 'bi-check-circle-fill' : 
-                     type === 'info' ? 'bi-info-circle-fill' : 
-                     type === 'warning' ? 'bi-exclamation-triangle-fill' : 
-                     'bi-exclamation-circle-fill';
-        
-        alert.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="bi ${icon} me-2 fs-5"></i>
-                <div class="flex-grow-1">${message}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        document.body.appendChild(alert);
-        
-        // Auto hide after 3 seconds
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.remove();
-            }
-        }, 3000);
-    }
-    
     // Progress bar animation when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        // Animate progress bar
-        const progressBar = document.querySelector('.progress-bar');
-        let currentProgress = 0;
-        const interval = setInterval(() => {
-            if (currentProgress >= progressPercentage) {
-                clearInterval(interval);
-                return;
-            }
-            currentProgress += 1;
-            progressBar.style.width = currentProgress + '%';
-            progressBar.setAttribute('aria-valuenow', currentProgress);
-            progressBar.textContent = currentProgress + '%';
-        }, 20);
-        
-        console.log('{% trans "Progress bar animation started..." %}');
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate main progress bar
+        const mainProgressBar = document.querySelector('.progress-bar.progress-bar-striped');
+        if (mainProgressBar) {
+            const targetProgress = parseInt(mainProgressBar.getAttribute('data-progress') || 0);
+            let currentProgress = 0;
+            const interval = setInterval(() => {
+                if (currentProgress >= targetProgress) {
+                    clearInterval(interval);
+                    return;
+                }
+                currentProgress += 1;
+                mainProgressBar.style.width = currentProgress + '%';
+                mainProgressBar.setAttribute('aria-valuenow', currentProgress);
+                mainProgressBar.textContent = currentProgress + '%';
+            }, 20);
+        }
     });
 </script>
 {% endblock %}
