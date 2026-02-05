@@ -165,7 +165,8 @@
                                 <div class="card-body p-0" style="position: relative; background-color: #000;">
                                     <div style="position: relative; display: inline-block; width: 100%;">
                                         <video id="cameraPreview" autoplay playsinline
-                                            style="width: 100%; height: 400px; object-fit: cover; background-color: #000; display: block;"></video>
+                                            style="width: 100%; height: 400px; object-fit: cover; background-color: #000; display: block;"
+                                            class="video-normal"></video>
                                         <canvas id="cameraCanvas"
                                             style="position: absolute; top: 0; left: 0; width: 100%; height: 400px; display: block; cursor: none;"></canvas>
                                     </div>
@@ -315,6 +316,12 @@
             opacity: 1;
         }
     }
+
+    .video-normal {
+    transform: scaleX(-1);          /* membalik mirror → jadi normal */
+    -webkit-transform: scaleX(-1);  /* untuk Safari/iOS */
+    }
+
 </style>
 
 <script>

@@ -23,7 +23,7 @@ from mediapipe_utils import process_liveness
 # CONFIG
 # ===============================
 IMG_SIZE = 128
-SPOOF_THRESHOLD = 0.7
+SPOOF_THRESHOLD = 0.8
 GAMMA_VALUE = 1.4   
 
 # ===============================
@@ -169,7 +169,7 @@ def process_frame_liveness(frame_base64):
         # PROCESS FACE
         # ===============================
         for det in detections:
-            if det["confidence"] < 0.9:
+            if det["confidence"] < 0.8:
                 continue
             
             x, y, w, h = det["box"]

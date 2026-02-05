@@ -63,8 +63,8 @@ def detect_eyes_brightness(frame, face_box):
         cascade_paths = [
             'haarcascade_eye.xml',
             './haarcascade_eye.xml',
-            'D:/antispoofing/haarcascade_eye.xml',
-            'D:\\antispoofing\\haarcascade_eye.xml',
+            'C:\laragon\www\facerecognition_django\haarcascade_eye.xml',
+            'C:\\laragon\\www\\facerecognition_django\\haarcascade_eye.xml',
             os.path.join(os.path.dirname(__file__), 'haarcascade_eye.xml'),
             cv2.data.haarcascades + 'haarcascade_eye.xml'
         ]
