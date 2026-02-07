@@ -86,8 +86,10 @@
                                             </td>
                                             <td>
                                                 <span class="badge badge-sm 
-                                                    {% if presensi.tingkatan == 'D4' %}bg-gradient-success
-                                                    {% elif presensi.tingkatan == 'D3' %}bg-gradient-info
+                                                    {% if 'D4' in presensi.tingkatan %}bg-gradient-success
+                                                    {% elif 'D3' in presensi.tingkatan %}bg-gradient-info
+                                                    {% elif 'LJ' in presensi.tingkatan %}bg-gradient-primary
+                                                    {% elif 'S2' in presensi.tingkatan %}bg-gradient-danger
                                                     {% else %}bg-gradient-secondary{% endif %}">
                                                     {{ presensi.tingkatan|default:"-" }}
                                                 </span>

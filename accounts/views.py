@@ -791,11 +791,33 @@ def detect_liveness_frame(request):
             from liveness_detection import process_frame_liveness
             result = process_frame_liveness(frame_base64)
             
-            # AUTO-SAVE PRESENSI HANYA JIKA STATUS = REAL
+            # AUTO-SAVE PRESENSI HANYA JIKA STATUS = REAL & FACE MATCHED
             if result.get('status') == 'REAL' and mahasiswa_id and action:
+                # --- TAMBAHAN: FACE RECOGNITION DENGAN INSIGHTFACE (ArcFace) ---
+                from .face_recognition_utils import verify_face_with_insightface
+                from liveness_detection import reset_detection_state
+                
+                # OPTIMASI: Kirim face box ke utility recognition
+                box = result.get('box')
+                recognition_result = verify_face_with_insightface(frame_base64, mahasiswa_id, face_box=box)
+                
+                if not recognition_result.get('verified'):
+                    # Jika gagal recognition, balikkan ke liveness (reset blink)
+                    reset_detection_state()
+                    result['status'] = 'NOT_RECOGNIZED'
+                    result['message'] = recognition_result.get('message', 'Identity not matched')
+                    result['verified'] = False
+                    result['blink_count'] = 0 # Reset di response juga
+                    return JsonResponse(result) 
+                
+                # Update result with recognition info & Student Name
+                mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
+                result['recognition_score'] = float(1 - recognition_result.get('distance', 1.0))
+                result['nama_mahasiswa'] = mahasiswa.user.nama_lengkap or mahasiswa.user.username
+                # ---------------------------------------------------
+
                 try:
-                    mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
-                    today = datetime.now().date()
+                    today = date.today()
                     
                     if action == 'checkin':
                         # Cek apakah sudah ada presensi yang belum check-out hari ini
@@ -2916,9 +2938,9 @@ def rekap_presensi(request):
                 mahasiswa__jenjang_pendidikan=tingkatan  # Langsung bandingkan dengan objek
             )
         
-        # Filter kegiatan
+        # Filter kegiatan - gunakan many-to-many pada mahasiswa (karena sistem agregat)
         if kegiatan:
-            presensi_list = presensi_list.filter(kegiatan_pa=kegiatan)
+            presensi_list = presensi_list.filter(mahasiswa__kegiatan_pa=kegiatan)
 
     # 5. Default: 7 hari terakhir jika tidak ada filter tanggal
     if not request.GET.get('tanggal_mulai') and not request.GET.get('tanggal_selesai'):
@@ -2936,6 +2958,9 @@ def rekap_presensi(request):
     
     # 6. Siapkan data untuk template
     data_presensi = []
+    
+    # Prefetch untuk optimasi ManyToMany
+    presensi_list = presensi_list.prefetch_related('mahasiswa__kegiatan_pa')
     
     for presensi in presensi_list:
         # Hitung durasi
@@ -2964,15 +2989,17 @@ def rekap_presensi(request):
             except Exception as e:
                 durasi_str = "Error"
         
-        # PERBAIKAN 1: Ambil tingkatan dari jenjang pendidikan
+        # Ambil tingkatan dari jenjang pendidikan mahasiswa
         tingkatan_value = "-"
         if presensi.mahasiswa.jenjang_pendidikan:
             tingkatan_value = presensi.mahasiswa.jenjang_pendidikan.nama_jenjang
         
-        # PERBAIKAN 2: Ambil kegiatan PA dari presensi, bukan dari semua kegiatan mahasiswa
-        kegiatan_pa_value = "-"
-        if presensi.kegiatan_pa:
-            kegiatan_pa_value = presensi.kegiatan_pa.nama_kegiatan
+        # Ambil SEMUA kegiatan PA yang diambil mahasiswa (sesuai permintaan user)
+        kegiatan_pa_list = presensi.mahasiswa.kegiatan_pa.all()
+        if kegiatan_pa_list:
+            kegiatan_pa_value = ", ".join([k.nama_kegiatan for k in kegiatan_pa_list])
+        else:
+            kegiatan_pa_value = "-"
         
         data_presensi.append({
             'tanggal': presensi.tanggal_presensi,

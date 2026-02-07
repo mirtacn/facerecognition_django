@@ -23,7 +23,7 @@ from mediapipe_utils import process_liveness
 # CONFIG
 # ===============================
 IMG_SIZE = 128
-SPOOF_THRESHOLD = 0.8
+SPOOF_THRESHOLD = 0.7
 GAMMA_VALUE = 1.4   
 
 # ===============================
@@ -169,7 +169,7 @@ def process_frame_liveness(frame_base64):
         # PROCESS FACE
         # ===============================
         for det in detections:
-            if det["confidence"] < 0.8:
+            if det["confidence"] < 0.9:
                 continue
             
             x, y, w, h = det["box"]
@@ -210,8 +210,8 @@ def process_frame_liveness(frame_base64):
             # UI STATUS LOGIC
             # ===============================
             color = (0, 255, 255)  # Kuning
-            status = "VERIFYING"
-            message = f"Verifying... (Blinks: {state['blink_count']}/2)"
+            status = "LIVENESS_CHECK"
+            message = f"Liveness Check... (Blinks: {state['blink_count']}/2)"
             verified = False
             
             if spoof_score < SPOOF_THRESHOLD:
@@ -224,7 +224,7 @@ def process_frame_liveness(frame_base64):
             elif state["blink_count"] >= 2:
                 color = (0, 255, 0)  # Hijau
                 status = "REAL"
-                message = "REAL / LIVE - Liveness Verified"
+                message = "Proses Face Recognition"
                 verified = True
                 state["verified"] = True
             

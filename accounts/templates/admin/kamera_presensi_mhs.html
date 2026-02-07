@@ -183,10 +183,10 @@
                         <div class="alert alert-info mt-3">
                             <strong><i class="fas fa-lightbulb"></i> Instructions:</strong>
                             <ul class="mb-0 mt-2">
-                                <li>Position your face clearly in the camera</li>
-                                <li>Blink naturally 2 times</li>
-                                <li>System will auto-save when face is verified</li>
-                                <li>Status will show: VERIFYING → REAL (or SPOOF)</li>
+                                <li><strong>Step 1:</strong> Position your face clearly</li>
+                                <li><strong>Step 2:</strong> Blink naturally 2 times (Liveness Check)</li>
+                                <li><strong>Step 3:</strong> System will verify your identity (Face Recognition)</li>
+                                <li>If identity matches, attendance will be saved automatically</li>
                             </ul>
                         </div>
                     </div>
@@ -438,27 +438,32 @@
 
         const box = result.box;
         let boxColor = '#6c757d';
-        let statusText = 'VERIFYING...';
+        let statusText = 'DETECTING...';
         let statusColor = '#6c757d';
 
         // Tentukan warna berdasarkan status
         if (result.status === 'REAL') {
             boxColor = '#28a745';
             statusColor = '#28a745';
-            statusText = 'REAL / LIVE ✓';
+            // Tampilkan PROSES FACE RECOGNITION dan Nama mahasiswa jika tersedia
+            statusText = result.nama_mahasiswa ? result.nama_mahasiswa : 'PROSES FACE RECOGNITION';
+        } else if (result.status === 'NOT_RECOGNIZED') {
+            boxColor = '#fd7e14'; 
+            statusColor = '#fd7e14';
+            statusText = 'ID MISMATCH ✗';
         } else if (result.status === 'SPOOF') {
             boxColor = '#dc3545';
             statusColor = '#dc3545';
             statusText = 'SPOOF ✗';
-        } else if (result.status === 'VERIFYING') {
+        } else if (result.status === 'LIVENESS_CHECK') {
             boxColor = '#ffc107';
             statusColor = '#ffc107';
-            statusText = `VERIFYING (${result.blink_count}/2)`;
+            statusText = `EYE BLINK (${result.blink_count}/2)`;
         }
 
         // Gambar kotak wajah
         drawCtx.strokeStyle = boxColor;
-        drawCtx.lineWidth = 3;
+        drawCtx.lineWidth = 4;
         drawCtx.strokeRect(box.x, box.y, box.w, box.h);
 
         // Gambar background status text
@@ -479,8 +484,22 @@
         drawCtx.fillStyle = '#fff';
         drawCtx.fillText(statusText, textX + 5, textY - 5);
 
+        // Tambahkan Sub-label jika REAL
+        if (result.status === 'REAL' && result.nama_mahasiswa) {
+            const subText = "PROSES FACE RECOGNITION";
+            drawCtx.font = `bold 12px ${fontFamily}`;
+            drawCtx.fillStyle = 'rgba(0,0,0,0.5)';
+            drawCtx.fillRect(textX, textY, drawCtx.measureText(subText).width + 10, 20);
+            drawCtx.fillStyle = '#fff';
+            drawCtx.fillText(subText, textX + 5, textY + 15);
+        }
+
         // Info di bawah kotak
-        const infoText = `Score: ${result.spoof_score.toFixed(3)} | Blinks: ${result.blink_count}/2`;
+        let infoText = `Liveness: ${result.spoof_score.toFixed(2)} | Blinks: ${result.blink_count}/2`;
+        if (result.recognition_score) {
+            infoText += ` | Match: ${(result.recognition_score * 100).toFixed(0)}%`;
+        }
+        
         drawCtx.font = `12px ${fontFamily}`;
         drawCtx.fillStyle = boxColor;
         drawCtx.fillRect(box.x, box.y + box.h + 5, drawCtx.measureText(infoText).width + 10, 20);
@@ -494,13 +513,19 @@
         let color = '#6c757d';
 
         if (result.status === 'REAL') {
-            statusText = `<strong style="color: #28a745;">✓ REAL / LIVE</strong><br/>Face verified successfully<br/><small>Score: ${result.spoof_score.toFixed(3)} | Eyes Open: ${result.eyes_open ? 'Yes' : 'No'}</small>`;
+            const matchPercent = result.recognition_score ? (result.recognition_score * 100).toFixed(0) + '%' : 'N/A';
+            const displayHeader = `⏳ PROSES FACE RECOGNITION...`;
+            const displayName = result.nama_mahasiswa ? `<br/><strong style="font-size: 1.1em;">✓ ${result.nama_mahasiswa}</strong>` : '';
+            statusText = `<strong style="color: #28a745;">${displayHeader}</strong>${displayName}<br/>Identity matched (${matchPercent})<br/><small>Liveness: ${result.spoof_score.toFixed(2)}</small>`;
             color = '#28a745';
+        } else if (result.status === 'NOT_RECOGNIZED') {
+            statusText = `<strong style="color: #fd7e14;">✗ NOT RECOGNIZED</strong><br/>Face does not match ID<br/><small>Please look straight at camera</small>`;
+            color = '#fd7e14';
         } else if (result.status === 'SPOOF') {
             statusText = `<strong style="color: #dc3545;">✗ SPOOF DETECTED</strong><br/>Fake face pattern detected<br/><small>Score: ${result.spoof_score.toFixed(3)}</small>`;
             color = '#dc3545';
-        } else if (result.status === 'VERIFYING') {
-            statusText = `<strong style="color: #ffc107;">⏳ VERIFYING...</strong><br/>Blinks: ${result.blink_count}/2<br/><small>Score: ${result.spoof_score.toFixed(3)}</small>`;
+        } else if (result.status === 'LIVENESS_CHECK') {
+            statusText = `<strong style="color: #ffc107;">⏳ LIVENESS CHECK...</strong><br/>Blinks: ${result.blink_count}/2<br/><small>Score: ${result.spoof_score.toFixed(2)}</small>`;
             color = '#ffc107';
         } else if (result.status === 'NO_FACE') {
             statusText = `<strong style="color: #6c757d;">📹 NO FACE</strong><br/>Position face to camera`;
@@ -526,13 +551,13 @@
 
             if (livenessInterval) clearInterval(livenessInterval);
 
-            updateDetectionStatus('✓ Saving to database...', '#17a2b8');
-            showNotification('✓ Face verified! Saving attendance...', 'success');
+            updateDetectionStatus(`✓ Saving to database...`, '#17a2b8');
+            showNotification(`✓ Welcome, ${result.nama_mahasiswa}! Saving attendance...`, 'success');
 
             // Jika backend sudah auto-save melalui detect_liveness_frame
             if (result.saved) {
-                updateDetectionStatus(`✓ Saved successfully!<br/>ID: ${result.presensi_id}`, '#28a745');
-                showNotification(`✓ ${currentAction.toUpperCase()} saved successfully!`, 'success');
+                updateDetectionStatus(`✓ Saved successfully!<br/>Name: ${result.nama_mahasiswa}`, '#28a745');
+                showNotification(`✓ ${currentAction.toUpperCase()} successful for ${result.nama_mahasiswa}`, 'success');
 
                 if (currentAction === 'checkin') {
                     presensiId = result.presensi_id;

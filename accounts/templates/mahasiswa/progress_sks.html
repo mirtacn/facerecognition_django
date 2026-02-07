@@ -130,7 +130,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Completion Estimate -->
+                    {% comment %} <!-- Completion Estimate -->
                     {% if estimasi_selesai %}
                     <div class="row mt-4">
                         <div class="col-12">
@@ -201,7 +201,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> {% endcomment %}
 
 <!-- Hidden data untuk JavaScript -->
 <div id="js-data" data-js="{{ js_data_json }}" style="display: none;"></div>
