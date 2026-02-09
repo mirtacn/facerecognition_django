@@ -426,87 +426,88 @@
     }
 
     // Gambar kotak wajah dan status di canvas overlay
-    function drawDetectionResult(result) {
-        const drawCtx = drawCanvas.getContext('2d');
+   function drawDetectionResult(result) {
+    const drawCtx = drawCanvas.getContext('2d');
+    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
 
-        // Clear canvas
-        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-
-        if (!result.face_detected || !result.box) {
-            return;
-        }
-
-        const box = result.box;
-        let boxColor = '#6c757d';
-        let statusText = 'DETECTING...';
-        let statusColor = '#6c757d';
-
-        // Tentukan warna berdasarkan status
-        if (result.status === 'REAL') {
-            boxColor = '#28a745';
-            statusColor = '#28a745';
-            // Tampilkan PROSES FACE RECOGNITION dan Nama mahasiswa jika tersedia
-            statusText = result.nama_mahasiswa ? result.nama_mahasiswa : 'PROSES FACE RECOGNITION';
-        } else if (result.status === 'NOT_RECOGNIZED') {
-            boxColor = '#fd7e14'; 
-            statusColor = '#fd7e14';
-            statusText = 'ID MISMATCH ✗';
-        } else if (result.status === 'SPOOF') {
-            boxColor = '#dc3545';
-            statusColor = '#dc3545';
-            statusText = 'SPOOF ✗';
-        } else if (result.status === 'LIVENESS_CHECK') {
-            boxColor = '#ffc107';
-            statusColor = '#ffc107';
-            statusText = `EYE BLINK (${result.blink_count}/2)`;
-        }
-
-        // Gambar kotak wajah
-        drawCtx.strokeStyle = boxColor;
-        drawCtx.lineWidth = 4;
-        drawCtx.strokeRect(box.x, box.y, box.w, box.h);
-
-        // Gambar background status text
-        const fontSize = 18;
-        const fontFamily = 'Arial';
-        drawCtx.font = `bold ${fontSize}px ${fontFamily}`;
-        const textMetrics = drawCtx.measureText(statusText);
-        const textWidth = textMetrics.width;
-        const textHeight = fontSize + 8;
-        const textX = box.x;
-        const textY = box.y - 10;
-
-        // Background box
-        drawCtx.fillStyle = boxColor;
-        drawCtx.fillRect(textX, textY - textHeight, textWidth + 10, textHeight);
-
-        // Text
-        drawCtx.fillStyle = '#fff';
-        drawCtx.fillText(statusText, textX + 5, textY - 5);
-
-        // Tambahkan Sub-label jika REAL
-        if (result.status === 'REAL' && result.nama_mahasiswa) {
-            const subText = "PROSES FACE RECOGNITION";
-            drawCtx.font = `bold 12px ${fontFamily}`;
-            drawCtx.fillStyle = 'rgba(0,0,0,0.5)';
-            drawCtx.fillRect(textX, textY, drawCtx.measureText(subText).width + 10, 20);
-            drawCtx.fillStyle = '#fff';
-            drawCtx.fillText(subText, textX + 5, textY + 15);
-        }
-
-        // Info di bawah kotak
-        let infoText = `Liveness: ${result.spoof_score.toFixed(2)} | Blinks: ${result.blink_count}/2`;
-        if (result.recognition_score) {
-            infoText += ` | Match: ${(result.recognition_score * 100).toFixed(0)}%`;
-        }
-        
-        drawCtx.font = `12px ${fontFamily}`;
-        drawCtx.fillStyle = boxColor;
-        drawCtx.fillRect(box.x, box.y + box.h + 5, drawCtx.measureText(infoText).width + 10, 20);
-        drawCtx.fillStyle = '#fff';
-        drawCtx.fillText(infoText, box.x + 5, box.y + box.h + 20);
+    if (!result.face_detected || !result.box) {
+        return;
     }
 
+    const box = result.box;
+    
+    // KOREKSI KOORDINAT UNTUK VIDEO YANG DI-MIRROR
+    // Karena video di-flip horizontal (scaleX(-1)), kita perlu flip koordinat X juga
+    const mirroredX = drawCanvas.width - box.x - box.w;
+    
+    // Warna berdasarkan status
+    let boxColor = '#6c757d';
+    let statusText = 'DETECTING...';
+    let statusColor = '#6c757d';
+
+    if (result.status === 'REAL') {
+        boxColor = '#28a745';
+        statusColor = '#28a745';
+        statusText = result.nama_mahasiswa ? result.nama_mahasiswa : 'PROSES FACE RECOGNITION';
+    } else if (result.status === 'NOT_RECOGNIZED') {
+        boxColor = '#fd7e14'; 
+        statusColor = '#fd7e14';
+        statusText = 'ID MISMATCH ✗';
+    } else if (result.status === 'SPOOF') {
+        boxColor = '#dc3545';
+        statusColor = '#dc3545';
+        statusText = 'SPOOF ✗';
+    } else if (result.status === 'LIVENESS_CHECK') {
+        boxColor = '#ffc107';
+        statusColor = '#ffc107';
+        statusText = `EYE BLINK (${result.blink_count}/2)`;
+    }
+
+    // Gambar kotak wajah dengan koordinat yang sudah di-mirror
+    drawCtx.strokeStyle = boxColor;
+    drawCtx.lineWidth = 4;
+    drawCtx.strokeRect(mirroredX, box.y, box.w, box.h);
+
+    // Gambar background status text (juga di-mirror)
+    const fontSize = 18;
+    const fontFamily = 'Arial';
+    drawCtx.font = `bold ${fontSize}px ${fontFamily}`;
+    const textMetrics = drawCtx.measureText(statusText);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize + 8;
+    const textX = mirroredX;
+    const textY = box.y - 10;
+
+    // Background box
+    drawCtx.fillStyle = boxColor;
+    drawCtx.fillRect(textX, textY - textHeight, textWidth + 10, textHeight);
+
+    // Text
+    drawCtx.fillStyle = '#fff';
+    drawCtx.fillText(statusText, textX + 5, textY - 5);
+
+    // Tambahkan Sub-label jika REAL
+    if (result.status === 'REAL' && result.nama_mahasiswa) {
+        const subText = "PROSES FACE RECOGNITION";
+        drawCtx.font = `bold 12px ${fontFamily}`;
+        drawCtx.fillStyle = 'rgba(0,0,0,0.5)';
+        drawCtx.fillRect(textX, textY, drawCtx.measureText(subText).width + 10, 20);
+        drawCtx.fillStyle = '#fff';
+        drawCtx.fillText(subText, textX + 5, textY + 15);
+    }
+
+    // Info di bawah kotak
+    let infoText = `Liveness: ${result.spoof_score.toFixed(2)} | Blinks: ${result.blink_count}/2`;
+    if (result.recognition_score) {
+        infoText += ` | Match: ${(result.recognition_score * 100).toFixed(0)}%`;
+    }
+    
+    drawCtx.font = `12px ${fontFamily}`;
+    drawCtx.fillStyle = boxColor;
+    drawCtx.fillRect(mirroredX, box.y + box.h + 5, drawCtx.measureText(infoText).width + 10, 20);
+    drawCtx.fillStyle = '#fff';
+    drawCtx.fillText(infoText, mirroredX + 5, box.y + box.h + 20);
+}
     // Update detection UI di panel info
     function updateDetectionUI(result) {
         let statusText = '';
@@ -706,8 +707,8 @@
         setTimeout(() => { if (notification.parentNode) notification.remove(); }, 5000);
     }
 
-    setInterval(() => {
+    {% comment %} setInterval(() => {
         fetch('{% url "get_presensi_today" %}').catch(e => console.log('Refresh check'));
-    }, 30000);
+    }, 30000); {% endcomment %}
 </script>
 {% endblock %}

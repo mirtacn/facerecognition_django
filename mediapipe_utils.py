@@ -63,8 +63,8 @@ def detect_eyes_brightness(frame, face_box):
         cascade_paths = [
             'haarcascade_eye.xml',
             './haarcascade_eye.xml',
-            'D:/antispoofing/haarcascade_eye.xml',
-            'D:\\antispoofing\\haarcascade_eye.xml',
+            'C:\laragon\www\facerecognition_django\haarcascade_eye.xml',
+            'C:\\laragon\\www\\facerecognition_django\\haarcascade_eye.xml',
             os.path.join(os.path.dirname(__file__), 'haarcascade_eye.xml'),
             cv2.data.haarcascades + 'haarcascade_eye.xml'
         ]
@@ -172,7 +172,7 @@ def process_liveness(frame, frame_shape, state, blink_threshold=0.22, timeout_se
                     state["eye_closed"] = True
                     print(f"  ↓ Eyes closing... (count: {state['eye_closed_count']})")
             else:  # Eyes opening/open
-                if state["eye_closed"] and state["eye_closed_count"] > 3:  # Blink confirmed (sustained closure)
+                if state["eye_closed"] and state["eye_closed_count"] > 2:  # Blink confirmed (sustained closure)
                     state["blink_count"] += 1
                     state['last_blink_time'] = current_time
                     state["eye_closed"] = False

@@ -1375,44 +1375,53 @@ def get_progress_sks_api(request):
 
 @login_required
 def get_presensi_today(request):
-    """API untuk mendapatkan data presensi hari ini"""
-    today = date.today()
-    mahasiswa_list = Mahasiswa.objects.select_related('user').all()
-    
-    presensi_list = []
-    for mahasiswa in mahasiswa_list:
-        presensi_today = Presensi.objects.filter(
-            mahasiswa=mahasiswa,
-            tanggal_presensi=today
-        ).order_by('-jam_checkin')
-        
-        presensi_data = []
-        for presensi in presensi_today:
-            presensi_data.append({
-                'jam_checkin': presensi.jam_checkin.strftime('%H:%M') if presensi.jam_checkin else '-',
-                'jam_checkout': presensi.jam_checkout.strftime('%H:%M') if presensi.jam_checkout else '-',
-                'foto_checkin_url': presensi.foto_checkin.url if presensi.foto_checkin else '',
-                'foto_checkout_url': presensi.foto_checkout.url if presensi.foto_checkout else ''
+    try:
+        today = date.today()
+        mahasiswa_list = Mahasiswa.objects.select_related('user').filter(
+            pengajuan_pendaftaran__status_pengajuan='disetujui'
+        )  # tambah filter approved biar aman
+
+        presensi_list = []
+        for mahasiswa in mahasiswa_list:
+            presensi_today = Presensi.objects.filter(
+                mahasiswa=mahasiswa,
+                tanggal_presensi=today
+            ).order_by('-jam_checkin')
+
+            presensi_data = []
+            for presensi in presensi_today:
+                presensi_data.append({
+                    'jam_checkin': presensi.jam_checkin.strftime('%H:%M') if presensi.jam_checkin else '-',
+                    'jam_checkout': presensi.jam_checkout.strftime('%H:%M') if presensi.jam_checkout else '-',
+                    'foto_checkin_url': presensi.foto_checkin.url if presensi.foto_checkin else '',
+                    'foto_checkout_url': presensi.foto_checkout.url if presensi.foto_checkout else ''
+                })
+
+            is_checked_in = any(p.jam_checkin and not p.jam_checkout for p in presensi_today)
+
+            presensi_list.append({
+                'id': mahasiswa.id,
+                'nama': mahasiswa.user.nama_lengkap,
+                'nrp': mahasiswa.user.nrp,
+                'kelas': mahasiswa.kelas,
+                'is_checked_in': is_checked_in,
+                'presensi_today': presensi_data
             })
-        
-       
-        # Status check-in aktif
-        is_checked_in = any(p.jam_checkin is not None and p.jam_checkout is None for p in presensi_today)
-        
-        presensi_list.append({
-            'id': mahasiswa.id,
-            'nama': mahasiswa.user.nama_lengkap,
-            'nrp': mahasiswa.user.nrp,
-            'kelas': mahasiswa.kelas,
-            'is_checked_in': is_checked_in,
-            'presensi_today': presensi_data
+
+        return JsonResponse({
+            'success': True,
+            'data': presensi_list,
+            'today': today.strftime('%d/%m/%Y')
         })
-    
-    return JsonResponse({
-        'success': True,
-        'data': presensi_list,
-        'today': today.strftime('%d/%m/%Y')
-    })
+
+    except Exception as e:
+        import traceback
+        print(f"[ERROR get_presensi_today] {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 # accounts/views.py - Tambahkan di akhir file
 @login_required

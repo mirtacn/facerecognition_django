@@ -22,8 +22,8 @@ from mediapipe_utils import process_liveness
 # ===============================
 # CONFIG
 # ===============================
-IMG_SIZE = 128
-SPOOF_THRESHOLD = 0.7
+IMG_SIZE = 150
+SPOOF_THRESHOLD = 0.5
 GAMMA_VALUE = 1.4   
 
 # ===============================
@@ -70,7 +70,7 @@ def init_liveness_detection():
             print("[LIVENESS] MTCNN detector initialized")
         
         if model is None:
-            model_path = "model_antispoof_128x128_final.h5"
+            model_path = "liveness_detection_model_1_terbaru_fix.h5"
             if os.path.exists(model_path):
                 model = tf.keras.models.load_model(model_path)
                 print("[LIVENESS] Model loaded successfully")
@@ -169,7 +169,7 @@ def process_frame_liveness(frame_base64):
         # PROCESS FACE
         # ===============================
         for det in detections:
-            if det["confidence"] < 0.9:
+            if det["confidence"] < 0.5:
                 continue
             
             x, y, w, h = det["box"]
