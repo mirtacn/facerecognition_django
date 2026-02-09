@@ -70,7 +70,7 @@ def init_liveness_detection():
             print("[LIVENESS] MTCNN detector initialized")
         
         if model is None:
-            model_path = "liveness_detection_model_1_terbaru_fix.h5"
+            model_path = "model_1.h5"
             if os.path.exists(model_path):
                 model = tf.keras.models.load_model(model_path)
                 print("[LIVENESS] Model loaded successfully")
