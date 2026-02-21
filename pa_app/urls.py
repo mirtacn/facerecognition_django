@@ -49,6 +49,7 @@ from accounts.views import (
     status_pemenuhan_sks,
     get_progress_sks_api,
     detect_liveness_frame,
+    detect_face_registration,
 )
 
 # =====================================================================
@@ -63,6 +64,7 @@ urlpatterns = [
     path('api/checkin/', checkin_presensi, name='checkin_presensi'),
     path('api/checkout/', checkout_presensi, name='checkout_presensi'),
     path('api/liveness-detect/', detect_liveness_frame, name='detect_liveness_frame'),
+    path('api/detect-face-registration/', detect_face_registration, name='detect_face_registration'),
     path('api/presensi-today/', get_presensi_today, name='get_presensi_today'),
     path('api/progress-sks/', get_progress_sks_api, name='api_progress_sks'),
     path('api/kegiatan-pa-by-jenjang/<int:jenjang_id>/', get_kegiatan_pa_by_jenjang, name='kegiatan_pa_api'),
@@ -79,7 +81,6 @@ urlpatterns += [
     # Custom Admin URLs
     path('admin/dashboard/', admin_dashboard, name='admin_dashboard'),
     path('admin/kamera_presensi_mhs/', kamera_presensi_mhs, name='kamera_presensi_mhs'),
-    path('admin/monitor-durasi/', monitor_durasi, name='monitor_durasi'),
     path('admin/management-data/', management_data, name='management_data'),
     path('admin/approval-pendaftaran/', approval_pendaftaran, name='approval_pendaftaran'),
     path('admin/data-mahasiswa/', data_mahasiswa, name='data_mahasiswa'),
@@ -122,6 +123,7 @@ urlpatterns += [
     path('riwayat_presensi/', riwayat_presensi, name='riwayat_presensi'),
     path('progress_sks/', progress_sks, name='progress_sks'),
     path('logout/', logout_view, name='logout'),
+    path('monitor-durasi/', monitor_durasi, name='monitor_durasi'),
 
     # Root → redirect ke login
     path('', lambda request: redirect('login'), name='home'),

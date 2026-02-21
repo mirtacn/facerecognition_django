@@ -892,6 +892,90 @@ def detect_liveness_frame(request):
     
     return JsonResponse({'success': False, 'error': 'Method not allowed'})
 
+@csrf_exempt
+def detect_face_registration(request):
+    """
+    API endpoint khusus untuk deteksi wajah saat registrasi (TANPA side-effect liveness blink)
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            frame_base64 = data.get('frame')
+            
+            if not frame_base64:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'No frame provided',
+                    'face_detected': False
+                })
+
+            # Decode frame
+            from liveness_detection import decode_base64_image, apply_gamma_correction, detector, init_liveness_detection, GAMMA_VALUE
+            import cv2
+            import numpy as np
+
+            # Pastikan detector siap
+            if detector is None:
+                init_liveness_detection()
+                from liveness_detection import detector as initialized_detector
+                d = initialized_detector
+            else:
+                d = detector
+
+            frame = decode_base64_image(frame_base64)
+            if frame is None:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Failed to decode image',
+                    'face_detected': False
+                })
+            
+            # Apply gamma correction (supaya konsisten dengan liveness)
+            frame_gamma = apply_gamma_correction(frame, GAMMA_VALUE)
+            rgb = cv2.cvtColor(frame_gamma, cv2.COLOR_BGR2RGB)
+            
+            # Detect faces
+            from liveness_detection import detector as d_fix
+            if d_fix is None:
+                init_liveness_detection()
+                from liveness_detection import detector as d_fix
+            
+            detections = d_fix.detect_faces(rgb)
+            
+            if len(detections) > 0:
+                # Ambil face pertama dengan confidence cukup
+                best_face = None
+                for det in detections:
+                    if det['confidence'] > 0.5:
+                        best_face = det
+                        break
+                
+                if best_face:
+                    x, y, w, h = best_face['box']
+                    return JsonResponse({
+                        'success': True,
+                        'face_detected': True,
+                        'box': {'x': int(x), 'y': int(y), 'w': int(w), 'h': int(h)},
+                        'frame_width': frame.shape[1],
+                        'frame_height': frame.shape[0]
+                    })
+
+            return JsonResponse({
+                'success': True,
+                'face_detected': False,
+                'message': 'No face detected'
+            })
+
+        except Exception as e:
+            print(f"[ERROR] detect_face_registration: {e}")
+            return JsonResponse({
+                'success': False, 
+                'error': str(e),
+                'face_detected': False
+            })
+
+    return JsonResponse({'success': False, 'error': 'Method not allowed'})
+
 def calculate_aggregate_progress(mahasiswa):
     """
     Menghitung progress AGREGAT (total gabungan) dari semua kegiatan PA
@@ -2020,7 +2104,7 @@ def calculate_total_duration_all(mahasiswa_id):
 @login_required
 def monitor_durasi(request):
     """View untuk monitor durasi presensi admin"""
-    return render(request, 'admin/monitor_durasi.html')
+    return render(request, 'mahasiswa/monitor_durasi.html')
 
 @login_required
 def management_data(request):

@@ -30,15 +30,6 @@
             </a>
         </li>
 
-        <!-- Monitor Durasi Presensi -->
-        <li class="nav-item mb-2">
-            <a href="{% url 'monitor_durasi' %}" 
-               class="nav-link text-white d-flex align-items-center py-2 px-3 rounded {% if request.resolver_match.url_name == 'monitor_durasi' %}active bg-primary{% else %}hover-bg{% endif %}">
-                <i class="bi bi-clock me-3 fs-6"></i>
-                <span class="fw-medium">{% trans "Attendance Duration Monitor" %}</span>
-            </a>
-        </li>
-
         <!-- Management Data - Dropdown -->
         <li class="nav-item mb-2">
             <a class="nav-link text-white d-flex align-items-center py-2 px-3 rounded hover-bg" 

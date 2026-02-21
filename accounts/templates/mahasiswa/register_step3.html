@@ -140,9 +140,134 @@
             text-decoration: none;
         }
         
-        .login-link-text a:hover {
-            color: #4b5cf2;
-            text-decoration: underline;
+        .camera-container {
+            border-radius: 16px;
+            overflow: hidden;
+            background-color: #000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 16px;
+        }
+
+        #video-wrapper {
+            position: relative;
+        }
+
+        #face-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+            transform: scaleX(-1); /* Mirror to match video */
+        }
+
+        .face-status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .face-detected {
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+        }
+
+        .face-not-detected {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .nav-pills .nav-link {
+            color: #64748b;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: #fff !important;
+            color: #2563eb !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.1);
+        }
+        
+        .nav-pills .nav-link:hover:not(.active) {
+            background-color: #f1f5f9;
+            color: #334155;
+        }
+        
+        .photo-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .photo-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 2;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        
+        .btn-outline-primary {
+            border-radius: 10px;
+            padding: 10px 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            background-color: #f8fafc;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f0f9ff;
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -185,7 +310,7 @@
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4 p-md-5">
                     
-                    <h5 class="fw-bold mb-1">{% trans "Upload Face Photos" %} :</h5>
+                    <h5 class="fw-bold mb-1">{% trans "Face Photo Registration" %} :</h5>
                     {% if messages %}
                         <div class="messages-container mb-4">
                             {% for message in messages %}
@@ -196,7 +321,7 @@
                             {% endfor %}
                         </div>
                     {% endif %}
-                    <p class="text-muted small mb-4">{% trans "Upload face photos for face recognition attendance system" %}</p>
+                    <p class="text-muted small mb-4">{% trans "Provide at least 10 face photos for the system to recognize you." %}</p>
                     
                     {% if form.non_field_errors %}
                         <div class="alert alert-danger" role="alert">
@@ -207,63 +332,111 @@
                         </div>
                     {% endif %}
 
+                    <!-- Method Selection Tabs -->
+                    <ul class="nav nav-pills nav-fill mb-4 bg-light p-1 rounded-3" id="methodTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-2" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload-pane" type="button" role="tab">
+                                <i class="bi bi-cloud-arrow-up me-2"></i>{% trans "Upload Photos" %}
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-2" id="camera-tab" data-bs-toggle="tab" data-bs-target="#camera-pane" type="button" role="tab">
+                                <i class="bi bi-camera me-2"></i>{% trans "Live Capture" %}
+                            </button>
+                        </li>
+                    </ul>
+
                     <form method="post" enctype="multipart/form-data" id="upload-form">
                         {% csrf_token %}
                         
+                        <div class="tab-content" id="methodTabContent">
+                            <!-- Upload Pane -->
+                            <div class="tab-pane fade show active" id="upload-pane" role="tabpanel" aria-labelledby="upload-tab">
+                                <div class="mb-4">
+                                    <div class="upload-area" id="drop-area">
+                                        <div class="mb-3">
+                                            <i class="bi bi-cloud-arrow-up-fill text-primary" style="font-size: 48px;"></i>
+                                        </div>
+                                        <h5 class="mb-2">{% trans "Click to upload photos or drag & drop" %}</h5>
+                                        <p class="text-muted mb-0">JPG, PNG ({% trans "Max. 5MB per file" %})</p>
+                                        <p class="text-muted small mt-2">{% trans "You can select multiple files at once." %}</p>
+                                        
+                                        <input type="file" 
+                                               id="id_file_path" 
+                                               name="file_path" 
+                                               accept=".jpg,.jpeg,.png" 
+                                               multiple
+                                               class="d-none">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Camera Pane -->
+                            <div class="tab-pane fade" id="camera-pane" role="tabpanel" aria-labelledby="camera-tab">
+                                <div class="camera-container mb-4 position-relative">
+                                    <div id="camera-placeholder" class="bg-light rounded-4 d-flex flex-column align-items-center justify-content-center" style="height: 400px; border: 2px dashed #dee2e6;">
+                                        <i class="bi bi-camera-fill text-secondary mb-3" style="font-size: 48px;"></i>
+                                        <button type="button" class="btn btn-primary" id="start-camera-btn">
+                                            <i class="bi bi-play-fill me-1"></i>{% trans "Start Camera" %}
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="video-wrapper" class="d-none">
+                                        <div class="face-status-badge face-not-detected" id="face-status">
+                                            <i class="bi bi-person-x-fill me-1"></i>{% trans "FACE NOT DETECTED" %}
+                                        </div>
+                                        <video id="video" width="100%" height="auto" autoplay muted playsinline class="rounded-4 bg-dark shadow-sm" style="max-height: 480px; transform: scaleX(-1);"></video>
+                                        <canvas id="face-canvas"></canvas>
+                                        <canvas id="canvas" class="d-none"></canvas>
+                                        
+                                        <div class="d-flex justify-content-center gap-2 mt-3">
+                                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold" id="capture-btn">
+                                                <i class="bi bi-camera-fill me-2"></i>{% trans "Capture Photo" %}
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary px-4 py-2" id="auto-capture-btn">
+                                                <i class="bi bi-lightning-auto me-2"></i>{% trans "Auto 10 Photos" %}
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" id="stop-camera-btn">
+                                                <i class="bi bi-stop-fill"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <div id="capture-status" class="mt-2 text-center small fw-bold text-primary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-4">
-                            <h6 class="fw-bold mb-2">{% trans "Photo Quality Guidelines" %}:</h6>
+                            <h6 class="fw-bold mb-2">{% trans "Guidelines" %}:</h6>
                             <ul class="guideline-list text-muted small">
-                                <li>{% trans "Plain background (preferably white/gray)" %}</li>
-                                <li>{% trans "Good lighting, face clearly visible" %}</li>
-                                <li>{% trans "No sunglasses, hats, or masks" %}</li>
-                                <li>{% trans "Upload at least 10 photos with different angles and expressions" %}</li>
-                                <li>{% trans "Format: JPG, PNG, maximum 5MB per file" %}</li>
+                                <li>{% trans "Plain background, good lighting" %}</li>
+                                <li>{% trans "Upload or capture at least 10 photos" %}</li>
+                                <li>{% trans "Vary your expressions and head angles slightly" %}</li>
                             </ul>
                         </div>
 
-                        <div class="mb-4">
-                            <div class="upload-area" id="drop-area">
-                                <div class="mb-3">
-                                    <i class="bi bi-cloud-arrow-up-fill text-primary" style="font-size: 48px;"></i>
-                                </div>
-                                <h5 class="mb-2">{% trans "Click to upload photos or drag & drop" %}</h5>
-                                <p class="text-muted mb-0">JPG, PNG ({% trans "Max. 5MB per file" %})</p>
-                                
-                                <input type="file" 
-                                       id="id_file_path" 
-                                       name="file_path" 
-                                       accept=".jpg,.jpeg,.png" 
-                                       class="d-none">
-                            </div>
-                            
-                            <div id="photo-preview-container" class="photo-list"></div>
-                            
-                            <div class="alert alert-primary bg-light border-0 d-flex align-items-center mt-3">
-                                <i class="bi bi-info-circle-fill text-primary me-2"></i>
-                                <span class="text-primary fw-bold small">
-                                    <span id="photo-count">0</span> {% trans "of 10 photos uploaded" %}
-                                </span>
-                            </div>
+                        <div id="photo-preview-container" class="photo-list"></div>
+                        
+                        <div class="alert alert-primary bg-light border-0 d-flex align-items-center mt-3">
+                            <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                            <span class="text-primary fw-bold small">
+                                <span id="photo-count-number">0</span> {% trans "of" %} 10 {% trans "photos collected" %}
+                            </span>
                         </div>
 
-                        <!-- Important note with new styling -->
+                        <!-- Important note -->
                         <div class="important-note mb-4">
                             <div class="d-flex align-items-start">
                                 <span class="photo-counter">!</span>
                                 <div class="ms-2">
                                     <p class="note-title mb-1">{% trans "Important Note" %}:</p>
                                     <p class="note-content mb-0">
-                                        {% trans "The system requires at least 10 photos with different angles and expressions for the best accuracy in face recognition." %}
+                                        {% trans "Good quality photos with clear visibility are essential for attendance system accuracy." %}
                                     </p>
                                 </div>
                             </div>
                         </div>
-
-                        {% if form.file_path.errors %}
-                            <div class="alert alert-danger small mb-4">
-                                {{ form.file_path.errors }}
-                            </div>
-                        {% endif %}
 
                         <hr class="my-4">
 
@@ -274,8 +447,6 @@
                                 {% trans "Submit Data & Request Approval" %}
                             </button>
                         </div>
-                        
-                        <!-- Login link plain text -->
                     </form>
 
                 </div>
@@ -296,159 +467,345 @@ document.addEventListener("DOMContentLoaded", function() {
     const dropArea = document.getElementById('drop-area');
     const fileInput = document.getElementById('id_file_path');
     const photoPreview = document.getElementById('photo-preview-container');
-    const photoCount = document.getElementById('photo-count');
+    const photoCountNumber = document.getElementById('photo-count-number');
     const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('upload-form');
+    
+    // Camera elements
+    const startCameraBtn = document.getElementById('start-camera-btn');
+    const stopCameraBtn = document.getElementById('stop-camera-btn');
+    const captureBtn = document.getElementById('capture-btn');
+    const autoCaptureBtn = document.getElementById('auto-capture-btn');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const cameraPlaceholder = document.getElementById('camera-placeholder');
+    const videoWrapper = document.getElementById('video-wrapper');
+    const captureStatus = document.getElementById('capture-status');
+    const faceCanvas = document.getElementById('face-canvas');
+    const faceStatus = document.getElementById('face-status');
+    
     const MIN_PHOTOS = 10;
-    
     let files = [];
-    
-    // Click to upload
-    dropArea.addEventListener('click', function() {
-        fileInput.click();
-    });
-    
-    // File input change
-    fileInput.addEventListener('change', function() {
-        handleFiles(this.files);
-    });
-    
-    // Drag and drop
+    let stream = null;
+    let isCapturing = false;
+    let faceDetected = false;
+    let detectionInterval = null;
+    let lastBox = null;
+
+    // --- UPLOAD LOGIC ---
+    dropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', function() { handleFiles(this.files); });
+
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
+        dropArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
     });
-    
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    
+
     ['dragenter', 'dragover'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
             dropArea.classList.add('border-primary');
             dropArea.style.backgroundColor = '#f0f7ff';
         });
     });
-    
+
     ['dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, () => {
             dropArea.classList.remove('border-primary');
             dropArea.style.backgroundColor = '';
         });
     });
-    
-    dropArea.addEventListener('drop', function(e) {
-        const dt = e.dataTransfer;
-        const droppedFiles = dt.files;
-        handleFiles(droppedFiles);
+
+    dropArea.addEventListener('drop', (e) => {
+        handleFiles(e.dataTransfer.files);
     });
-    
-    // Process files
+
     function handleFiles(selectedFiles) {
         for (let i = 0; i < selectedFiles.length; i++) {
             const file = selectedFiles[i];
-            
-            // Validate file type
-            if (!file.type.match('image.*')) {
-                alert(`{% trans 'File' %} "${file.name}" {% trans 'is not an image. Only JPG, PNG are allowed.' %}`);
-                continue;
-            }
-            
-            // Validate file size (5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert(`{% trans 'File' %} "${file.name}" {% trans 'is too large. Maximum 5MB.' %}`);
-                continue;
-            }
-            
+            if (!file.type.match('image.*')) continue;
+            if (file.size > 5 * 1024 * 1024) continue;
             files.push(file);
         }
-        
-        updatePreview();
-        updateCount();
-        updateSubmitButton();
+        updateUI();
     }
-    
-    // Update preview
-    function updatePreview() {
-        photoPreview.innerHTML = '';
-        
-        files.forEach((file, index) => {
-            const reader = new FileReader();
+
+    // --- CAMERA LOGIC ---
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } } 
+            });
+            video.srcObject = stream;
+            cameraPlaceholder.classList.add('d-none');
+            videoWrapper.classList.remove('d-none');
             
-            reader.onload = function(e) {
-                const photoItem = document.createElement('div');
-                photoItem.className = 'photo-item';
-                
-                photoItem.innerHTML = `
-                    <img src="${e.target.result}" alt="{% trans 'Preview' %} ${index + 1}">
-                    <div class="photo-remove" onclick="removePhoto(${index})">
-                        <i class="bi bi-x"></i>
-                    </div>
-                `;
-                
-                photoPreview.appendChild(photoItem);
+            // Wait for video to be ready to set canvas size
+            video.onloadedmetadata = () => {
+                faceCanvas.width = video.videoWidth;
+                faceCanvas.height = video.videoHeight;
+                startFaceDetection();
             };
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            alert("{% trans 'Cannot access camera. Please make sure you have given permission.' %}");
+        }
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        video.srcObject = null;
+        stopFaceDetection();
+        cameraPlaceholder.classList.remove('d-none');
+        videoWrapper.classList.add('d-none');
+        isCapturing = false;
+        captureStatus.textContent = '';
+    }
+
+    // --- MTCNN FACE DETECTION LOGIC (BACKEND CALL) ---
+    function startFaceDetection() {
+        if (detectionInterval) clearInterval(detectionInterval);
+        
+        detectionInterval = setInterval(async () => {
+            if (!stream || video.paused || video.ended) return;
             
-            reader.readAsDataURL(file);
+            // Capture current frame for detection
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
+            const ctx = tempCanvas.getContext('2d');
+            
+            // We mirror the detection frame to match what's on screen if needed, 
+            // but backend MTCNN doesn't care about flip. 
+            // However, drawImage(video) gives the raw frame (not flipped by CSS).
+            ctx.drawImage(video, 0, 0);
+            const frameBase64 = tempCanvas.toDataURL('image/jpeg', 0.5); // Low quality for speed
+            
+            try {
+                const response = await fetch('/api/detect-face-registration/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ frame: frameBase64 })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.face_detected) {
+                    faceDetected = true;
+                    lastBox = data.box;
+                    updateFaceStatus(true);
+                    drawFaceBox(data.box);
+                    // Enable buttons
+                    if (!isCapturing) {
+                        captureBtn.disabled = false;
+                        autoCaptureBtn.disabled = false;
+                    }
+                } else {
+                    faceDetected = false;
+                    lastBox = null;
+                    updateFaceStatus(false);
+                    clearFaceCanvas();
+                    // Disable buttons
+                    captureBtn.disabled = true;
+                    autoCaptureBtn.disabled = true;
+                }
+            } catch (err) {
+                console.error("Detection error:", err);
+            }
+        }, 500); // Check every 500ms
+    }
+
+    function stopFaceDetection() {
+        if (detectionInterval) {
+            clearInterval(detectionInterval);
+            detectionInterval = null;
+        }
+        clearFaceCanvas();
+        faceDetected = false;
+    }
+
+    function updateFaceStatus(detected) {
+        if (detected) {
+            faceStatus.className = 'face-status-badge face-detected';
+            faceStatus.innerHTML = '<i class="bi bi-person-check-fill me-1"></i>{% trans "FACE DETECTED" %}';
+            captureBtn.classList.replace('btn-primary', 'btn-success');
+        } else {
+            faceStatus.className = 'face-status-badge face-not-detected';
+            faceStatus.innerHTML = '<i class="bi bi-person-x-fill me-1"></i>{% trans "FACE NOT DETECTED" %}';
+            captureBtn.classList.replace('btn-success', 'btn-primary');
+        }
+    }
+
+    function drawFaceBox(box) {
+        if (!faceCanvas) return;
+        const ctx = faceCanvas.getContext('2d');
+        ctx.clearRect(0, 0, faceCanvas.width, faceCanvas.height);
+        
+        ctx.strokeStyle = '#22c55e'; // Green
+        ctx.lineWidth = 3;
+        ctx.strokeRect(box.x, box.y, box.w, box.h);
+        
+        // Add corners
+        ctx.fillStyle = '#22c55e';
+        const cs = 15; // corner size
+        const t = 4; // thickness
+        // Top-left
+        ctx.fillRect(box.x, box.y, cs, t); ctx.fillRect(box.x, box.y, t, cs);
+        // Top-right
+        ctx.fillRect(box.x + box.w - cs, box.y, cs, t); ctx.fillRect(box.x + box.w - t, box.y, t, cs);
+        // Bottom-left
+        ctx.fillRect(box.x, box.y + box.h - t, cs, t); ctx.fillRect(box.x, box.y + box.h - cs, t, cs);
+        // Bottom-right
+        ctx.fillRect(box.x + box.w - cs, box.y + box.h - t, cs, t); ctx.fillRect(box.x + box.w - t, box.y + box.h - cs, t, cs);
+    }
+
+    function clearFaceCanvas() {
+        if (!faceCanvas) return;
+        const ctx = faceCanvas.getContext('2d');
+        ctx.clearRect(0, 0, faceCanvas.width, faceCanvas.height);
+    }
+
+    function capturePhoto(silent = false) {
+        if (!stream || !faceDetected) {
+            if (!faceDetected && !silent) alert("{% trans 'Face not detected! Please look at the camera clearly.' %}");
+            return false;
+        }
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        
+        // Drawer uses mirror because video is mirrored via CSS
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob) => {
+            const file = new File([blob], `capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            files.push(file);
+            updateUI();
+            
+            // Flash effect
+            video.classList.add('opacity-50');
+            setTimeout(() => video.classList.remove('opacity-50'), 100);
+        }, 'image/jpeg', 0.9);
+        return true;
+    }
+
+    async function autoCapture() {
+        if (isCapturing || !faceDetected) {
+            if (!faceDetected) alert("{% trans 'Please position your face in the frame first.' %}");
+            return;
+        }
+        
+        isCapturing = true;
+        autoCaptureBtn.disabled = true;
+        captureBtn.disabled = true;
+        
+        let count = 0;
+        const totalToTake = 10;
+        
+        const interval = setInterval(() => {
+            if (!stream || !isCapturing || count >= totalToTake) {
+                clearInterval(interval);
+                isCapturing = false;
+                autoCaptureBtn.disabled = false;
+                captureBtn.disabled = !faceDetected;
+                if (count >= totalToTake) {
+                    captureStatus.textContent = "{% trans 'Auto capture finished!' %}";
+                    setTimeout(() => { if (!isCapturing) captureStatus.textContent = ""; }, 3000);
+                }
+                return;
+            }
+            
+            // Capture only if face is currently detected
+            if (faceDetected) {
+                const success = capturePhoto(true); // Silent mode
+                if (success) {
+                    count++;
+                    captureStatus.textContent = `{% trans 'Capturing' %} ${count} / ${totalToTake}...`;
+                }
+            } else {
+                captureStatus.textContent = "{% trans 'Waiting for face...' %}";
+            }
+        }, 1000); // Take a photo every 1 second if face detected
+    }
+
+    startCameraBtn.addEventListener('click', startCamera);
+    stopCameraBtn.addEventListener('click', stopCamera);
+    captureBtn.addEventListener('click', capturePhoto);
+    autoCaptureBtn.addEventListener('click', autoCapture);
+
+    // Tab switch handling
+    const cameraTab = document.getElementById('camera-tab');
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', (e) => {
+            if (e.target.id !== 'camera-tab') {
+                stopCamera();
+            }
         });
-    }
-    
-    // Update count
-    function updateCount() {
-        photoCount.textContent = files.length;
-        
-        // Update message based on count
-        const message = files.length >= MIN_PHOTOS 
-            ? `<span class="text-success">${files.length} {% trans 'of 10 photos uploaded' %} ✓</span>`
-            : `${files.length} {% trans 'of 10 photos uploaded' %}`;
-        
-        photoCount.innerHTML = message;
-    }
-    
-    // Update submit button state
-    function updateSubmitButton() {
+    });
+
+    // --- SHARED UI LOGIC ---
+    function updateUI() {
+        // Update Preview
+        photoPreview.innerHTML = '';
+        files.forEach((file, index) => {
+            const url = URL.createObjectURL(file);
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.innerHTML = `
+                <img src="${url}" alt="Preview ${index + 1}">
+                <div class="photo-remove" onclick="removePhoto(${index})">
+                    <i class="bi bi-x"></i>
+                </div>
+            `;
+            photoPreview.appendChild(photoItem);
+            // We should ideally revoke objects URLs to avoid memory leaks, 
+            // but for a wizard page it's usually fine.
+        });
+
+        // Update Count
+        photoCountNumber.textContent = files.length;
         if (files.length >= MIN_PHOTOS) {
+            photoCountNumber.parentElement.classList.remove('text-primary');
+            photoCountNumber.parentElement.classList.add('text-success');
             submitBtn.disabled = false;
             submitBtn.classList.remove('btn-secondary');
             submitBtn.classList.add('btn-dark-custom');
         } else {
+            photoCountNumber.parentElement.classList.add('text-primary');
+            photoCountNumber.parentElement.classList.remove('text-success');
             submitBtn.disabled = true;
-            submitBtn.classList.remove('btn-dark-custom');
             submitBtn.classList.add('btn-secondary');
+            submitBtn.classList.remove('btn-dark-custom');
         }
     }
-    
-    // Remove photo
+
     window.removePhoto = function(index) {
         files.splice(index, 1);
-        updatePreview();
-        updateCount();
-        updateSubmitButton();
+        updateUI();
     };
-    
-    // Form submission
-    const form = document.getElementById('upload-form');
+
     form.addEventListener('submit', function(e) {
-        console.log('Form submit triggered');
-        console.log('Files count:', files.length);
-        
         if (files.length < MIN_PHOTOS) {
             e.preventDefault();
-            alert(`{% trans 'Minimum' %} ${MIN_PHOTOS} {% trans 'photos required. You have only uploaded' %} ${files.length} {% trans 'photos.' %}`);
+            alert(`{% trans 'Minimum 10 photos required.' %}`);
             return;
         }
-        
-        // Update file input with all files
+
         const dataTransfer = new DataTransfer();
         files.forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
         
-        // Show loading
+        stopCamera();
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Sending..." %}';
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Processing..." %}';
     });
-    
-    // Initialize
-    updateSubmitButton();
 });
 </script>
 
