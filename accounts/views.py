@@ -660,21 +660,40 @@ def checkin_presensi(request):
             mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
             today = date.today()
             
-            # CEK SESSION AKTIF
+            # PERBAIKAN: CEK SESSION AKTIF - Pastikan tidak ada yang belum checkout
+            # Gunakan filter yang lebih ketat
             existing_presensi = Presensi.objects.filter(
                 mahasiswa=mahasiswa,
                 tanggal_presensi=today,
                 jam_checkout__isnull=True
-            ).first()
+            )
             
-            if existing_presensi:
+            if existing_presensi.exists():
+                # Jika ada lebih dari 1, perbaiki dulu
+                if existing_presensi.count() > 1:
+                    print(f"⚠️ Terdeteksi {existing_presensi.count()} session aktif! Membersihkan...")
+                    # Ambil yang terbaru untuk dipertahankan
+                    latest = existing_presensi.order_by('-jam_checkin').first()
+                    # Nonaktifkan yang lain
+                    now_local = timezone.localtime(timezone.now())
+                    for session in existing_presensi.exclude(id=latest.id):
+                        session.jam_checkout = now_local.time()
+                        session.session_status = 'auto_checkout'
+                        session.save()
+                        print(f"✅ Menonaktifkan session duplikat ID: {session.id}")
+                    
+                    # Gunakan yang terbaru sebagai session aktif
+                    active_session = latest
+                else:
+                    active_session = existing_presensi.first()
+                
                 return JsonResponse({
                     'success': False,
                     'message': 'Anda masih memiliki sesi aktif. Silakan checkout terlebih dahulu.',
                     'existing_session': {
-                        'id': existing_presensi.id,
-                        'jam_checkin': existing_presensi.jam_checkin.strftime('%H:%M'),
-                        'session_status': existing_presensi.session_status
+                        'id': active_session.id,
+                        'jam_checkin': active_session.jam_checkin.strftime('%H:%M'),
+                        'session_status': active_session.session_status
                     }
                 })
             
@@ -694,7 +713,7 @@ def checkin_presensi(request):
                 mahasiswa=mahasiswa,
                 kegiatan_pa=None,
                 tanggal_presensi=today,
-                jam_checkin=now_local.time(),  # Simpan waktu lokal
+                jam_checkin=now_local.time(),
                 foto_checkin=foto_data,
                 last_verified_at=now_utc,
                 terakhir_terdeteksi=now_local.time(),
@@ -724,7 +743,6 @@ def checkin_presensi(request):
             print(f"Mahasiswa: {mahasiswa.user.nama_lengkap} ({mahasiswa.nim})")
             print(f"Presensi ID: {presensi.id}")
             print(f"Waktu Lokal: {now_local.strftime('%H:%M:%S')}")
-            print(f"Waktu UTC: {now_utc.strftime('%H:%M:%S')}")
             print(f"Jam Check-in tersimpan: {presensi.jam_checkin}")
             print(f"==========================\n")
             
@@ -1075,7 +1093,8 @@ def periodic_verify(request):
             return JsonResponse({
                 "success": False, 
                 "message": "Tidak ada sesi presensi aktif. Silakan check-in terlebih dahulu.",
-                "session_status": "none"
+                "session_status": "none",
+                "clear_storage": True  # Tambahkan flag untuk membersihkan localStorage
             })
         
         # UPDATE STATUS SESSION KE 'verifying'
@@ -1203,17 +1222,15 @@ def periodic_verify(request):
         )
         
         # ==================== UPDATE SESSION ====================
-        # PERBAIKAN: Gunakan timezone.now() tapi konversi ke waktu lokal untuk disimpan
         now_utc = timezone.now()
-        now_local = timezone.localtime(now_utc)  # Konversi ke WIB (Asia/Jakarta)
+        now_local = timezone.localtime(now_utc)
         
-        # 1. UPDATE last_verified_at (simpan dalam UTC untuk konsistensi)
+        # 1. UPDATE last_verified_at
         presensi.last_verified_at = now_utc
         
         # 2. UPDATE failure_count
         if verification_success:
             presensi.failure_count = 0
-            # Simpan waktu lokal untuk terakhir_terdeteksi
             presensi.terakhir_terdeteksi = now_local.time()
         else:
             presensi.failure_count += 1
@@ -1223,12 +1240,12 @@ def periodic_verify(request):
         checkout_time_str = None
         
         if presensi.failure_count >= 2:
-            # PERBAIKAN: Auto checkout - simpan waktu LOKAL
+            # PERBAIKAN: Auto checkout
             presensi.session_status = 'auto_checkout'
-            presensi.jam_checkout = now_local.time()  # Simpan dalam waktu lokal (WIB)
+            presensi.jam_checkout = now_local.time()
             presensi.foto_checkout = foto_data_verif
             
-            # Hitung durasi - pastikan menggunakan waktu yang sama (lokal)
+            # Hitung durasi
             checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
             checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
             
@@ -1246,13 +1263,10 @@ def periodic_verify(request):
             auto_checked_out = True
             checkout_time_str = presensi.jam_checkout.strftime('%H:%M:%S')
             
-            # Debug: Cetak waktu auto checkout
             print(f"[PERIODIC] AUTO CHECKOUT - ID: {presensi.id}")
             print(f"[PERIODIC] Tanggal: {presensi.tanggal_presensi}")
-            print(f"[PERIODIC] Check-in (lokal): {presensi.jam_checkin}")
-            print(f"[PERIODIC] Check-out (lokal): {presensi.jam_checkout}")
-            print(f"[PERIODIC] Waktu Server (UTC): {now_utc}")
-            print(f"[PERIODIC] Waktu Lokal (WIB): {now_local}")
+            print(f"[PERIODIC] Check-in: {presensi.jam_checkin}")
+            print(f"[PERIODIC] Check-out: {presensi.jam_checkout}")
             print(f"[PERIODIC] Durasi: {durasi}")
         else:
             presensi.session_status = 'active'
@@ -1268,7 +1282,7 @@ def periodic_verify(request):
         VerificationLog.objects.create(
             mahasiswa=mahasiswa,
             presensi=presensi,
-            timestamp=now_utc,  # Log tetap simpan dalam UTC
+            timestamp=now_utc,
             status=verification_success,
             is_liveness_real=is_real,
             failure_count=presensi.failure_count,
@@ -1276,7 +1290,7 @@ def periodic_verify(request):
         )
         
         # ==================== HITUNG NEXT VERIFICATION ====================
-        VERIFICATION_INTERVAL = 5 * 60  # 5 menit
+        VERIFICATION_INTERVAL = 5 * 60
         next_verification_time = presensi.last_verified_at + timedelta(seconds=VERIFICATION_INTERVAL)
         time_left = max(0, int((next_verification_time - now_utc).total_seconds()))
         
@@ -1301,7 +1315,8 @@ def periodic_verify(request):
                 "recognition": "MATCHED" if verification_success else "MISMATCH" if face_detected and is_real else "SKIPPED",
                 "faces": len(detections) if detections is not None else 0,
                 "recognition_score": recognition_score if verification_success else 0
-            }
+            },
+            "clear_storage": auto_checked_out  # Tambahkan flag untuk membersihkan localStorage
         }
         
         # Redirect URL
@@ -1314,18 +1329,21 @@ def periodic_verify(request):
     except json.JSONDecodeError:
         return JsonResponse({
             "success": False, 
-            "message": "Format JSON tidak valid"
+            "message": "Format JSON tidak valid",
+            "clear_storage": False
         })
     except Mahasiswa.DoesNotExist:
         return JsonResponse({
             "success": False, 
-            "message": "Data mahasiswa tidak ditemukan"
+            "message": "Data mahasiswa tidak ditemukan",
+            "clear_storage": False
         })
     except Presensi.DoesNotExist:
         return JsonResponse({
             "success": False,
             "message": "Session presensi tidak ditemukan",
-            "session_status": "not_found"
+            "session_status": "not_found",
+            "clear_storage": True  # Session tidak ditemukan, bersihkan localStorage
         })
     except Exception as e:
         import traceback
@@ -1334,7 +1352,8 @@ def periodic_verify(request):
         return JsonResponse({
             "success": False, 
             "message": f"Terjadi kesalahan: {str(e)}",
-            "auto_checked_out": False
+            "auto_checked_out": False,
+            "clear_storage": False
         })
 
 @login_required
@@ -1353,19 +1372,56 @@ def get_session_status(request):
         mahasiswa = get_object_or_404(Mahasiswa, user=request.user)
         today = date.today()
         
-        # Cari session aktif hari ini (belum checkout)
+        # PERBAIKAN: Cari session aktif hari ini (belum checkout)
+        # Gunakan .latest() atau .first() untuk memastikan hanya 1
         active_session = Presensi.objects.filter(
             mahasiswa=mahasiswa,
             tanggal_presensi=today,
             jam_checkout__isnull=True
-        ).order_by('-jam_checkin').first()
+        ).order_by('-jam_checkin').first()  # Ambil yang terbaru
         
         if not active_session:
+            # PERBAIKAN: Jika tidak ada session aktif hari ini, cek apakah ada session aktif dari hari sebelumnya
+            # yang masih aktif (kemungkinan bug)
+            old_active = Presensi.objects.filter(
+                mahasiswa=mahasiswa,
+                jam_checkout__isnull=True
+            ).exclude(
+                tanggal_presensi=today
+            ).order_by('-tanggal_presensi', '-jam_checkin').first()
+            
+            if old_active:
+                # Auto checkout session lama
+                print(f"⚠️ Menemukan session lama yang masih aktif: {old_active.id}")
+                now_local = timezone.localtime(timezone.now())
+                old_active.jam_checkout = now_local.time()
+                old_active.session_status = 'auto_checkout'
+                old_active.save()
+                print(f"✅ Auto checkout session lama")
+            
             return JsonResponse({
                 'success': True,
                 'has_active_session': False,
-                'message': 'Tidak ada session aktif'
+                'message': 'Tidak ada session aktif',
+                'clear_storage': True  # Minta frontend bersihkan storage
             })
+        
+        # PERBAIKAN: Pastikan tidak ada session aktif lain untuk hari yang sama
+        # Jika ada, kita nonaktifkan yang lain
+        other_active = Presensi.objects.filter(
+            mahasiswa=mahasiswa,
+            tanggal_presensi=today,
+            jam_checkout__isnull=True
+        ).exclude(id=active_session.id)
+        
+        if other_active.exists():
+            print(f"⚠️ Menemukan {other_active.count()} session aktif lain untuk hari yang sama")
+            now_local = timezone.localtime(timezone.now())
+            for session in other_active:
+                session.jam_checkout = now_local.time()
+                session.session_status = 'auto_checkout'
+                session.save()
+                print(f"✅ Menonaktifkan session duplikat ID: {session.id}")
         
         # Konfigurasi verifikasi
         VERIFICATION_INTERVAL = 5 * 60  # 5 menit dalam detik
@@ -1382,11 +1438,11 @@ def get_session_status(request):
             )
             next_verification = checkin_datetime + timedelta(seconds=VERIFICATION_INTERVAL)
         
-        # Hitung sisa waktu - PASTIKAN INI YANG DIKIRIM
+        # Hitung sisa waktu
         if next_verification > now:
             time_left = int((next_verification - now).total_seconds())
         else:
-            time_left = 0  # Kalau sudah lewat, kirim 0
+            time_left = 0
         
         # Hitung durasi session
         checkin_dt = timezone.make_aware(
@@ -1400,7 +1456,7 @@ def get_session_status(request):
             'checkin_time': active_session.jam_checkin.strftime('%H:%M:%S'),
             'checkin_datetime': checkin_dt.isoformat(),
             'duration_seconds': duration_seconds,
-            'time_left': time_left,  # <-- INI YANG PENTING
+            'time_left': time_left,
             'failure_count': active_session.failure_count,
             'session_status': active_session.session_status,
             'last_verified_at': active_session.last_verified_at.isoformat() if active_session.last_verified_at else None,
