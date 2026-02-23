@@ -180,13 +180,40 @@ class Presensi(models.Model):
     jam_checkout = models.TimeField(_("Check-out Time"), null=True, blank=True)
     foto_checkin = models.ImageField(_("Check-in Photo"), upload_to='presensi/checkin/', null=True, blank=True)
     foto_checkout = models.ImageField(_("Check-out Photo"), upload_to='presensi/checkout/', null=True, blank=True)
+    terakhir_terdeteksi = models.TimeField(_("Last Detected Time"), null=True, blank=True)
+    last_verified_at = models.DateTimeField(_("Last Verified At"), null=True, blank=True)
+    failure_count = models.IntegerField(_("Failure Count"), default=0)
+    session_status = models.CharField(
+        _("Session Status"),
+        max_length=20,
+        choices=[
+            ('active', _('Active')),
+            ('verifying', _('Verifying')),
+            ('auto_checkout', _('Auto Checked Out')),
+            ('completed', _('Completed'))
+        ],
+        default='active'
+    )
     
     def __str__(self):
         return f"Attendance {self.mahasiswa.user.nama_lengkap} - {self.tanggal_presensi}"
-    
+
+class VerificationLog(models.Model):
+    mahasiswa = models.ForeignKey(Mahasiswa, on_delete=models.CASCADE)
+    presensi = models.ForeignKey(Presensi, on_delete=models.CASCADE, related_name='verification_logs', null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    status = models.BooleanField(default=False) # True if face detected and matched
+    is_liveness_real = models.BooleanField(default=False)
+    failure_count = models.IntegerField(default=0)
+    foto = models.ImageField(_("Verification Photo"), upload_to='presensi/verification/', null=True, blank=True)
+
     class Meta:
-        verbose_name = _("Attendance")
-        verbose_name_plural = _("Attendances")
+        verbose_name = _("Presence Verification Log")
+        verbose_name_plural = _("Presence Verification Logs")
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"Verification {self.mahasiswa.user.username} - {self.timestamp} - {'Success' if self.status else 'Failed'}"
 
 class Durasi(models.Model):
     presensi = models.OneToOneField(Presensi, on_delete=models.CASCADE)

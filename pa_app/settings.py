@@ -134,10 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-TIME_ZONE = 'UTC'
-
-# HAPUS BARIS INI (SUDAH ADA DI ATAS):
-# USE_I18N = True
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_TZ = True
 

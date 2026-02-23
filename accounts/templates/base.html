@@ -493,11 +493,6 @@
                 display: none;
             }
         }
-
-        /* Hapus language switcher fixed */
-        .language-switcher {
-            display: none;
-        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -521,15 +516,13 @@
                 <div class="d-flex align-items-center">
                     <!-- Tambahkan spacer untuk mobile -->
                     <div class="d-md-none me-3" style="width: 40px;"></div>
-                    <h1 class="h5 fw-bold mb-0">{% block page_title %}{% trans "Student Dashboard" %}{% endblock %}</h1>
+                    <h1 class="h5 fw-bold mb-0">{% block page_title %}{% trans "Dashboard" %}{% endblock %}</h1>
                 </div>
                 <div class="user-info-header">
                     <!-- Language Switcher -->
-                    <!-- Language Switcher (GANTI SELURUH BAGIAN INI) -->
                     <div class="header-language-switcher">
                         <form action="{% url 'set_language' %}" method="post">
                             {% csrf_token %}
-                            <!-- Parameter 'next' WAJIB ada supaya redirect kembali ke halaman yang sama dengan prefix baru -->
                             <input type="hidden" name="next" value="{{ request.get_full_path|urlencode }}">
                             
                             <select name="language" onchange="this.form.submit()" class="form-select form-select-sm">
@@ -578,6 +571,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Sidebar Toggle Script -->
     <script>
         document.getElementById('sidebarToggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
@@ -624,6 +618,510 @@
             }
         });
     </script>
+
+    <!-- ==================== GLOBAL MONITORING SCRIPT ==================== -->
+    <script>
+        // Global monitoring state
+        window.monitoring = {
+            active: false,
+            sessionId: null,
+            checkinTime: null,
+            timeLeft: 0,
+            failureCount: 0,
+            timerInterval: null,
+            verificationInProgress: false,
+            overlayVisible: false,
+            config: {
+                verification_interval: 300, // 5 menit dalam detik
+                max_failures: 2
+            },
+            
+            init: function() {
+                console.log('Initializing global monitoring...');
+                
+                // Cek session status setiap 30 detik
+                this.checkSessionStatus();
+                setInterval(() => this.checkSessionStatus(), 30000);
+                
+                // Daftarkan event listener untuk page visibility
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible' && this.active) {
+                        // Update status saat halaman menjadi visible lagi
+                        this.checkSessionStatus();
+                    }
+                });
+            },
+            
+            checkSessionStatus: function() {
+                fetch('/api/get-session-status/', {
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.has_active_session) {
+                        if (!this.active) {
+                            // Session baru dimulai
+                            this.startMonitoring(data.session, data.config);
+                        } else {
+                            // Update session yang sudah ada
+                            this.updateSession(data.session);
+                        }
+                        
+                        // Update logs jika ada
+                        if (data.logs && document.getElementById('log-list')) {
+                            this.updateLogs(data.logs);
+                        }
+                    } else {
+                        if (this.active) {
+                            // Session berakhir
+                            this.stopMonitoring();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking session:', error);
+                });
+            },
+            
+            startMonitoring: function(session, config) {
+                console.log('Starting monitoring for session:', session);
+                this.active = true;
+                this.sessionId = session.id;
+                this.checkinTime = new Date(session.checkin_datetime);
+                this.timeLeft = session.time_left;
+                this.failureCount = session.failure_count;
+                this.config = config || this.config;
+                
+                // Mulai timer
+                this.startTimer();
+                
+                // Tampilkan notifikasi
+                this.showNotification('Session monitoring active', 'info');
+                
+                // Update UI
+                this.updateUI();
+            },
+            
+            updateSession: function(session) {
+                this.timeLeft = session.time_left;
+                this.failureCount = session.failure_count;
+                
+                // Update UI
+                this.updateUI();
+            },
+            
+            stopMonitoring: function() {
+                console.log('Stopping monitoring');
+                this.active = false;
+                this.sessionId = null;
+                
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+                
+                if (this.overlayVisible) {
+                    this.hideVerificationOverlay();
+                }
+                
+                // Update UI ke status idle
+                this.updateUI();
+            },
+            
+            startTimer: function() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                }
+                
+                this.timerInterval = setInterval(() => {
+                    if (this.timeLeft > 0 && this.active) {
+                        this.timeLeft--;
+                        this.updateUI();
+                        
+                        // Cek apakah waktunya verifikasi
+                        if (this.timeLeft <= 0 && !this.verificationInProgress) {
+                            this.startVerification();
+                        }
+                    }
+                }, 1000);
+            },
+            
+            startVerification: function() {
+                if (this.verificationInProgress || !this.active) return;
+                
+                this.verificationInProgress = true;
+                this.showVerificationOverlay();
+                
+                // Tunggu 2 detik untuk persiapan kamera
+                setTimeout(() => {
+                    this.captureAndVerify();
+                }, 2000);
+            },
+            
+            showVerificationOverlay: function() {
+                // Cek apakah overlay sudah ada
+                let overlay = document.getElementById('global-verification-overlay');
+                
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'global-verification-overlay';
+                    overlay.innerHTML = `
+                        <div class="v-overlay" style="position:fixed; inset:0; background:rgba(15,23,42,0.95); backdrop-filter:blur(12px); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:1rem;">
+                            <div class="v-camera-container" style="width:100%; max-width:400px; aspect-ratio:4/3; background:#000; border-radius:1.5rem; border:4px solid #3b82f6; overflow:hidden; position:relative;">
+                                <video id="global-video-preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+                                <div class="scanner-line" style="position:absolute; width:100%; height:3px; background:#3b82f6; top:0; left:0; animation:scan 2s linear infinite; box-shadow:0 0 15px #3b82f6; z-index:10;"></div>
+                            </div>
+                            <div class="v-message" id="global-overlay-message" style="color:white; margin-top:2rem; font-size:1.5rem; font-weight:700; text-align:center;">Verifying Presence...</div>
+                            <div class="v-submessage" id="global-overlay-submessage" style="color:#94a3b8; font-size:0.9rem; margin-top:0.5rem;">Please look at the camera</div>
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
+                    
+                    // Tambahkan keyframe animation
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes scan {
+                            0% { top: 0; }
+                            50% { top: 100%; }
+                            100% { top: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                overlay.style.display = 'flex';
+                this.overlayVisible = true;
+            },
+            
+            hideVerificationOverlay: function() {
+                const overlay = document.getElementById('global-verification-overlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    
+                    // Stop camera
+                    const video = document.getElementById('global-video-preview');
+                    if (video && video.srcObject) {
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                        video.srcObject = null;
+                    }
+                }
+                this.overlayVisible = false;
+            },
+            
+            captureAndVerify: async function() {
+                const video = document.getElementById('global-video-preview');
+                const overlayMessage = document.getElementById('global-overlay-message');
+                const overlaySubmessage = document.getElementById('global-overlay-submessage');
+                
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user',
+                            frameRate: { ideal: 15 }
+                        } 
+                    });
+                    
+                    video.srcObject = stream;
+                    
+                    // Tunggu video siap
+                    await new Promise(resolve => {
+                        if (video.readyState >= 2) {
+                            resolve();
+                        } else {
+                            video.onloadeddata = resolve;
+                        }
+                    });
+                    
+                    // Tunggu sebentar untuk stabilisasi
+                    await new Promise(r => setTimeout(r, 1500));
+                    
+                    // Capture frame
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const frameData = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    // Stop camera
+                    stream.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                    
+                    // Update message
+                    if (overlaySubmessage) overlaySubmessage.textContent = 'Processing...';
+                    
+                    // Kirim ke server
+                    const response = await fetch('/api/periodic-verify/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ 
+                            frame: frameData,
+                            presensi_id: this.sessionId
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    // Handle result
+                    if (result.success) {
+                        if (result.auto_checked_out) {
+                            this.showNotification('Auto checked out due to failed verifications', 'warning');
+                            this.stopMonitoring();
+                            setTimeout(() => {
+                                if (result.redirect) {
+                                    window.location.href = result.redirect;
+                                } else {
+                                    window.location.reload();
+                                }
+                            }, 2000);
+                        } else if (result.verified) {
+                            this.showNotification('Verification successful', 'success');
+                            
+                            // Update state
+                            this.timeLeft = result.time_left || this.config.verification_interval;
+                            this.failureCount = result.failure_count;
+                            this.updateUI();
+                            
+                            // Refresh logs
+                            this.checkSessionStatus();
+                        } else {
+                            this.showNotification('Verification failed: ' + result.message, 'error');
+                            
+                            // Update state
+                            this.timeLeft = result.time_left || this.config.verification_interval;
+                            this.failureCount = result.failure_count;
+                            this.updateUI();
+                            
+                            // Refresh logs
+                            this.checkSessionStatus();
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('Verification error:', error);
+                    
+                    let errorMessage = 'Camera error';
+                    if (error.message.includes('Permission')) {
+                        errorMessage = 'Camera access denied. Please check permissions.';
+                    } else if (error.message.includes('NotFound')) {
+                        errorMessage = 'No camera found on this device.';
+                    } else {
+                        errorMessage = error.message;
+                    }
+                    
+                    this.showNotification(errorMessage, 'error');
+                    
+                    // Increment failure count secara lokal
+                    this.failureCount++;
+                    this.updateUI();
+                    
+                    // Reset timer
+                    this.timeLeft = this.config.verification_interval;
+                    
+                } finally {
+                    this.hideVerificationOverlay();
+                    this.verificationInProgress = false;
+                }
+            },
+            
+            updateUI: function() {
+                // Update elemen UI jika ada di halaman
+                const timerDisplay = document.getElementById('timer-display');
+                if (timerDisplay) {
+                    if (this.active) {
+                        const mins = Math.floor(this.timeLeft / 60);
+                        const secs = this.timeLeft % 60;
+                        timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    } else {
+                        timerDisplay.textContent = '--:--';
+                    }
+                }
+                
+                const progressBar = document.getElementById('progress-bar');
+                if (progressBar && this.config && this.active) {
+                    const progress = ((this.config.verification_interval - this.timeLeft) / this.config.verification_interval) * 100;
+                    progressBar.style.width = `${progress}%`;
+                } else if (progressBar) {
+                    progressBar.style.width = '0%';
+                }
+                
+                // Update failure dots
+                for (let i = 1; i <= 2; i++) {
+                    const dot = document.getElementById(`dot-${i}`);
+                    if (dot) {
+                        if (this.active && this.failureCount >= i) {
+                            dot.classList.add('active');
+                            dot.innerHTML = '<i class="fas fa-times"></i>';
+                        } else {
+                            dot.classList.remove('active');
+                            dot.innerHTML = '';
+                        }
+                    }
+                }
+                
+                // Update badge status
+                const badgeStatus = document.getElementById('badge-status');
+                if (badgeStatus) {
+                    if (!this.active) {
+                        badgeStatus.className = 'status-pill pill-inactive';
+                        badgeStatus.innerHTML = '<i class="fas fa-power-off"></i> <span>{% trans "No Active Session" %}</span>';
+                    } else if (this.verificationInProgress) {
+                        badgeStatus.className = 'status-pill pill-verifying';
+                        badgeStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>{% trans "Verifying..." %}</span>';
+                    } else {
+                        badgeStatus.className = 'status-pill pill-active';
+                        badgeStatus.innerHTML = '<i class="fas fa-check-circle"></i> <span>{% trans "Monitoring Active" %}</span>';
+                    }
+                }
+                
+                // Update check-in time
+                const checkinTime = document.getElementById('checkin-time');
+                if (checkinTime && this.checkinTime) {
+                    checkinTime.textContent = this.checkinTime.toLocaleTimeString('id-ID', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                } else if (checkinTime) {
+                    checkinTime.textContent = '--:--';
+                }
+                
+                // Update duration
+                const durationEl = document.getElementById('current-duration');
+                if (durationEl && this.checkinTime && this.active) {
+                    const now = new Date();
+                    const diffSeconds = Math.floor((now - this.checkinTime) / 1000);
+                    const hours = Math.floor(diffSeconds / 3600);
+                    const mins = Math.floor((diffSeconds % 3600) / 60);
+                    const secs = diffSeconds % 60;
+                    durationEl.textContent = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                } else if (durationEl) {
+                    durationEl.textContent = '00:00:00';
+                }
+                
+                // Update status title
+                const statusTitle = document.getElementById('status-title');
+                const statusSubtitle = document.getElementById('status-subtitle');
+                
+                if (statusTitle) {
+                    if (this.active) {
+                        statusTitle.textContent = '{% trans "Active Monitoring" %}';
+                    } else {
+                        statusTitle.textContent = '{% trans "No Active Session" %}';
+                    }
+                }
+                
+                if (statusSubtitle) {
+                    if (this.active) {
+                        statusSubtitle.textContent = '{% trans "System is tracking your physical presence" %}';
+                    } else {
+                        statusSubtitle.textContent = '{% trans "Check-in to start monitoring" %}';
+                    }
+                }
+            },
+            
+            updateLogs: function(logs) {
+                const logList = document.getElementById('log-list');
+                if (!logList) return;
+                
+                logList.innerHTML = '';
+                
+                if (logs.length === 0) {
+                    logList.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-sync fa-spin me-2"></i>Waiting for first verification cycle...</div>';
+                    return;
+                }
+                
+                logs.forEach(log => {
+                    const status = log.status ? 'SUCCESS' : 'FAILED';
+                    const message = log.message || (log.status ? 'Presence verified' : 'Verification failed');
+                    
+                    const item = document.createElement('div');
+                    item.className = 'log-item';
+                    
+                    const timeStr = new Date(log.timestamp).toLocaleTimeString('id-ID', { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit' 
+                    });
+                    
+                    const thumbHtml = log.foto_url 
+                        ? `<img src="${log.foto_url}" class="log-thumb" style="width:40px; height:40px; border-radius:0.5rem; object-fit:cover; background:#000; border:1px solid #334155;">` 
+                        : `<div class="log-thumb d-flex align-items-center justify-content-center bg-dark" style="width:40px; height:40px; border-radius:0.5rem; background:#000; border:1px solid #334155;">
+                            <i class="fas fa-camera text-muted" style="font-size: 1rem;"></i>
+                        </div>`;
+                    
+                    let detailsHtml = '';
+                    if (log.is_liveness_real !== undefined) {
+                        detailsHtml = `
+                            <div class="d-flex gap-1 mt-1">
+                                <span class="badge-liveness ${log.is_liveness_real ? 'bg-success' : 'bg-danger'} bg-opacity-25 text-${log.is_liveness_real ? 'success' : 'danger'}" style="font-size:0.6rem; padding:0.15rem 0.4rem; border-radius:9999px;">
+                                    ${log.is_liveness_real ? 'LIVE' : 'SPOOF'}
+                                </span>
+                                <span class="badge-liveness ${log.status ? 'bg-success' : 'bg-danger'} bg-opacity-25 text-${log.status ? 'success' : 'danger'}" style="font-size:0.6rem; padding:0.15rem 0.4rem; border-radius:9999px;">
+                                    ${log.status ? 'MATCH' : 'MISMATCH'}
+                                </span>
+                            </div>
+                        `;
+                    }
+                    
+                    item.innerHTML = `
+                        ${thumbHtml}
+                        <div class="log-info" style="flex:1; min-width:0;">
+                            <div class="log-meta" style="display:flex; justify-content:space-between; font-size:0.65rem; margin-bottom:0.1rem; color:#94a3b8;">
+                                <span>${timeStr}</span>
+                                <span class="log-status" style="color: ${log.status ? '#34d399' : '#f87171'}; font-weight:700;">
+                                    ${log.status ? '✓ SUCCESS' : '✗ FAILED'}
+                                </span>
+                            </div>
+                            <div class="log-text" style="font-size:0.8rem; font-weight:500; color:#f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${message}</div>
+                            ${detailsHtml}
+                        </div>
+                    `;
+                    
+                    logList.appendChild(item);
+                });
+            },
+            
+            showNotification: function(message, type = 'info') {
+                // Buat toast notification
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+                    color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    font-size: 14px;
+                    font-weight: 500;
+                    animation: slideIn 0.3s ease;
+                `;
+                toast.textContent = message;
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+        
+        // Initialize saat DOM siap
+        document.addEventListener('DOMContentLoaded', function() {
+            window.monitoring.init();
+        });
+    </script>
+    <!-- ==================== END GLOBAL MONITORING SCRIPT ==================== -->
 
     {% block extra_js %}{% endblock %}
 </body>

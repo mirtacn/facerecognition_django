@@ -4,641 +4,349 @@
 
 {% block page_title %}{% trans "Credit Fulfillment Status" %}{% endblock %}
 
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #4f46e5;
+        --primary-light: #818cf8;
+        --success: #10b981;
+        --danger: #f43f5e;
+        --warning: #f59e0b;
+        --info: #0ea5e9;
+        --bg-gray: #f8fafc;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    .status-container {
+        padding: 1.5rem;
+        background-color: var(--bg-gray);
+        min-height: 100vh;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: 1rem;
+        transition: transform 0.2s;
+        background: #fff;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .table-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .custom-table {
+        margin-bottom: 0;
+    }
+
+    .custom-table thead th {
+        background-color: #f1f5f9;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border: none;
+        padding: 1rem;
+    }
+
+    .custom-table tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+        border-color: #f1f5f9;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .student-name-cell {
+        font-weight: 700;
+        color: var(--primary) !important;
+    }
+
+    .badge-premium {
+        padding: 0.5em 1em;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .badge-fulfilled { background-color: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .badge-pending { background-color: rgba(244, 63, 94, 0.1); color: var(--danger); }
+
+    .progress-minimal {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #f1f5f9;
+        margin-bottom: 0.5rem;
+    }
+
+    .search-box {
+        background: #fff;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        padding: 0.5rem 1rem;
+    }
+
+    .search-box:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .search-box input {
+        border: none;
+        outline: none;
+        width: 100%;
+        padding-left: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .separator-row {
+        height: 1rem;
+        background-color: var(--bg-gray);
+    }
+
+    .summary-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+    }
+
+    @media print {
+        .no-print { display: none !important; }
+        .status-container { padding: 0; background: #fff; }
+        .table-card { box-shadow: none; border: 1px solid #ddd; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100 rounded-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">{% trans "TOTAL STUDENTS" %}</h6>
-                            <h3 class="fw-bold mb-0">{{ total_mahasiswa }}</h3>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon-circle bg-primary bg-opacity-10 text-primary">
-                                <i class="fas fa-users fs-4"></i>
-                            </div>
-                        </div>
+<div class="status-container">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">{% trans "Credit Fulfillment Monitoring" %}</h2>
+            <p class="text-muted small mb-0">{% trans "Track student activity progress and SKS targets." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm rounded-3" onclick="window.print()">
+                <i class="fas fa-print me-2"></i>{% trans "Print Report" %}
+            </button>
+            <button class="btn btn-success btn-sm rounded-3" onclick="exportToExcel()">
+                <i class="fas fa-file-excel me-2"></i>{% trans "Export" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4 no-print">
+        <div class="col-md-3">
+            <div class="stat-card card shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box bg-primary-light bg-opacity-10 text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="text-muted small">{% trans "Total Students" %}</div>
+                        <div class="h4 fw-bold mb-0">{{ total_mahasiswa }}</div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100 rounded-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">{% trans "TOTAL CREDITS" %}</h6>
-                            <h3 class="fw-bold mb-0">{{ total_sks_all }}</h3>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon-circle bg-success bg-opacity-10 text-success">
-                                <i class="fas fa-graduation-cap fs-4"></i>
-                            </div>
-                        </div>
+        <div class="col-md-3">
+            <div class="stat-card card shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="text-muted small">{% trans "Fulfilled" %}</div>
+                        <div class="h4 fw-bold mb-0">{{ total_memenuhi }}</div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100 rounded-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">{% trans "FULFILLED STATUS" %}</h6>
-                            <h3 class="fw-bold mb-0">{{ total_memenuhi }}</h3>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon-circle bg-info bg-opacity-10 text-info">
-                                <i class="fas fa-check-circle fs-4"></i>
-                            </div>
-                        </div>
+        <div class="col-md-3">
+            <div class="stat-card card shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="text-muted small">{% trans "Pending" %}</div>
+                        <div class="h4 fw-bold mb-0">{{ total_belum_memenuhi }}</div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm h-100 rounded-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <h6 class="text-muted text-uppercase small">{% trans "NOT FULFILLED" %}</h6>
-                            <h3 class="fw-bold mb-0">{{ total_belum_memenuhi }}</h3>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon-circle bg-warning bg-opacity-10 text-warning">
-                                <i class="fas fa-x fs-4"></i>
-                            </div>
-                        </div>
+        <div class="col-md-3">
+            <div class="stat-card card shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <div class="icon-box bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="ms-3">
+                        <div class="text-muted small">{% trans "Total Credits" %}</div>
+                        <div class="h4 fw-bold mb-0">{{ total_sks_all }}</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filter & Search -->
-    <div class="card border-0 shadow-sm mb-4 rounded-3">
+    <!-- Controls -->
+    <div class="card table-card shadow-sm mb-4 no-print">
         <div class="card-body p-3">
-            <div class="row g-3 align-items-center">
-                <!-- Search -->
-                <div class="col-md-5">
-                    <label for="searchInput" class="form-label small fw-semibold text-muted">{% trans "Search Student" %}</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" 
-                               class="form-control border-0 ps-0" 
-                               id="searchInput"
-                               placeholder="{% trans 'Search by name, ID, or class...' %}"
-                               autocomplete="off">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="search-box d-flex align-items-center">
+                        <i class="fas fa-search text-muted"></i>
+                        <input type="text" id="searchInput" placeholder="{% trans 'Search name, ID, or activity...' %}">
                     </div>
                 </div>
-
-                <div class="col-md-4">
-                    <label for="jenjangFilter" class="form-label small fw-semibold text-muted">{% trans "Filter Education Level" %}</label>
-                    <select class="form-select" id="jenjangFilter">
-                        <option value="">{% trans "All Levels" %}</option>
+                <div class="col-md-3">
+                    <select class="form-select border-0 shadow-none bg-light rounded-3" id="jenjangFilter">
+                        <option value="">{% trans "All Education Levels" %}</option>
                         {% for jenjang in jenjang_list %}
-                        <option value="{{ jenjang.nama_jenjang }}">
-                            {{ jenjang.nama_jenjang }}
-                        </option>
+                        <option value="{{ jenjang.nama_jenjang }}">{{ jenjang.nama_jenjang }}</option>
                         {% endfor %}
                     </select>
                 </div>
-
-                <!-- Buttons -->
-                <div class="col-md-3 text-end">
-                    <button type="button" class="btn btn-success me-2" onclick="exportToExcel()">
-                        <i class="fas fa-file-excel me-2"></i>{% trans "Export Excel" %}
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="printPDF()">
-                        <i class="fas fa-file-pdf me-2"></i>{% trans "Print PDF" %}
-                    </button>
+                <div class="col-md-3">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="showOnlyIncomplete">
+                        <label class="form-check-label small text-muted" for="showOnlyIncomplete">
+                            {% trans "Only show pending" %}
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Credit Fulfillment Status Data -->
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-header bg-white border-0 rounded-top-3 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">
-                    {% trans "Credit Fulfillment Status" %}
-                    {% if jenjang_filter %}
-                    <span class="text-muted">({{ jenjang_filter }})</span>
-                    {% endif %}
-                </h5>
-                <span class="badge bg-primary rounded-pill fs-6" id="mahasiswaCounter">
-                    {{ total_mahasiswa }} {% trans "students found" %}
-                </span>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-bordered mb-0" id="statusTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="py-3 text-center" style="width: 12%;">{% trans "Student Name" %}</th>
-                            <th class="py-3 text-center" style="width: 18%;">{% trans "Activity" %}</th>
-                            <th class="py-3 text-center" style="width: 10%;">{% trans "Level" %}</th>
-                            <th class="py-3 text-center" style="width: 8%;">{% trans "Credits" %}</th>
-                            <th class="py-3 text-center" style="width: 10%;">{% trans "Hours/Week" %}</th>
-                            <th class="py-3 text-center" style="width: 12%;">{% trans "Hours/Semester" %}</th>
-                            <th class="py-3 text-center" style="width: 15%;">{% trans "Progress" %}</th>
-                            <th class="py-3 text-center" style="width: 10%;">{% trans "Status" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for data in data_mahasiswa %}
-                            <!-- First row for each student -->
-                            {% with first_kegiatan=data.kegiatan_list|first %}
-                            <tr class="align-middle mahasiswa-row" data-jenjang="{{ data.jenjang|default:'-' }}">
-                                <!-- Student Name (rowspan for all activity rows) -->
-                                <td class="text-center fw-bold" rowspan="{{ data.kegiatan_list|length }}">
-                                    {{ data.nama }}
-                                </td>
-                                
-                                <!-- First activity -->
-                                <td class="text-center">{{ first_kegiatan.nama_kegiatan }}</td>
-                                
-                                <!-- Level from database (rowspan for all activity rows) -->
-                                <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
-                                    <span class="badge bg-secondary">
-                                        {{ data.jenjang|default:"-" }}
-                                    </span>
-                                </td>
-                                
-                                <!-- Credits for first activity -->
-                                <td class="text-center">
-                                    {{ first_kegiatan.sks|default:0 }} {% trans "Credits" %}
-                                </td>
-                                
-                                <!-- Hours/Week for first activity -->
-                                <td class="text-center">{{ first_kegiatan.jam_per_minggu|default:0 }} {% trans "Hours" %}</td>
-                                
-                                <!-- Hours/Semester for first activity -->
-                                <td class="text-center">{{ first_kegiatan.jam_target|default:0 }} {% trans "Hours" %}</td>
-                                
-                                <!-- TOTAL Progress (rowspan for all activity rows) -->
-                                <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
-                                    {{ data.total_jam_ditempuh }}/{{ data.total_jam_target }} {% trans "hours" %}
-                                </td>
-                                
-                                <!-- TOTAL Status (rowspan for all activity rows) -->
-                                <td class="text-center" rowspan="{{ data.kegiatan_list|length }}">
-                                    <span class="badge {% if data.status_overall == 'Memenuhi' %}bg-sukses{% else %}bg-kurang{% endif %}">
-                                        {% if data.status_overall == 'Memenuhi' %}
-                                            {% trans "Fulfilled" %}
-                                        {% else %}
-                                            {% trans "Not Fulfilled" %}
-                                        {% endif %}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endwith %}
-                            
-                            <!-- Rows for subsequent activities (if more than 1 activity) -->
-                            {% for kegiatan in data.kegiatan_list|slice:"1:" %}
-                            <tr class="align-middle mahasiswa-row" data-jenjang="{{ data.jenjang|default:'-' }}">
-                                <!-- Activity -->
-                                <td class="text-center">{{ kegiatan.nama_kegiatan }}</td>
-                                
-                                <!-- Credits -->
-                                <td class="text-center">
-                                    {{ kegiatan.sks|default:0 }} {% trans "Credits" %}
-                                </td>
-                                
-                                <!-- Hours/Week -->
-                                <td class="text-center">{{ kegiatan.jam_per_minggu|default:0 }} {% trans "Hours" %}</td>
-                                
-                                <!-- Hours/Semester -->
-                                <td class="text-center">{{ kegiatan.jam_target|default:0 }} {% trans "Hours" %}</td>
-                                
-                                <!-- Progress and Status already merged in first row -->
-                            </tr>
-                            {% endfor %}
-                            
-                            <!-- Empty row as separator between students -->
-                            <tr class="separator-row">
-                                <td colspan="8" style="height: 10px; background-color: #fff; border: none;"></td>
-                            </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                                    <h5 class="mb-2">{% trans "No data for students with approved status" %}</h5>
-                                    <p>{% trans "No students have been approved yet" %}</p>
+    <!-- Main Table -->
+    <div class="card table-card shadow-sm">
+        <div class="table-responsive">
+            <table class="table custom-table" id="statusTable">
+                <thead>
+                    <tr>
+                        <th style="width: 20%">{% trans "Student Info" %}</th>
+                        <th style="width: 25%">{% trans "Activities" %}</th>
+                        <th style="width: 10%">{% trans "Total Session" %}</th>
+                        <th style="width: 10%">{% trans "Target" %}</th>
+                        <th style="width: 20%">{% trans "Overall Progress" %}</th>
+                        <th style="width: 15%" class="text-center">{% trans "Fulfillment status" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in data_mahasiswa %}
+                    <tr class="mahasiswa-row" data-jenjang="{{ data.jenjang }}" data-status="{{ data.status_overall }}">
+                        <td>
+                            <div class="student-name-cell">{{ data.nama }}</div>
+                            <div class="text-muted small">{{ data.jenjang|default:"-" }}</div>
+                        </td>
+                        <td>
+                            <div class="activity-stack">
+                                {% for kag in data.kegiatan_list %}
+                                <div class="mb-1 d-flex justify-content-between align-items-center">
+                                    <span class="small">{{ kag.nama_kegiatan }}</span>
+                                    <span class="badge bg-light text-dark extra-small" style="font-size: 0.65rem;">{{ kag.sks }} SKS</span>
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="fw-bold">{{ data.total_jam_ditempuh }} <span class="text-muted fw-normal small">h</span></td>
+                        <td class="text-muted">{{ data.total_jam_target }} <span class="small">h</span></td>
+                        <td>
+                            <div class="progress progress-minimal">
+                                <div class="progress-bar {{ data.progress_class }}" 
+                                     role="progressbar" 
+                                     style="width: {{ data.progress_percentage }}%"></div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="extra-small text-muted">{{ data.progress_percentage }}%</span>
+                                <span class="extra-small text-muted">{{ data.sisa_jam }} {% trans "h left" %}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge-premium {% if data.status_overall == 'Memenuhi' %}badge-fulfilled{% else %}badge-pending{% endif %}">
+                                {% if data.status_overall == 'Memenuhi' %}
+                                    <i class="fas fa-check me-1"></i> {% trans "Fulfilled" %}
+                                {% else %}
+                                    <i class="fas fa-hourglass-half me-1"></i> {% trans "In Progress" %}
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <img src="{% static 'img/empty.svg' %}" alt="No data" style="width: 150px; opacity: 0.2">
+                            <p class="mt-3 text-muted">{% trans "No approved students found." %}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<style>
-.card {
-    border-radius: 12px !important;
-    overflow: hidden;
-}
-
-.rounded-3 {
-    border-radius: 12px !important;
-}
-
-.icon-circle {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.table {
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0;
-    width: 100%;
-}
-
-.table th {
-    font-weight: 700;
-    border: 1px solid #dee2e6 !important;
-    white-space: nowrap;
-    vertical-align: middle;
-    padding: 12px 8px !important;
-}
-
-.table td {
-    vertical-align: middle;
-    padding: 12px 8px !important;
-    border: 1px solid #dee2e6 !important;
-    word-wrap: break-word;
-}
-
-/* All columns align center */
-.table td,
-.table th {
-    text-align: center !important;
-}
-
-/* Column widths */
-.table th:nth-child(1) { width: 12%; } /* Student Name */
-.table th:nth-child(2) { width: 18%; } /* Activity */
-.table th:nth-child(3) { width: 10%; } /* Level */
-.table th:nth-child(4) { width: 8%; }  /* Credits */
-.table th:nth-child(5) { width: 10%; } /* Hours/Week */
-.table th:nth-child(6) { width: 12%; } /* Hours/Semester */
-.table th:nth-child(7) { width: 15%; } /* Progress */
-.table th:nth-child(8) { width: 10%; } /* Status */
-
-/* Style for badge */
-.badge {
-    font-weight: 500;
-    padding: 0.35em 0.65em;
-    font-size: 0.85em;
-}
-
-.bg-sukses {
-    background-color: #28a745 !important;
-    color: white !important;
-}
-
-.bg-kurang {
-    background-color: #ff0000ff !important;
-    color: #ffffffff !important;
-}
-
-/* Responsive for table */
-@media (max-width: 768px) {
-    .table-responsive {
-        margin: 0 -1rem;
-        width: calc(100% + 2rem);
-    }
-    
-    .table {
-        min-width: 800px; /* Minimum width for horizontal scroll */
-    }
-    
-    .table th,
-    .table td {
-        padding: 8px 6px !important;
-        font-size: 0.9rem;
-    }
-    
-    .badge {
-        font-size: 0.8em;
-        padding: 0.3em 0.5em;
-    }
-}
-
-/* Hover effect for rows */
-.table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-}
-
-/* Separator row between students */
-.separator-row td {
-    height: 10px !important;
-    background-color: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-}
-
-/* Additional styling for neat table */
-.table-bordered {
-    border: 1px solid #dee2e6;
-}
-
-.table-bordered th,
-.table-bordered td {
-    border: 1px solid #dee2e6;
-}
-
-/* Ensure table has no outer margin */
-.card-body.p-0 {
-    padding: 0 !important;
-}
-
-.table-responsive {
-    border-radius: 0 0 12px 12px;
-    overflow: hidden;
-}
-
-/* Border radius for table corners */
-.table {
-    border-radius: 0 0 12px 12px;
-    overflow: hidden;
-}
-
-/* Specific style for Activity column */
-#statusTable td:nth-child(2) {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-@media (min-width: 1200px) {
-    #statusTable td:nth-child(2) {
-        max-width: 250px;
-        white-space: normal;
-    }
-}
-
-/* Ensure rowspan works correctly */
-.table td[rowspan] {
-    vertical-align: middle !important;
-}
-
-/* Style for first row of student */
-.mahasiswa-row:first-of-type td {
-    border-top: 2px solid #dee2e6 !important;
-}
-
-/* Additional to make rows look like a group */
-.mahasiswa-row td:first-child {
-    font-weight: 600;
-    background-color: #f8f9fa;
-}
-
-/* Remove top border for rows other than first in group */
-.mahasiswa-row:not(:first-of-type) td {
-    border-top: 1px solid #dee2e6 !important;
-}
-
-/* Style for clearer separator */
-.separator-row {
-    background: linear-gradient(90deg, transparent 0%, #e9ecef 50%, transparent 100%);
-}
-
-.separator-row td {
-    height: 4px !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-}
-</style>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
     const searchInput = document.getElementById('searchInput');
     const jenjangFilter = document.getElementById('jenjangFilter');
-    const mahasiswaCounter = document.getElementById('mahasiswaCounter');
-    
-    // Function to count visible students
-    function countVisibleMahasiswa() {
-        const allRows = document.querySelectorAll('#statusTable tbody tr');
-        let visibleMahasiswa = new Set();
-        let currentMahasiswaName = '';
-        let isMahasiswaVisible = false;
-        
-        allRows.forEach(row => {
-            if (row.classList.contains('separator-row')) {
-                // If separator, reset for next student
-                if (isMahasiswaVisible && currentMahasiswaName) {
-                    visibleMahasiswa.add(currentMahasiswaName);
-                }
-                currentMahasiswaName = '';
-                isMahasiswaVisible = false;
-            } else if (row.classList.contains('mahasiswa-row')) {
-                // If student row
-                if (row.style.display !== 'none') {
-                    // Check if this is first row of student (has rowspan in name column)
-                    const namaCell = row.querySelector('td:first-child');
-                    if (namaCell && namaCell.hasAttribute('rowspan')) {
-                        currentMahasiswaName = namaCell.textContent.trim();
-                        isMahasiswaVisible = true;
-                    } else if (currentMahasiswaName) {
-                        // If not first row, use existing name
-                        isMahasiswaVisible = true;
-                    }
-                }
-            }
-        });
-        
-        // Add last student if visible
-        if (isMahasiswaVisible && currentMahasiswaName) {
-            visibleMahasiswa.add(currentMahasiswaName);
-        }
-        
-        return visibleMahasiswa.size;
-    }
-    
-    // Function to update counter
-    function updateCounter() {
-        const totalVisible = countVisibleMahasiswa();
-        mahasiswaCounter.textContent = totalVisible + ' {% trans "students found" %}';
-    }
-    
-    // Function to apply filters
-    function applyFilters() {
-        const searchValue = searchInput.value.toLowerCase();
+    const incompleteToggle = document.getElementById('showOnlyIncomplete');
+    const rows = document.querySelectorAll('.mahasiswa-row');
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
         const jenjangValue = jenjangFilter.value;
-        
-        const rows = document.querySelectorAll('#statusTable tbody tr');
-        let currentMahasiswaRows = [];
-        let showMahasiswa = false;
-        let mahasiswaIndex = 0;
-        let currentJenjang = '';
-        let currentMahasiswaName = '';
-        
+        const onlyIncomplete = incompleteToggle.checked;
+
         rows.forEach(row => {
-            const isSeparator = row.classList.contains('separator-row');
-            const isMahasiswaRow = row.classList.contains('mahasiswa-row');
-            
-            if (isSeparator) {
-                // Process separator: show or hide student group
-                if (showMahasiswa) {
-                    currentMahasiswaRows.forEach(r => r.style.display = 'table-row');
-                    row.style.display = 'table-row';
-                } else {
-                    currentMahasiswaRows.forEach(r => r.style.display = 'none');
-                    row.style.display = 'none';
-                }
-                
-                // Reset for next student
-                currentMahasiswaRows = [];
-                showMahasiswa = false;
-                mahasiswaIndex = 0;
-                currentJenjang = '';
-                currentMahasiswaName = '';
-            } else if (isMahasiswaRow) {
-                currentMahasiswaRows.push(row);
-                
-                // Check if this is first row of student
-                if (mahasiswaIndex === 0) {
-                    // Get student name
-                    const firstCell = row.querySelector('td:first-child');
-                    if (firstCell && firstCell.hasAttribute('rowspan')) {
-                        currentMahasiswaName = firstCell.textContent.trim();
-                    }
-                    
-                    // Get level from data attribute
-                    currentJenjang = row.getAttribute('data-jenjang') || '';
-                    
-                    let matchesSearch = true;
-                    let matchesJenjang = true;
-                    
-                    // Check search filter
-                    if (searchValue) {
-                        // Search in all row text
-                        const rowText = row.textContent.toLowerCase();
-                        matchesSearch = rowText.includes(searchValue);
-                    }
-                    
-                    // Check level filter
-                    if (jenjangValue) {
-                        matchesJenjang = currentJenjang === jenjangValue;
-                    }
-                    
-                    // If meets both filters
-                    showMahasiswa = matchesSearch && matchesJenjang;
-                }
-                
-                mahasiswaIndex++;
+            const name = row.cells[0].textContent.toLowerCase();
+            const activity = row.cells[1].textContent.toLowerCase();
+            const jenjang = row.getAttribute('data-jenjang');
+            const status = row.getAttribute('data-status');
+
+            const matchesSearch = name.includes(searchTerm) || activity.includes(searchTerm);
+            const matchesJenjang = !jenjangValue || jenjang === jenjangValue;
+            const matchesStatus = !onlyIncomplete || status !== 'Memenuhi';
+
+            if (matchesSearch && matchesJenjang && matchesStatus) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
             }
         });
-        
-        // Update counter
-        updateCounter();
     }
-    
-    // Event listeners
-    if (searchInput) {
-        searchInput.addEventListener('keyup', applyFilters);
-    }
-    
-    if (jenjangFilter) {
-        jenjangFilter.addEventListener('change', applyFilters);
-    }
-    
-    // Add checkbox for "Not Fulfilled" filter
-    const filterContainer = document.querySelector('.col-md-4');
-    if (filterContainer) {
-        const incompleteCheckbox = document.createElement('div');
-        incompleteCheckbox.className = 'form-check mt-2';
-        incompleteCheckbox.innerHTML = `
-            <input class="form-check-input" type="checkbox" id="showOnlyIncomplete">
-            <label class="form-check-label small" for="showOnlyIncomplete">
-                {% trans "Show only not fulfilled" %}
-            </label>
-        `;
-        filterContainer.appendChild(incompleteCheckbox);
-        
-        document.getElementById('showOnlyIncomplete').addEventListener('change', function() {
-            const showIncomplete = this.checked;
-            const rows = document.querySelectorAll('#statusTable tbody tr');
-            let currentMahasiswaRows = [];
-            let showMahasiswa = false;
-            let mahasiswaIndex = 0;
-            
-            rows.forEach(row => {
-                const isSeparator = row.classList.contains('separator-row');
-                const isMahasiswaRow = row.classList.contains('mahasiswa-row');
-                
-                if (isSeparator) {
-                    // Process separator
-                    if (showMahasiswa) {
-                        currentMahasiswaRows.forEach(r => r.style.display = 'table-row');
-                        row.style.display = 'table-row';
-                    } else {
-                        currentMahasiswaRows.forEach(r => r.style.display = 'none');
-                        row.style.display = 'none';
-                    }
-                    
-                    currentMahasiswaRows = [];
-                    showMahasiswa = false;
-                    mahasiswaIndex = 0;
-                } else if (isMahasiswaRow) {
-                    currentMahasiswaRows.push(row);
-                    
-                    // Check if this is first row of student
-                    if (mahasiswaIndex === 0) {
-                        const statusBadge = row.querySelector('td:nth-child(8) .badge');
-                        if (statusBadge) {
-                            const statusText = statusBadge.textContent.trim().toLowerCase();
-                            if (showIncomplete) {
-                                showMahasiswa = statusText.includes('{% trans "not fulfilled" %}'.toLowerCase());
-                            } else {
-                                showMahasiswa = true;
-                            }
-                        }
-                    }
-                    
-                    mahasiswaIndex++;
-                }
-            });
-            
-            // Update counter
-            updateCounter();
-        });
-    }
-    
-    // Function export Excel
+
+    searchInput.addEventListener('input', filterTable);
+    jenjangFilter.addEventListener('change', filterTable);
+    incompleteToggle.addEventListener('change', filterTable);
+
     window.exportToExcel = function() {
-        alert("{% trans 'Excel export feature will be implemented' %}");
+        // Logic for excel export or redirect
+        window.location.href = window.location.pathname + '?export=excel';
     };
-    
-    // Function print PDF
-    window.printPDF = function() {
-        window.print();
-    };
-    
-    // Initial setup
-    updateCounter();
 });
 </script>
 {% endblock %}

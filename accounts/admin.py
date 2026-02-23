@@ -7,8 +7,9 @@ from .models import (
     Akun, Mahasiswa, Dosen, Mahasiswa_Dosen,
     Kegiatan_PA, Status_Pemenuhan_SKS,
     Presensi, Durasi, FotoWajah,
-    Pengajuan_Pendaftaran
+    Pengajuan_Pendaftaran, VerificationLog
 )
+
 
 # --- Admin dengan Translation ---
 @admin.register(Jenjang_Pendidikan)
@@ -103,3 +104,18 @@ class PengajuanPendaftaranAdmin(TranslationAdmin):
     search_fields = ('mahasiswa__nim', 'mahasiswa__user__nama_lengkap')
     raw_id_fields = ('mahasiswa',)
     readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(VerificationLog)
+
+class VerificationLogAdmin(admin.ModelAdmin):
+    list_display = ('mahasiswa', 'timestamp', 'status', 'is_liveness_real', 'failure_count', 'show_foto')
+    list_filter = ('status', 'is_liveness_real', 'timestamp')
+    search_fields = ('mahasiswa__nim', 'mahasiswa__user__nama_lengkap')
+    readonly_fields = ('timestamp', 'show_foto')
+    
+    def show_foto(self, obj):
+        if obj.foto:
+            from django.utils.html import format_html
+            return format_html('<img src="{}" width="100" />', obj.foto.url)
+        return "-"
+    show_foto.short_description = _('Verification Photo')

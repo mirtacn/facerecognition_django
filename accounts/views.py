@@ -1,5 +1,3 @@
-# accounts/views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
@@ -19,7 +17,7 @@ from .forms import Step1Form, Step2Form, Step3Form
 from .models import (
     Mahasiswa, FotoWajah, Kegiatan_PA, Jenjang_Pendidikan,
     Tahun_Ajaran, Dosen, Mahasiswa_Dosen, Pengajuan_Pendaftaran,
-    Status_Pemenuhan_SKS, Semester, FotoWajah, Mahasiswa_Dosen, Presensi,Durasi
+    Status_Pemenuhan_SKS, Semester, FotoWajah, Mahasiswa_Dosen, Presensi,Durasi,VerificationLog
 )
 from .forms import FilterRekapPresensiForm
 from django.db.models import Sum, F, Case, When, Value
@@ -500,7 +498,7 @@ def riwayat_presensi(request):
     try:
         mahasiswa = Mahasiswa.objects.get(user=request.user)
         
-        # Ambil semua presensi mahasiswa ini (tanpa filter kegiatan_pa)
+        # Ambil semua presensi mahasiswa ini
         presensi_qs = Presensi.objects.filter(
             mahasiswa=mahasiswa
         ).order_by('-tanggal_presensi', '-jam_checkin')
@@ -538,44 +536,23 @@ def riwayat_presensi(request):
                     durasi_text = "Error"
                     print(f"ERROR hitung durasi: {e}")
             
+            # Debug: Cetak waktu checkout
+            print(f"DEBUG - Presensi {p.id}: Checkout={p.jam_checkout}, Session Status={p.session_status}")
+            
             # Tambahkan ke list
             presensi_list.append({
                 'tanggal': p.tanggal_presensi,
                 'check_in': p.jam_checkin,
                 'check_out': p.jam_checkout,
                 'durasi': durasi_text,
+                'session_status': p.session_status,
                 'foto_checkin': p.foto_checkin.url if p.foto_checkin else None,
                 'foto_checkout': p.foto_checkout.url if p.foto_checkout else None,
             })
         
-        # Hitung total SKS dari kegiatan PA yang diambil
-        total_sks = sum(k.jumlah_sks for k in mahasiswa.kegiatan_pa.all())
-        total_target_jam = sum(k.target_jam for k in mahasiswa.kegiatan_pa.all())
-        
-        # Ambil nama semester
-        semester_nama = mahasiswa.semester.nama_semester if mahasiswa.semester else "-"
-        
-        # Hitung total durasi yang sudah dikerjakan
-        total_durasi = 0
-        for p in presensi_list:
-            if p['durasi'] != '-' and p['durasi'] != 'Error':
-                # Parse durasi teks menjadi jam
-                try:
-                    if 'j' in p['durasi']:
-                        hours = int(p['durasi'].split('j')[0].strip())
-                        total_durasi += hours
-                except:
-                    pass
-        
         context = {
             'presensi_list': presensi_list,
-            'total_sks': total_sks,
-            'total_target_jam': total_target_jam,
-            'total_durasi': total_durasi,
-            'semester_nama': semester_nama,
             'mahasiswa': mahasiswa,
-            'kegiatan_pa_list': mahasiswa.kegiatan_pa.all(),
-            'total_kegiatan': mahasiswa.kegiatan_pa.count(),
         }
         
         return render(request, 'mahasiswa/riwayat_presensi.html', context)
@@ -585,6 +562,8 @@ def riwayat_presensi(request):
         return redirect('profil_mahasiswa')
     except Exception as e:
         print(f"ERROR in riwayat_presensi: {str(e)}")
+        import traceback
+        traceback.print_exc()
         messages.error(request, 'Terjadi kesalahan saat mengambil data presensi')
         return redirect('profil_mahasiswa')
 
@@ -645,76 +624,140 @@ def kamera_presensi_mhs(request):
     
     return render(request, 'admin/kamera_presensi_mhs.html', context)
 
-# Tambahkan fungsi-fungsi ini di accounts/views.py
-
 @csrf_exempt
 @login_required
 def checkin_presensi(request):
+    """
+    API untuk check-in mahasiswa dengan liveness detection + face recognition
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             mahasiswa_id = data.get('mahasiswa_id')
             foto_base64 = data.get('foto')
             
+            # Validasi input
+            if not mahasiswa_id or not foto_base64:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Data tidak lengkap'
+                })
+            
             # Decode base64 image
-            format, imgstr = foto_base64.split(';base64,')
-            ext = format.split('/')[-1]
-            
-            # Buat nama file
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f'checkin_{mahasiswa_id}_{timestamp}.{ext}'
-            
-            # Simpan foto check-in
-            foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
+            try:
+                format, imgstr = foto_base64.split(';base64,')
+                ext = format.split('/')[-1]
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f'checkin_{mahasiswa_id}_{timestamp}.{ext}'
+                foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Gagal decode foto: {str(e)}'
+                })
             
             # Get mahasiswa
             mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
+            today = date.today()
             
-            # Cek apakah sudah ada presensi hari ini yang belum check-out
+            # CEK SESSION AKTIF
             existing_presensi = Presensi.objects.filter(
                 mahasiswa=mahasiswa,
-                tanggal_presensi=date.today(),
+                tanggal_presensi=today,
                 jam_checkout__isnull=True
             ).first()
             
             if existing_presensi:
                 return JsonResponse({
                     'success': False,
-                    'message': 'Mahasiswa belum check-out dari sesi sebelumnya'
+                    'message': 'Anda masih memiliki sesi aktif. Silakan checkout terlebih dahulu.',
+                    'existing_session': {
+                        'id': existing_presensi.id,
+                        'jam_checkin': existing_presensi.jam_checkin.strftime('%H:%M'),
+                        'session_status': existing_presensi.session_status
+                    }
                 })
             
-            # SIMPLIFIKASI: Buat presensi TANPA kegiatan_pa (karena agregat)
-            presensi = Presensi.objects.create(
-                mahasiswa=mahasiswa,
-                kegiatan_pa=None,  # NULL karena sistem agregat
-                tanggal_presensi=date.today(),
-                jam_checkin=datetime.now().time(),
-                foto_checkin=foto_data
-            )
-            
-            # Simpan juga ke FotoWajah untuk dataset
-            FotoWajah.objects.create(
+            # SIMPAN FOTO KE DATASET
+            foto_wajah = FotoWajah.objects.create(
                 mahasiswa=mahasiswa,
                 file_path=foto_data,
                 keterangan=f'Check-in {datetime.now().strftime("%d/%m/%Y %H:%M")}'
             )
             
+            # PERBAIKAN: Gunakan waktu lokal untuk check-in
+            now_utc = timezone.now()
+            now_local = timezone.localtime(now_utc)
+            
+            # BUAT PRESENSI BARU
+            presensi = Presensi.objects.create(
+                mahasiswa=mahasiswa,
+                kegiatan_pa=None,
+                tanggal_presensi=today,
+                jam_checkin=now_local.time(),  # Simpan waktu lokal
+                foto_checkin=foto_data,
+                last_verified_at=now_utc,
+                terakhir_terdeteksi=now_local.time(),
+                failure_count=0,
+                session_status='active'
+            )
+            
+            # BUAT VERIFICATION LOG UNTUK CHECK-IN
+            VerificationLog.objects.create(
+                mahasiswa=mahasiswa,
+                presensi=presensi,
+                timestamp=now_utc,
+                status=True,
+                is_liveness_real=True,
+                failure_count=0,
+                foto=foto_data
+            )
+            
+            # HITUNG DURASI SEMENTARA
+            Durasi.objects.create(
+                presensi=presensi,
+                waktu_durasi=timedelta(seconds=0)
+            )
+            
+            # LOG UNTUK DEBUG
+            print(f"\n=== CHECK-IN BERHASIL ===")
+            print(f"Mahasiswa: {mahasiswa.user.nama_lengkap} ({mahasiswa.nim})")
+            print(f"Presensi ID: {presensi.id}")
+            print(f"Waktu Lokal: {now_local.strftime('%H:%M:%S')}")
+            print(f"Waktu UTC: {now_utc.strftime('%H:%M:%S')}")
+            print(f"Jam Check-in tersimpan: {presensi.jam_checkin}")
+            print(f"==========================\n")
+            
             return JsonResponse({
                 'success': True,
-                'message': 'Check-in berhasil',
+                'message': 'Check-in berhasil! Monitoring akan aktif secara otomatis.',
                 'data': {
                     'presensi_id': presensi.id,
-                    'jam_checkin': presensi.jam_checkin.strftime('%H:%M')
+                    'jam_checkin': presensi.jam_checkin.strftime('%H:%M'),
+                    'session_status': presensi.session_status,
+                    'failure_count': presensi.failure_count,
+                    'last_verified_at': presensi.last_verified_at.isoformat() if presensi.last_verified_at else None
                 }
             })
             
-        except Exception as e:
+        except Mahasiswa.DoesNotExist:
             return JsonResponse({
                 'success': False,
-                'message': f'Error: {str(e)}'
+                'message': 'Mahasiswa tidak ditemukan'
+            })
+        except Exception as e:
+            import traceback
+            print(f"ERROR checkin_presensi: {str(e)}")
+            traceback.print_exc()
+            return JsonResponse({
+                'success': False,
+                'message': f'Terjadi kesalahan: {str(e)}'
             })
     
-    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+    return JsonResponse({
+        'success': False,
+        'message': 'Method tidak diizinkan'
+    })
 
 @login_required
 def debug_presensi_data(request):
@@ -975,6 +1018,474 @@ def detect_face_registration(request):
             })
 
     return JsonResponse({'success': False, 'error': 'Method not allowed'})
+
+@csrf_exempt
+@login_required
+def periodic_verify(request):
+    """
+    API endpoint untuk verifikasi periodik setiap 5 menit.
+    """
+    if request.method != 'POST':
+        return JsonResponse({
+            "success": False, 
+            "message": "Method not allowed"
+        })
+    
+    try:
+        # Parse request body
+        data = json.loads(request.body)
+        frame_base64 = data.get('frame')
+        presensi_id = data.get('presensi_id')
+        
+        if not frame_base64:
+            return JsonResponse({
+                "success": False, 
+                "message": "Frame tidak ditemukan"
+            })
+        
+        # Validasi user adalah mahasiswa
+        if request.user.role != 'mahasiswa':
+            return JsonResponse({
+                "success": False, 
+                "message": "Hanya mahasiswa yang bisa menggunakan fitur ini"
+            })
+        
+        # Ambil data mahasiswa
+        mahasiswa = get_object_or_404(Mahasiswa, user=request.user)
+        today = date.today()
+        
+        # CARI SESSION AKTIF
+        if presensi_id:
+            presensi = get_object_or_404(
+                Presensi, 
+                id=presensi_id,
+                mahasiswa=mahasiswa,
+                tanggal_presensi=today,
+                jam_checkout__isnull=True
+            )
+        else:
+            presensi = Presensi.objects.filter(
+                mahasiswa=mahasiswa,
+                tanggal_presensi=today,
+                jam_checkout__isnull=True,
+                session_status='active'
+            ).order_by('-jam_checkin').first()
+        
+        if not presensi:
+            return JsonResponse({
+                "success": False, 
+                "message": "Tidak ada sesi presensi aktif. Silakan check-in terlebih dahulu.",
+                "session_status": "none"
+            })
+        
+        # UPDATE STATUS SESSION KE 'verifying'
+        presensi.session_status = 'verifying'
+        presensi.save(update_fields=['session_status'])
+        
+        # ==================== LIVENESS DETECTION ====================
+        from liveness_detection import (
+            decode_base64_image, 
+            apply_gamma_correction, 
+            detector, 
+            model, 
+            IMG_SIZE, 
+            SPOOF_THRESHOLD, 
+            GAMMA_VALUE, 
+            init_liveness_detection
+        )
+        import cv2
+        import numpy as np
+        from .face_recognition_utils import verify_face_with_insightface
+        
+        # Pastikan detector dan model sudah diinisialisasi
+        if detector is None or model is None:
+            init_liveness_detection()
+            from liveness_detection import detector as d_init, model as m_init
+            d, m = d_init, m_init
+        else:
+            d, m = detector, model
+        
+        # Decode frame base64
+        frame = decode_base64_image(frame_base64)
+        if frame is None:
+            return JsonResponse({
+                "success": False, 
+                "message": "Gagal decode gambar"
+            })
+        
+        # Apply gamma correction
+        frame_gamma = apply_gamma_correction(frame, GAMMA_VALUE)
+        
+        # Konversi ke RGB untuk face detection
+        rgb = cv2.cvtColor(frame_gamma, cv2.COLOR_BGR2RGB)
+        
+        # Detect faces
+        detections = d.detect_faces(rgb)
+        
+        # Inisialisasi variabel hasil
+        is_real = False
+        verified = False
+        face_box = None
+        face_detected = len(detections) > 0
+        recognition_score = 0
+        nama_mahasiswa = None
+        
+        # Proses deteksi wajah
+        if face_detected:
+            # Cek multiple faces
+            multiple_faces = len(detections) > 1
+            
+            # Ambil deteksi terbaik
+            best_det = max(detections, key=lambda x: x['confidence'])
+            
+            if best_det and best_det['confidence'] > 0.5:
+                x, y, w, h = best_det['box']
+                face_box = {'x': int(x), 'y': int(y), 'w': int(w), 'h': int(h)}
+                
+                # Crop face untuk liveness detection
+                face = frame_gamma[max(0, y):y+h, max(0, x):x+w]
+                
+                if face.size > 0:
+                    # Resize face untuk model liveness
+                    face_resized = cv2.resize(face, (IMG_SIZE, IMG_SIZE))
+                    face_input = face_resized / 255.0
+                    face_input = np.expand_dims(face_input, axis=0)
+                    
+                    # Liveness prediction
+                    spoof_score = float(m.predict(face_input, verbose=0)[0][0])
+                    is_real = spoof_score >= SPOOF_THRESHOLD
+                    
+                    # Face Recognition hanya jika liveness real
+                    if is_real and not multiple_faces:
+                        try:
+                            recognition_result = verify_face_with_insightface(
+                                frame_base64, 
+                                mahasiswa.id, 
+                                face_box=face_box
+                            )
+                            
+                            verified = recognition_result.get('verified', False)
+                            recognition_score = recognition_result.get('recognition_score', 0)
+                            nama_mahasiswa = recognition_result.get('nama_mahasiswa')
+                            
+                        except Exception as e:
+                            print(f"[PERIODIC] Recognition error: {e}")
+                            verified = False
+                            recognition_score = 0
+        
+        # ==================== TENTUKAN HASIL VERIFIKASI ====================
+        verification_success = face_detected and not multiple_faces and is_real and verified
+        
+        # Tentukan pesan berdasarkan kondisi
+        if not face_detected:
+            msg = "Wajah tidak terdeteksi"
+        elif multiple_faces:
+            msg = "Terdeteksi lebih dari satu wajah"
+        elif not is_real:
+            msg = "Spoofing terdeteksi"
+        elif not verified:
+            msg = "Identitas wajah tidak cocok"
+        else:
+            msg = "Verifikasi berhasil"
+        
+        # ==================== SIMPAN FOTO KE DATABASE ====================
+        timestamp_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename_verif = f'verif_{mahasiswa.nim}_{timestamp_str}.jpg'
+        
+        if ';base64,' in frame_base64:
+            imgstr_verif = frame_base64.split(';base64,')[1]
+        else:
+            imgstr_verif = frame_base64
+            
+        foto_data_verif = ContentFile(
+            base64.b64decode(imgstr_verif), 
+            name=filename_verif
+        )
+        
+        # ==================== UPDATE SESSION ====================
+        # PERBAIKAN: Gunakan timezone.now() tapi konversi ke waktu lokal untuk disimpan
+        now_utc = timezone.now()
+        now_local = timezone.localtime(now_utc)  # Konversi ke WIB (Asia/Jakarta)
+        
+        # 1. UPDATE last_verified_at (simpan dalam UTC untuk konsistensi)
+        presensi.last_verified_at = now_utc
+        
+        # 2. UPDATE failure_count
+        if verification_success:
+            presensi.failure_count = 0
+            # Simpan waktu lokal untuk terakhir_terdeteksi
+            presensi.terakhir_terdeteksi = now_local.time()
+        else:
+            presensi.failure_count += 1
+        
+        # 3. UPDATE session_status dan auto checkout
+        auto_checked_out = False
+        checkout_time_str = None
+        
+        if presensi.failure_count >= 2:
+            # PERBAIKAN: Auto checkout - simpan waktu LOKAL
+            presensi.session_status = 'auto_checkout'
+            presensi.jam_checkout = now_local.time()  # Simpan dalam waktu lokal (WIB)
+            presensi.foto_checkout = foto_data_verif
+            
+            # Hitung durasi - pastikan menggunakan waktu yang sama (lokal)
+            checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+            checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
+            
+            if checkout_dt < checkin_dt:
+                checkout_dt += timedelta(days=1)
+            
+            durasi = checkout_dt - checkin_dt
+            
+            # Update Durasi
+            Durasi.objects.update_or_create(
+                presensi=presensi,
+                defaults={'waktu_durasi': durasi}
+            )
+            
+            auto_checked_out = True
+            checkout_time_str = presensi.jam_checkout.strftime('%H:%M:%S')
+            
+            # Debug: Cetak waktu auto checkout
+            print(f"[PERIODIC] AUTO CHECKOUT - ID: {presensi.id}")
+            print(f"[PERIODIC] Tanggal: {presensi.tanggal_presensi}")
+            print(f"[PERIODIC] Check-in (lokal): {presensi.jam_checkin}")
+            print(f"[PERIODIC] Check-out (lokal): {presensi.jam_checkout}")
+            print(f"[PERIODIC] Waktu Server (UTC): {now_utc}")
+            print(f"[PERIODIC] Waktu Lokal (WIB): {now_local}")
+            print(f"[PERIODIC] Durasi: {durasi}")
+        else:
+            presensi.session_status = 'active'
+        
+        # Simpan perubahan
+        update_fields = ['last_verified_at', 'failure_count', 'session_status', 'terakhir_terdeteksi']
+        if auto_checked_out:
+            update_fields.extend(['jam_checkout', 'foto_checkout'])
+        
+        presensi.save(update_fields=update_fields)
+        
+        # ==================== BUAT VERIFICATION LOG ====================
+        VerificationLog.objects.create(
+            mahasiswa=mahasiswa,
+            presensi=presensi,
+            timestamp=now_utc,  # Log tetap simpan dalam UTC
+            status=verification_success,
+            is_liveness_real=is_real,
+            failure_count=presensi.failure_count,
+            foto=foto_data_verif
+        )
+        
+        # ==================== HITUNG NEXT VERIFICATION ====================
+        VERIFICATION_INTERVAL = 5 * 60  # 5 menit
+        next_verification_time = presensi.last_verified_at + timedelta(seconds=VERIFICATION_INTERVAL)
+        time_left = max(0, int((next_verification_time - now_utc).total_seconds()))
+        
+        # ==================== RETURN RESPONSE ====================
+        response_data = {
+            "success": True,
+            "verified": verification_success,
+            "is_real": is_real,
+            "face_detected": face_detected,
+            "multiple_faces": multiple_faces if 'multiple_faces' in locals() else False,
+            "failure_count": presensi.failure_count,
+            "auto_checked_out": auto_checked_out,
+            "session_status": presensi.session_status,
+            "message": msg,
+            "time_left": time_left,
+            "next_verification": next_verification_time.isoformat(),
+            "last_verified_at": presensi.last_verified_at.isoformat(),
+            "presensi_id": presensi.id,
+            "checkout_time": checkout_time_str,
+            "details": {
+                "liveness": "REAL" if is_real else "SPOOF" if face_detected else "NO_FACE",
+                "recognition": "MATCHED" if verification_success else "MISMATCH" if face_detected and is_real else "SKIPPED",
+                "faces": len(detections) if detections is not None else 0,
+                "recognition_score": recognition_score if verification_success else 0
+            }
+        }
+        
+        # Redirect URL
+        if auto_checked_out:
+            response_data["warning"] = "Anda telah di-checkout otomatis karena gagal verifikasi 2 kali berturut-turut"
+            response_data["redirect"] = "/riwayat_presensi/"
+        
+        return JsonResponse(response_data)
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            "success": False, 
+            "message": "Format JSON tidak valid"
+        })
+    except Mahasiswa.DoesNotExist:
+        return JsonResponse({
+            "success": False, 
+            "message": "Data mahasiswa tidak ditemukan"
+        })
+    except Presensi.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "message": "Session presensi tidak ditemukan",
+            "session_status": "not_found"
+        })
+    except Exception as e:
+        import traceback
+        print(f"[periodic_verify Error] {str(e)}")
+        traceback.print_exc()
+        return JsonResponse({
+            "success": False, 
+            "message": f"Terjadi kesalahan: {str(e)}",
+            "auto_checked_out": False
+        })
+
+@login_required
+def get_session_status(request):
+    """
+    API untuk mendapatkan status session monitoring terbaru
+    Dipanggil secara periodik oleh frontend (setiap 30 detik)
+    """
+    try:
+        if request.user.role != 'mahasiswa':
+            return JsonResponse({
+                'success': False,
+                'error': 'Hanya untuk mahasiswa'
+            })
+        
+        mahasiswa = get_object_or_404(Mahasiswa, user=request.user)
+        today = date.today()
+        
+        # Cari session aktif hari ini (belum checkout)
+        active_session = Presensi.objects.filter(
+            mahasiswa=mahasiswa,
+            tanggal_presensi=today,
+            jam_checkout__isnull=True
+        ).order_by('-jam_checkin').first()
+        
+        if not active_session:
+            return JsonResponse({
+                'success': True,
+                'has_active_session': False,
+                'message': 'Tidak ada session aktif'
+            })
+        
+        # Konfigurasi verifikasi
+        VERIFICATION_INTERVAL = 5 * 60  # 5 menit dalam detik
+        
+        # Hitung next verification
+        now = timezone.now()
+        
+        if active_session.last_verified_at:
+            next_verification = active_session.last_verified_at + timedelta(seconds=VERIFICATION_INTERVAL)
+        else:
+            # Belum pernah diverifikasi, hitung dari check-in
+            checkin_datetime = timezone.make_aware(
+                datetime.combine(active_session.tanggal_presensi, active_session.jam_checkin)
+            )
+            next_verification = checkin_datetime + timedelta(seconds=VERIFICATION_INTERVAL)
+        
+        # Hitung sisa waktu - PASTIKAN INI YANG DIKIRIM
+        if next_verification > now:
+            time_left = int((next_verification - now).total_seconds())
+        else:
+            time_left = 0  # Kalau sudah lewat, kirim 0
+        
+        # Hitung durasi session
+        checkin_dt = timezone.make_aware(
+            datetime.combine(active_session.tanggal_presensi, active_session.jam_checkin)
+        )
+        duration_seconds = int((now - checkin_dt).total_seconds())
+        
+        # Siapkan data session
+        session_data = {
+            'id': active_session.id,
+            'checkin_time': active_session.jam_checkin.strftime('%H:%M:%S'),
+            'checkin_datetime': checkin_dt.isoformat(),
+            'duration_seconds': duration_seconds,
+            'time_left': time_left,  # <-- INI YANG PENTING
+            'failure_count': active_session.failure_count,
+            'session_status': active_session.session_status,
+            'last_verified_at': active_session.last_verified_at.isoformat() if active_session.last_verified_at else None,
+            'terakhir_terdeteksi': active_session.terakhir_terdeteksi.strftime('%H:%M:%S') if active_session.terakhir_terdeteksi else None,
+        }
+        
+        # Ambil 5 log terakhir
+        recent_logs = VerificationLog.objects.filter(
+            presensi=active_session
+        ).order_by('-timestamp')[:5]
+
+        logs_data = []
+        for log in recent_logs:
+            wib_time = timezone.localtime(log.timestamp)
+            
+            logs_data.append({
+                'id': log.id,
+                'timestamp': wib_time.isoformat(),
+                'status': log.status,
+                'is_liveness_real': log.is_liveness_real,
+                'failure_count': log.failure_count,
+                'message': 'Verifikasi berhasil' if log.status else 'Verifikasi gagal',
+                'foto_url': log.foto.url if log.foto else None
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'has_active_session': True,
+            'session': session_data,
+            'logs': logs_data,
+            'config': {
+                'verification_interval': VERIFICATION_INTERVAL,
+                'max_failures': 2
+            }
+        })
+        
+    except Mahasiswa.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Mahasiswa tidak ditemukan'
+        })
+    except Exception as e:
+        print(f"Error in get_session_status: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+@login_required
+def get_verification_logs(request):
+    """API untuk mengambil logs verifikasi"""
+    try:
+        presensi_id = request.GET.get('presensi_id')
+        if not presensi_id:
+            return JsonResponse({'success': False, 'error': 'presensi_id required'})
+        
+        # Ambil logs untuk presensi ini
+        logs = VerificationLog.objects.filter(
+            presensi_id=presensi_id
+        ).order_by('-timestamp')[:20]  # Ambil 20 log terakhir
+        
+        log_data = []
+        for log in logs:
+            log_data.append({
+                'id': log.id,
+                'timestamp': log.timestamp.isoformat(),
+                'status': log.status,
+                'is_liveness_real': log.is_liveness_real,
+                'failure_count': log.failure_count,
+                'message': 'Verifikasi berhasil' if log.status else 'Verifikasi gagal',
+                'foto_url': log.foto.url if log.foto else None
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'logs': log_data
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
 
 def calculate_aggregate_progress(mahasiswa):
     """
@@ -2103,8 +2614,91 @@ def calculate_total_duration_all(mahasiswa_id):
 
 @login_required
 def monitor_durasi(request):
-    """View untuk monitor durasi presensi admin"""
-    return render(request, 'mahasiswa/monitor_durasi.html')
+    """View untuk monitor durasi presensi mahasiswa"""
+    is_checked_in = False
+    active_presensi = None
+    
+    if request.user.role == 'mahasiswa':
+        try:
+            mahasiswa = Mahasiswa.objects.get(user=request.user)
+            # Cari presensi hari ini yang belum checkout
+            active_presensi = Presensi.objects.filter(
+                mahasiswa=mahasiswa,
+                tanggal_presensi=date.today(),
+                jam_checkout__isnull=True
+            ).order_by('-jam_checkin').first()
+            
+            is_checked_in = active_presensi is not None
+            
+        except Mahasiswa.DoesNotExist:
+            pass
+            
+    return render(request, 'mahasiswa/monitor_durasi.html', {
+        'is_checked_in': is_checked_in,
+        'active_presensi': active_presensi
+    })
+
+@login_required
+def get_monitoring_status(request):
+    """API untuk mendapatkan status monitoring terbaru dari server"""
+    try:
+        if request.user.role != 'mahasiswa':
+            return JsonResponse({'success': False, 'error': 'Bukan mahasiswa'})
+        
+        mahasiswa = Mahasiswa.objects.get(user=request.user)
+        today = date.today()
+        
+        # Cari presensi aktif
+        active_presensi = Presensi.objects.filter(
+            mahasiswa=mahasiswa,
+            tanggal_presensi=today,
+            jam_checkout__isnull=True
+        ).first()
+        
+        if not active_presensi:
+            return JsonResponse({
+                'success': True,
+                'is_checked_in': False
+            })
+        
+        # Hitung sisa waktu sampai verifikasi berikutnya
+        now = datetime.now()
+        last_verified = active_presensi.last_verified_at or datetime.combine(today, active_presensi.jam_checkin)
+        
+        # Gunakan timezone-aware jika perlu
+        if timezone.is_naive(last_verified):
+            last_verified = timezone.make_aware(last_verified)
+        if timezone.is_naive(now):
+            now = timezone.make_aware(now)
+        
+        seconds_since_last = (now - last_verified).total_seconds()
+        VERIFICATION_INTERVAL = 5 * 60  # 5 menit
+        time_left = max(0, VERIFICATION_INTERVAL - seconds_since_last)
+        
+        # Hitung durasi sejak check-in
+        checkin_dt = datetime.combine(today, active_presensi.jam_checkin)
+        if timezone.is_naive(checkin_dt):
+            checkin_dt = timezone.make_aware(checkin_dt)
+        
+        duration_seconds = (now - checkin_dt).total_seconds()
+        
+        return JsonResponse({
+            'success': True,
+            'is_checked_in': True,
+            'presensi_id': active_presensi.id,
+            'jam_checkin': active_presensi.jam_checkin.strftime('%H:%M:%S'),
+            'tanggal_presensi': active_presensi.tanggal_presensi.isoformat(),
+            'time_left': int(time_left),
+            'failure_count': active_presensi.failure_count,
+            'monitoring_status': active_presensi.monitoring_status,
+            'duration_seconds': int(duration_seconds),
+            'last_verified_at': active_presensi.last_verified_at.isoformat() if active_presensi.last_verified_at else None
+        })
+        
+    except Mahasiswa.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Mahasiswa tidak ditemukan'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 @login_required
 def management_data(request):

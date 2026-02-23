@@ -50,6 +50,9 @@ from accounts.views import (
     get_progress_sks_api,
     detect_liveness_frame,
     detect_face_registration,
+    periodic_verify,
+    get_verification_logs,
+    get_session_status
 )
 
 # =====================================================================
@@ -65,6 +68,7 @@ urlpatterns = [
     path('api/checkout/', checkout_presensi, name='checkout_presensi'),
     path('api/liveness-detect/', detect_liveness_frame, name='detect_liveness_frame'),
     path('api/detect-face-registration/', detect_face_registration, name='detect_face_registration'),
+    path('api/periodic-verify/', periodic_verify, name='periodic_verify'),
     path('api/presensi-today/', get_presensi_today, name='get_presensi_today'),
     path('api/progress-sks/', get_progress_sks_api, name='api_progress_sks'),
     path('api/kegiatan-pa-by-jenjang/<int:jenjang_id>/', get_kegiatan_pa_by_jenjang, name='kegiatan_pa_api'),
@@ -124,6 +128,8 @@ urlpatterns += [
     path('progress_sks/', progress_sks, name='progress_sks'),
     path('logout/', logout_view, name='logout'),
     path('monitor-durasi/', monitor_durasi, name='monitor_durasi'),
+    path('api/get-session-status/', get_session_status, name='get_session_status'),
+    path('api/get-verification-logs/', get_verification_logs, name='get_verification_logs'),
 
     # Root → redirect ke login
     path('', lambda request: redirect('login'), name='home'),

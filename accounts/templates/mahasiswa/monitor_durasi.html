@@ -1,8 +1,999 @@
-{% extends 'base.html' %}
-{% load i18n %}
+{% extends 'base.html' %} 
+{% load i18n %} 
+{% load static %} 
 
-{% block page_title %}{% trans "Duration Monitor" %}{% endblock %}
+{% block title %}{% trans "Presence Duration Monitor" %}{% endblock %} 
+{% block page_title %}{% trans "Presence Duration Monitor" %}{% endblock %} 
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary-blue: #3b82f6;
+    --secondary-blue: #1d4ed8;
+    --success-green: #10b981;
+    --warning-yellow: #f59e0b;
+    --danger-red: #ef4444;
+    --dark-bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .monitor-card {
+    background: var(--card-bg);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.5),
+      0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  }
+
+  .status-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    font-size: 2rem;
+    color: var(--primary-blue);
+    position: relative;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary-blue);
+    border-radius: 50%;
+    animation: pulse-ring 2s infinite;
+    opacity: 0;
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.95);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .status-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+
+  .pill-active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .pill-verifying {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .pill-inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .timer-display {
+    font-family: "Inter", "Segoe UI", monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 4rem;
+    color: var(--text-main);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+    letter-spacing: 2px;
+  }
+
+  .timer-label {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), #818cf8);
+    width: 0%;
+    transition: width 0.5s linear;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .info-card {
+    background: rgba(13, 202, 240, 0.1);
+    border: 1px solid rgba(13, 202, 240, 0.2);
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .log-section {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    padding: 1rem;
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+  }
+
+  .log-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+    align-items: center;
+  }
+
+  .log-item:last-child {
+    border-bottom: none;
+  }
+
+  .log-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .log-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 0.75rem;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+    flex-shrink: 0;
+  }
+
+  .log-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .log-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.2rem;
+    font-size: 0.7rem;
+  }
+
+  .log-status {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .log-text {
+    font-size: 0.85rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .badge-liveness {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+</style>
+{% endblock %} 
 
 {% block content %}
+<div class="monitor-wrapper">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <div class="monitor-card" id="main-card">
+          <p class="text-center text-muted mb-4" id="status-subtitle">
+            {% if is_checked_in %}
+              {% trans "Session active - Monitoring in progress" %}
+            {% else %}
+              {% trans "No active session" %}
+            {% endif %}
+          </p>
 
+          <div class="text-center mb-4">
+            <div id="badge-status" class="status-pill {% if is_checked_in %}pill-active{% else %}pill-inactive{% endif %}">
+              {% if is_checked_in %}
+                <i class="fas fa-circle text-success me-2" style="font-size: 0.5rem;"></i>
+                <span>{% trans "MONITORING ACTIVE" %}</span>
+              {% else %}
+                <i class="fas fa-circle me-2" style="font-size: 0.5rem; color: var(--danger-red);"></i>
+                <span>{% trans "NO ACTIVE SESSION" %}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Timer Display -->
+          <div class="text-center">
+            <div class="timer-display" id="timer-display">
+              {% if is_checked_in %}05:00{% else %}--:--{% endif %}
+            </div>
+            <div class="timer-label">{% trans "Next Verification" %}</div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-container">
+            <div id="progress-bar" class="progress-fill" style="width: {% if is_checked_in %}0{% else %}0{% endif %}%;"></div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">
+                <i class="fas fa-clock me-1"></i> {% trans "Check-in Time" %}
+              </span>
+              <span class="stat-value" id="checkin-time">
+                {% if active_presensi %}
+                  {{ active_presensi.jam_checkin|time:"H:i" }}
+                {% else %}
+                  --:--
+                {% endif %}
+              </span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">
+                <i class="fas fa-hourglass-half me-1"></i> {% trans "Current Duration" %}
+              </span>
+              <span class="stat-value" id="current-duration">00:00:00</span>
+            </div>
+          </div>
+
+          <!-- Info Card -->
+          <div class="alert alert-info bg-info bg-opacity-10 border-info border-opacity-25 text-info mb-4">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fas fa-info-circle fs-4"></i>
+              <div class="small">
+                {% trans "System automatically verifies your presence every 5 minutes. You can navigate to other pages; monitoring continues in background." %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Log Section -->
+          <h6 class="mb-3 fw-semibold">
+            <i class="fas fa-history me-2"></i> {% trans "Verification History" %}
+            {% comment %} <button onclick="toggleDebug()" class="btn btn-xs btn-outline-secondary float-end">Debug</button> {% endcomment %}
+          </h6>
+          <div class="log-section" id="log-list">
+            <div class="text-center text-muted py-4">
+              <i class="fas fa-sync fa-spin me-2"></i>
+              {% trans "Loading verification history..." %}
+            </div>
+          </div>
+
+          <!-- Hidden Data for JavaScript -->
+          {% if active_presensi %}
+          <div id="session-data" 
+               data-presensi-id="{{ active_presensi.id }}"
+               data-checkin-time="{{ active_presensi.jam_checkin|time:'H:i:s' }}"
+               data-tanggal="{{ active_presensi.tanggal_presensi|date:'Y-m-d' }}"
+               style="display: none;">
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 
+
+{% block extra_js %}
+<script>
+// ==================== MONITORING CORE DENGAN LOCALSTORAGE ====================
+(function() {
+    // State
+    let monitoring = {
+        active: false,
+        presensiId: null,
+        checkinTime: null,
+        failureCount: 0,
+        sessionStatus: 'inactive',
+        durationSeconds: 0,
+        nextVerification: null,
+        verificationInterval: 5 * 60 * 1000, // 5 menit
+        timerInterval: null,
+        statusInterval: null,
+        lastLogs: []
+    };
+
+    // ==================== VERIFICATION FUNCTION ====================
+    function performVerification() {
+        if (!monitoring.active || monitoring.sessionStatus !== 'active') {
+            console.log('Cannot verify: session not active');
+            return;
+        }
+        
+        console.log('🔍 Performing verification at', new Date().toLocaleTimeString());
+        
+        // Capture frame from video
+        captureFrame(function(frameBase64) {
+            if (!frameBase64) {
+                console.error('Failed to capture frame');
+                return;
+            }
+            
+            fetch('/api/periodic-verify/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    frame: frameBase64,
+                    presensi_id: monitoring.presensiId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Verification response:', data);
+                
+                if (data.success) {
+                    // Update monitoring state with response data
+                    if (data.presensi_id) {
+                        monitoring.presensiId = data.presensi_id;
+                    }
+                    
+                    monitoring.failureCount = data.failure_count || 0;
+                    monitoring.sessionStatus = data.session_status || 'active';
+                    
+                    // IMPORTANT: Update nextVerification from server
+                    if (data.time_left !== undefined) {
+                        monitoring.nextVerification = new Date(Date.now() + (data.time_left * 1000));
+                        console.log('⏰ Next verification set to:', monitoring.nextVerification.toLocaleTimeString(), 
+                                    '(time_left:', data.time_left, 'seconds)');
+                    } else if (data.next_verification) {
+                        monitoring.nextVerification = new Date(data.next_verification);
+                    }
+                    
+                    // Auto checkout handling
+                    if (data.auto_checked_out) {
+                        monitoring.active = false;
+                        if (data.redirect) {
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 3000);
+                        }
+                    }
+                    
+                    // Update UI
+                    updateBadgeStatus();
+                    updateTimer();
+                    
+                    // Save state
+                    saveStateToStorage();
+                    
+                    // Add to log
+                    addToLog(data);
+                }
+            })
+            .catch(error => {
+                console.error('Verification error:', error);
+            });
+        });
+    }
+
+    // Helper to capture frame from video
+    function captureFrame(callback) {
+        const video = document.getElementById('videoElement');
+        if (!video || video.readyState !== video.HAVE_ENOUGH_DATA) {
+            callback(null);
+            return;
+        }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const frameBase64 = canvas.toDataURL('image/jpeg', 0.8);
+        callback(frameBase64);
+    }
+
+    // Get CSRF token
+    function getCsrfToken() {
+        const name = 'csrftoken';
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const trimmed = cookie.trim();
+            if (trimmed.startsWith(name + '=')) {
+                return decodeURIComponent(trimmed.substring(name.length + 1));
+            }
+        }
+        return '';
+    }
+
+    // ==================== LOCALSTORAGE FUNCTIONS ====================
+    function loadStateFromStorage() {
+        try {
+            const saved = localStorage.getItem('monitoring_state');
+            console.log('Raw localStorage data:', saved);
+            
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                console.log('Parsed localStorage data:', parsed);
+                
+                // Konversi string ke Date objects
+                if (parsed.checkinTime) {
+                    parsed.checkinTime = new Date(parsed.checkinTime);
+                }
+                if (parsed.nextVerification) {
+                    parsed.nextVerification = new Date(parsed.nextVerification);
+                }
+                
+                // Update state
+                monitoring.active = parsed.active || false;
+                monitoring.presensiId = parsed.presensiId || null;
+                monitoring.checkinTime = parsed.checkinTime || null;
+                monitoring.failureCount = parsed.failureCount || 0;
+                monitoring.sessionStatus = parsed.sessionStatus || 'inactive';
+                monitoring.nextVerification = parsed.nextVerification || null;
+                
+                console.log('State loaded from localStorage:', monitoring);
+                
+                // Validasi: kalau nextVerification sudah lewat, set ke default
+                if (monitoring.nextVerification && monitoring.nextVerification < new Date()) {
+                    console.log('Next verification sudah lewat, akan sync dengan server');
+                    monitoring.nextVerification = new Date(Date.now() + monitoring.verificationInterval);
+                }
+                
+                return true;
+            }
+        } catch (e) {
+            console.error('Error loading state:', e);
+        }
+        return false;
+    }
+
+    function saveStateToStorage() {
+        try {
+            const stateToSave = {
+                active: monitoring.active,
+                presensiId: monitoring.presensiId,
+                checkinTime: monitoring.checkinTime ? monitoring.checkinTime.toISOString() : null,
+                failureCount: monitoring.failureCount,
+                sessionStatus: monitoring.sessionStatus,
+                nextVerification: monitoring.nextVerification ? monitoring.nextVerification.toISOString() : null,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('monitoring_state', JSON.stringify(stateToSave));
+            console.log('State saved to localStorage:', stateToSave);
+        } catch (e) {
+            console.error('Error saving state:', e);
+        }
+    }
+
+    function clearStateFromStorage() {
+        localStorage.removeItem('monitoring_state');
+        console.log('State cleared from localStorage');
+    }
+
+    // ==================== INITIALIZATION ====================
+    function initMonitoring() {
+        console.log('DOM Loaded, initializing monitoring...');
+        
+        // Cek dulu apakah ada state tersimpan
+        const hasSavedState = loadStateFromStorage();
+        
+        const sessionData = document.getElementById('session-data');
+        const timerDisplay = document.getElementById('timer-display');
+        const progressBar = document.getElementById('progress-bar');
+        const checkinTimeEl = document.getElementById('checkin-time');
+        const durationEl = document.getElementById('current-duration');
+        
+        console.log('Session data element:', sessionData);
+        console.log('Has saved state:', hasSavedState);
+        
+        if (sessionData) {
+            // Ada session di HTML, prioritaskan ini
+            const presensiId = sessionData.dataset.presensiId;
+            const checkinTime = sessionData.dataset.checkinTime;
+            const tanggal = sessionData.dataset.tanggal;
+            
+            console.log('Active session found in HTML', { presensiId, checkinTime, tanggal });
+            
+            // Update monitoring state
+            monitoring.active = true;
+            monitoring.presensiId = presensiId;
+            monitoring.checkinTime = new Date(`${tanggal}T${checkinTime}`);
+            monitoring.sessionStatus = 'active';
+            
+            // Hanya set nextVerification kalau belum ada atau sudah lewat
+            if (!monitoring.nextVerification || monitoring.nextVerification < new Date()) {
+                monitoring.nextVerification = new Date(Date.now() + monitoring.verificationInterval);
+                console.log('Set new nextVerification:', monitoring.nextVerification);
+            } else {
+                console.log('Using existing nextVerification from storage:', monitoring.nextVerification);
+            }
+            
+            // Update UI immediately
+            if (checkinTimeEl) {
+                checkinTimeEl.textContent = checkinTime.substring(0, 5); // HH:MM format
+            }
+            
+            // Simpan ke localStorage
+            saveStateToStorage();
+            
+            // Start timers
+            startMonitoring();
+            
+            // Load logs
+            if (presensiId) {
+                loadVerificationLogs(presensiId);
+            }
+            
+            // Initial server fetch
+            fetchServerStatus();
+            
+        } else if (hasSavedState && monitoring.active) {
+            // Tidak ada session di HTML, tapi ada state tersimpan
+            console.log('Restoring session from localStorage');
+            
+            // Update UI dengan data dari localStorage
+            if (checkinTimeEl && monitoring.checkinTime) {
+                const hours = monitoring.checkinTime.getHours().toString().padStart(2, '0');
+                const minutes = monitoring.checkinTime.getMinutes().toString().padStart(2, '0');
+                checkinTimeEl.textContent = `${hours}:${minutes}`;
+            }
+            
+            // Update badge status
+            updateBadgeStatus();
+            
+            // Update timer display
+            if (timerDisplay && monitoring.nextVerification) {
+                const now = new Date();
+                let diffSeconds = Math.max(0, Math.floor((monitoring.nextVerification - now) / 1000));
+                diffSeconds = Math.min(300, diffSeconds);
+                const minutes = Math.floor(diffSeconds / 60);
+                const seconds = diffSeconds % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Update duration
+            if (durationEl && monitoring.checkinTime) {
+                const now = new Date();
+                const diffMs = now - monitoring.checkinTime;
+                let seconds = Math.max(0, Math.floor(diffMs / 1000));
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                durationEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            // Start timers
+            startMonitoring();
+            
+            // Load logs dari server
+            if (monitoring.presensiId) {
+                loadVerificationLogs(monitoring.presensiId);
+            }
+            
+            // Fetch server status
+            fetchServerStatus();
+            
+        } else {
+            console.log('No active session');
+            const logList = document.getElementById('log-list');
+            if (logList) {
+                logList.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-info-circle me-2"></i>No active session. Please check-in first.</div>';
+            }
+            
+            // Reset UI
+            if (timerDisplay) timerDisplay.textContent = '--:--';
+            if (progressBar) progressBar.style.width = '0%';
+            if (checkinTimeEl) checkinTimeEl.textContent = '--:--';
+            if (durationEl) durationEl.textContent = '00:00:00';
+        }
+    }
+
+    // ==================== TIMERS ====================
+    function startMonitoring() {
+        console.log('Starting monitoring timers...');
+        
+        // Update UI every second
+        if (monitoring.timerInterval) clearInterval(monitoring.timerInterval);
+        monitoring.timerInterval = setInterval(updateUI, 1000);
+        
+        // Fetch server status every 30 seconds
+        if (monitoring.statusInterval) clearInterval(monitoring.statusInterval);
+        monitoring.statusInterval = setInterval(fetchServerStatus, 30000);
+        
+        // Fetch segera setelah start
+        setTimeout(fetchServerStatus, 1000);
+    }
+
+    function stopMonitoring() {
+        console.log('Stopping monitoring...');
+        monitoring.active = false;
+        if (monitoring.timerInterval) clearInterval(monitoring.timerInterval);
+        if (monitoring.statusInterval) clearInterval(monitoring.statusInterval);
+        
+        // Clear localStorage
+        clearStateFromStorage();
+    }
+
+    // ==================== UI UPDATES ====================
+    function updateUI() {
+        if (!monitoring.active) {
+            const timerDisplay = document.getElementById('timer-display');
+            const progressBar = document.getElementById('progress-bar');
+            if (timerDisplay) timerDisplay.textContent = '--:--';
+            if (progressBar) progressBar.style.width = '0%';
+            return;
+        }
+        
+        updateTimer();
+        updateDuration();
+    }
+
+    function updateTimer() {
+        const timerDisplay = document.getElementById('timer-display');
+        const progressBar = document.getElementById('progress-bar');
+        
+        if (!timerDisplay || !progressBar) return;
+        
+        // Kalau failureCount >= 3, session expired
+        if (monitoring.failureCount >= 3) {
+            timerDisplay.textContent = '--:--';
+            progressBar.style.width = '0%';
+            return;
+        }
+        
+        // Kalau nextVerification null, set default
+        if (!monitoring.nextVerification) {
+            monitoring.nextVerification = new Date(Date.now() + monitoring.verificationInterval);
+            saveStateToStorage();
+        }
+        
+        const now = new Date();
+        
+        // PERBAIKAN: Kalau nextVerification sudah lewat, langsung fetch server
+        if (monitoring.nextVerification <= now && monitoring.active) {
+            console.log('⏰ Timer expired at', now.toLocaleTimeString(), 
+                    'nextVerification was', monitoring.nextVerification.toLocaleTimeString());
+            fetchServerStatus();
+            
+            // Sementara set ke 5 menit lagi sambil menunggu response
+            monitoring.nextVerification = new Date(Date.now() + monitoring.verificationInterval);
+            saveStateToStorage();
+        }
+        
+        let diffSeconds = Math.max(0, Math.floor((monitoring.nextVerification - now) / 1000));
+        
+        // BATASI MAKSIMAL 300 DETIK (5 MENIT)
+        diffSeconds = Math.min(300, diffSeconds);
+        
+        const minutes = Math.floor(diffSeconds / 60);
+        const seconds = diffSeconds % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Update progress bar
+        const totalInterval = 5 * 60;
+        const progress = ((totalInterval - diffSeconds) / totalInterval) * 100;
+        progressBar.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+    }
+
+    function updateDuration() {
+        const durationEl = document.getElementById('current-duration');
+        if (!durationEl) return;
+        
+        // Hitung durasi real-time dari checkinTime
+        if (monitoring.checkinTime && monitoring.active) {
+            const now = new Date();
+            const diffMs = now - monitoring.checkinTime;
+            let seconds = Math.max(0, Math.floor(diffMs / 1000));
+            
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            durationEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        } else {
+            // Fallback ke data dari server
+            let seconds = Math.max(0, monitoring.durationSeconds);
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            durationEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    }
+
+    function updateBadgeStatus() {
+        const badge = document.getElementById('badge-status');
+        const subtitle = document.getElementById('status-subtitle');
+        
+        if (!badge || !subtitle) return;
+        
+        if (monitoring.failureCount >= 3) {
+            badge.className = 'status-pill pill-inactive';
+            badge.innerHTML = '<i class="fas fa-circle me-2" style="font-size: 0.5rem; color: var(--danger-red);"></i><span>SESSION EXPIRED</span>';
+            subtitle.textContent = 'Session terminated after 3 failures';
+        } else if (monitoring.active) {
+            badge.className = 'status-pill pill-active';
+            badge.innerHTML = '<i class="fas fa-circle text-success me-2" style="font-size: 0.5rem;"></i><span>MONITORING ACTIVE</span>';
+            subtitle.textContent = 'Session active - Monitoring in progress';
+        } else {
+            badge.className = 'status-pill pill-inactive';
+            badge.innerHTML = '<i class="fas fa-circle me-2" style="font-size: 0.5rem; color: var(--danger-red);"></i><span>NO ACTIVE SESSION</span>';
+            subtitle.textContent = 'No active session';
+        }
+    }
+
+    // ==================== SERVER COMMUNICATION ====================
+    function fetchServerStatus() {
+    if (!monitoring.active) {
+        console.log('Monitoring not active, skipping fetch');
+        return;
+    }
+    
+    console.log('Fetching server status...');
+    
+    fetch('/api/get-session-status/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server response:', data);
+            
+            if (data.success) {
+                if (data.has_active_session) {
+                    // Update state
+                    monitoring.durationSeconds = data.session.duration_seconds || 0;
+                    monitoring.failureCount = data.session.failure_count || 0;
+                    
+                    // PERBAIKAN UTAMA: Prioritaskan time_left dari server
+                    const now = new Date();
+                    
+                    if (data.session.time_left !== undefined && data.session.time_left > 0) {
+                        // Gunakan time_left langsung dari server
+                        const timeLeftMs = data.session.time_left * 1000;
+                        monitoring.nextVerification = new Date(Date.now() + timeLeftMs);
+                        console.log('✅ Next verification dari time_left:', {
+                            time_left: data.session.time_left,
+                            nextVerification: monitoring.nextVerification.toLocaleTimeString()
+                        });
+                    } 
+                    else if (data.session.last_verified_at) {
+                        const lastVerified = new Date(data.session.last_verified_at);
+                        
+                        // HITUNG MANUAL: last_verified + 5 menit
+                        const calculatedNext = new Date(lastVerified.getTime() + monitoring.verificationInterval);
+                        
+                        // VALIDASI: Kalau calculatedNext sudah lewat, set ke sekarang + 5 menit
+                        if (calculatedNext <= now) {
+                            monitoring.nextVerification = new Date(now.getTime() + monitoring.verificationInterval);
+                            console.log('⚠️ Calculated next sudah lewat, reset ke sekarang + 5 menit');
+                        } else {
+                            monitoring.nextVerification = calculatedNext;
+                        }
+                        
+                        console.log('✅ Next verification dari last_verified:', {
+                            last_verified: lastVerified.toLocaleTimeString(),
+                            calculated: monitoring.nextVerification.toLocaleTimeString()
+                        });
+                    }
+                    else {
+                        // Fallback: sekarang + 5 menit
+                        monitoring.nextVerification = new Date(Date.now() + monitoring.verificationInterval);
+                        console.log('⚠️ Fallback next verification:', monitoring.nextVerification.toLocaleTimeString());
+                    }
+                    
+                    // PASTIKAN nextVerification TIDAK KURANG DARI SEKARANG
+                    if (monitoring.nextVerification <= new Date()) {
+                        monitoring.nextVerification = new Date(Date.now() + monitoring.verificationInterval);
+                        console.log('⚠️ Next verification force reset ke sekarang + 5 menit');
+                    }
+                    
+                    // Simpan state ke localStorage
+                    saveStateToStorage();
+                    
+                    // Update UI
+                    updateUI();
+                    updateBadgeStatus();
+                    
+                    // Update logs
+                    if (data.logs && data.logs.length > 0) {
+                        monitoring.lastLogs = data.logs;
+                        updateLogList(data.logs);
+                    }
+                } else {
+                    console.log('Session ended from server');
+                    monitoring.active = false;
+                    clearStateFromStorage();
+                    updateBadgeStatus();
+                    
+                    const logList = document.getElementById('log-list');
+                    if (logList) {
+                        logList.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-info-circle me-2"></i>Session ended. Please check-in again.</div>';
+                    }
+                    
+                    // Reset UI
+                    const timerDisplay = document.getElementById('timer-display');
+                    const progressBar = document.getElementById('progress-bar');
+                    if (timerDisplay) timerDisplay.textContent = '--:--';
+                    if (progressBar) progressBar.style.width = '0%';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching status:', error.message);
+        });
+    }
+
+    function loadVerificationLogs(presensiId) {
+        console.log('Loading verification logs for presensi ID:', presensiId);
+        
+        fetch(`/api/get-verification-logs/?presensi_id=${presensiId}`, {
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Logs response:', data);
+            
+            if (data.success && data.logs) {
+                monitoring.lastLogs = data.logs;
+                updateLogList(data.logs);
+            } else {
+                const logList = document.getElementById('log-list');
+                if (logList) {
+                    logList.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-clock me-2"></i>Waiting for first verification...</div>';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading logs:', error.message);
+        });
+    }
+
+    function updateLogList(logs) {
+        const logList = document.getElementById('log-list');
+        if (!logList) return;
+        
+        if (!logs || logs.length === 0) {
+            logList.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-clock me-2"></i>Waiting for first verification cycle...</div>';
+            return;
+        }
+        
+        logList.innerHTML = '';
+        
+        logs.forEach(log => {
+            const item = document.createElement('div');
+            item.className = 'log-item';
+            
+            const timestamp = new Date(log.timestamp);
+            const timeStr = timestamp.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const thumbHtml = log.foto_url
+                ? `<img src="${log.foto_url}" class="log-thumb">`
+                : `<div class="log-thumb d-flex align-items-center justify-content-center bg-dark">
+                    <i class="fas fa-camera text-muted" style="font-size: 1rem;"></i>
+                  </div>`;
+            
+            let detailsHtml = '';
+            if (log.is_liveness_real !== undefined) {
+                detailsHtml = `
+                    <div class="d-flex gap-1 mt-1">
+                        <span class="badge-liveness ${log.is_liveness_real ? 'bg-success' : 'bg-danger'} bg-opacity-25 text-${log.is_liveness_real ? 'success' : 'danger'}">
+                            ${log.is_liveness_real ? 'LIVE' : 'SPOOF'}
+                        </span>
+                        <span class="badge-liveness ${log.status ? 'bg-success' : 'bg-danger'} bg-opacity-25 text-${log.status ? 'success' : 'danger'}">
+                            ${log.status ? 'MATCH' : 'MISMATCH'}
+                        </span>
+                    </div>
+                `;
+            }
+            
+            item.innerHTML = `
+                ${thumbHtml}
+                <div class="log-info">
+                    <div class="log-meta">
+                        <span>${timeStr}</span>
+                        <span class="log-status" style="color: ${log.status ? '#34d399' : '#f87171'}">
+                            ${log.status ? '✓ SUCCESS' : '✗ FAILED'}
+                        </span>
+                    </div>
+                    <div class="log-text">${log.message || (log.status ? 'Verification successful' : 'Verification failed')}</div>
+                    ${detailsHtml}
+                </div>
+            `;
+            
+            logList.appendChild(item);
+        });
+    }
+
+    // ==================== CLEANUP ON PAGE UNLOAD ====================
+    function setupBeforeUnload() {
+        window.addEventListener('beforeunload', function() {
+            // Save state before page unload
+            if (monitoring.active) {
+                saveStateToStorage();
+            }
+        });
+    }
+
+    // ==================== START EVERYTHING ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        initMonitoring();
+        setupBeforeUnload();
+    });
+})();
+</script>
 {% endblock %}
