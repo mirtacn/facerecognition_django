@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'django_apscheduler',
 ]
 
 LANGUAGE_CODE = 'id'
@@ -136,7 +137,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 TIME_ZONE = 'Asia/Jakarta'
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -159,3 +160,66 @@ AUTH_USER_MODEL = 'accounts.Akun'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
+
+# ==================== EMAIL CONFIGURATION ====================
+# Gunakan Gmail SMTP untuk kirim email sungguhan
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # <-- UNCOMMENT INI
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mirtachadhirotin@gmail.com'
+EMAIL_HOST_PASSWORD = 'vprskktzxqyffftv'  # App Password baru Anda
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+
+# settings.py
+
+# Cache configuration untuk CAPTCHA
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+
+# Logging configuration untuk scheduler
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'scheduler_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs/scheduler.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'accounts.scheduler': {
+            'handlers': ['scheduler_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Buat folder logs jika belum ada
+import os
+if not os.path.exists(BASE_DIR / 'logs'):
+    os.makedirs(BASE_DIR / 'logs')

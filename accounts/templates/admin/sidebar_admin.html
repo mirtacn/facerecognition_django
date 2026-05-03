@@ -58,10 +58,38 @@
                         </a>
                     </li>
                     <li class="nav-item mb-1">
+                        <a href="{% url 'data_dosen' %}" 
+                        class="nav-link text-white d-flex align-items-center py-2 px-3 rounded {% if request.resolver_match.url_name == 'data_dosen' %}active bg-primary{% else %}hover-bg{% endif %}">
+                            <i class="fas fa-chalkboard-user me-2 fs-6"></i>
+                            <span>{% trans "Lecturer Data" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
                         <a href="{% url 'master_data_wajah' %}" 
                            class="nav-link text-white d-flex align-items-center py-2 px-3 rounded {% if request.resolver_match.url_name == 'master_data_wajah' %}active bg-primary{% else %}hover-bg{% endif %}">
                             <i class="bi bi-camera me-2 fs-6"></i>
                             <span>{% trans "Student Face Master Data" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{% url 'master_jenjang' %}" 
+                        class="nav-link text-white d-flex align-items-center py-2 px-3 rounded {% if request.resolver_match.url_name == 'master_jenjang' %}active bg-primary{% else %}hover-bg{% endif %}">
+                            <i class="fas fa-graduation-cap me-2 fs-6"></i>
+                            <span>{% trans "Education Level Master" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{% url 'master_kelas' %}" 
+                        class="nav-link text-white d-flex align-items-center py-2 px-3 rounded {% if request.resolver_match.url_name == 'master_kelas' %}active bg-primary{% else %}hover-bg{% endif %}">
+                            <i class="fas fa-chalkboard me-2 fs-6"></i>
+                            <span>{% trans "Class Master" %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{% url 'master_prodi' %}" 
+                        class="nav-link text-white d-flex align-items-center py-2 px-3 rounded {% if request.resolver_match.url_name == 'master_prodi' %}active bg-primary{% else %}hover-bg{% endif %}">
+                            <i class="bi bi-journal-text me-2 fs-6"></i>
+                            <span>{% trans "Study Program Master" %}</span>
                         </a>
                     </li>
                     <li class="nav-item mb-1">

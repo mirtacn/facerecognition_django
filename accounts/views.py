@@ -17,12 +17,15 @@ from .forms import Step1Form, Step2Form, Step3Form
 from .models import (
     Mahasiswa, FotoWajah, Kegiatan_PA, Jenjang_Pendidikan,
     Tahun_Ajaran, Dosen, Mahasiswa_Dosen, Pengajuan_Pendaftaran,
-    Status_Pemenuhan_SKS, Semester, FotoWajah, Mahasiswa_Dosen, Presensi,Durasi,VerificationLog
+    Status_Pemenuhan_SKS, Semester, FotoWajah, Mahasiswa_Dosen, Presensi,Durasi,VerificationLog, Dosen, Prodi, Kelas,
 )
+from django.core.cache import cache
+from .captcha_utils import get_or_create_captcha, verify_captcha
 from .forms import FilterRekapPresensiForm
 from django.db.models import Sum, F, Case, When, Value
 from django.db.models.functions import Coalesce
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.utils import translation
 import zipfile
@@ -42,83 +45,203 @@ from openpyxl.utils import get_column_letter
 from datetime import datetime
 import logging
 from liveness_detection import process_frame_liveness, init_liveness_detection, reset_detection_state
+import threading
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.mail import send_mail
+from django.conf import settings
+
+detection_locks = {}
+detection_lock = threading.Lock()
+
 
 def register_wizard(request, step=1):
-    # Gunakan Custom User Model
+    """Wizard registrasi mahasiswa dengan 3 langkah"""
     User = get_user_model()
     
     step1_data = request.session.get('step1_data', {})
     step2_data = request.session.get('step2_data', {})
     form = None
 
-    # ==================== STEP 1: AKUN ====================
-    # ==================== STEP 1: AKUN ====================
+    # ==================== STEP 1: AKUN & IDENTITAS ====================
     if step == 1:
         form = Step1Form(request.POST or None, initial=step1_data)
+        
         if request.method == 'POST' and form.is_valid():
-            # Validasi email dan NIM unik
             email = form.cleaned_data.get('email')
             nim = form.cleaned_data.get('nim')
             
-            # Cek jika email sudah terdaftar
-            if User.objects.filter(email=email).exists():
-                form.add_error('email', 'Email sudah terdaftar. Gunakan email lain.')
-            # PERBAIKAN DI SINI: Cek jika NIM sudah terdaftar melalui User.nrp
-            elif User.objects.filter(nrp=nim).exists():
-                form.add_error('nim', 'NIM sudah terdaftar.')
-            else:
-                # Simpan data ke session
-                request.session['step1_data'] = form.cleaned_data
+            # ========== PERBAIKAN VALIDASI ==========
+            # Cari user dengan email/nim yang sama
+            email_exists = User.objects.filter(email=email).first()
+            nim_exists = User.objects.filter(username=nim).first()  # Pakai username, bukan nrp
+            
+            email_conflict = False
+            nim_conflict = False
+            
+            # Validasi EMAIL
+            if email_exists:
+                if email_exists.status_akun == 'aktif' and email_exists.is_active:
+                    email_conflict = True
+                    form.add_error('email', 'Email sudah terdaftar dan AKTIF. Gunakan email lain.')
+                elif email_exists.status_akun == 'pending':
+                    email_conflict = True
+                    form.add_error('email', f'Email {email} masih dalam proses verifikasi. Silakan tunggu.')
+                else:
+                    # Status ditolak - izinkan daftar ulang
+                    print(f"INFO: Email {email} ditolak, izinkan daftar ulang")
+            
+            # Validasi NIM (username)
+            if nim_exists:
+                if nim_exists.status_akun == 'aktif' and nim_exists.is_active:
+                    nim_conflict = True
+                    form.add_error('nim', 'NIM sudah terdaftar dan AKTIF. Gunakan NIM lain.')
+                elif nim_exists.status_akun == 'pending':
+                    nim_conflict = True
+                    form.add_error('nim', f'NIM {nim} masih dalam proses verifikasi. Silakan tunggu.')
+                else:
+                    # Status ditolak - izinkan daftar ulang
+                    print(f"INFO: NIM {nim} ditolak, izinkan daftar ulang")
+            
+            # Jika tidak ada konflik, lanjutkan
+            if not email_conflict and not nim_conflict:
+                # Simpan data ke session (lanjut step 2)
+                step1_data_save = {
+                    'nama_lengkap': form.cleaned_data.get('nama_lengkap'),
+                    'nim': form.cleaned_data.get('nim'),
+                    'email': form.cleaned_data.get('email'),
+                    'password': form.cleaned_data.get('password'),
+                }
+                
+                # Simpan jenjang
+                jenjang_obj = form.cleaned_data.get('jenjang')
+                if jenjang_obj:
+                    step1_data_save['jenjang_id'] = jenjang_obj.id
+                    step1_data_save['jenjang_nama'] = jenjang_obj.nama_jenjang
+                
+                # Simpan prodi
+                prodi_obj = form.cleaned_data.get('prodi')
+                if prodi_obj:
+                    step1_data_save['prodi_id'] = prodi_obj.id
+                    step1_data_save['prodi_nama'] = prodi_obj.nama_prodi
+                
+                # Simpan kelas
+                kelas_obj = form.cleaned_data.get('kelas')
+                if kelas_obj:
+                    step1_data_save['kelas_id'] = kelas_obj.id
+                    step1_data_save['kelas_nama'] = kelas_obj.nama_kelas
+                
+                request.session['step1_data'] = step1_data_save
                 request.session.pop('step2_data', None)
+                
                 return redirect('register_step', step=2)
         
-        progress = 33  # 33% untuk step 1
+        progress = 33
         return render(request, 'mahasiswa/register_step1.html', {
             'form': form, 
             'step': step, 
             'progress': progress
         })
+    
+    # ==================== STEP 2: AKADEMIK ====================
     # ==================== STEP 2: AKADEMIK ====================
     elif step == 2:
+        # Validasi step1 sudah diisi
         if not step1_data:
             messages.warning(request, 'Silakan lengkapi data identitas terlebih dahulu.')
             return redirect('register_step', step=1)
-
-        # Perbaikan: Konversi ID ke objek untuk form initial
+        
+        # Ambil data dari step1
+        jenjang_id = step1_data.get('jenjang_id')
+        prodi_id = step1_data.get('prodi_id')
+        kelas_id = step1_data.get('kelas_id')
+        
+        jenjang_obj = None
+        prodi_obj = None
+        
+        if jenjang_id:
+            jenjang_obj = Jenjang_Pendidikan.objects.get(id=jenjang_id)
+        
+        if prodi_id:
+            prodi_obj = Prodi.objects.get(id=prodi_id)
+        
+        # === INI YANG DITAMBAHKAN - definisikan initial_data ===
         initial_data = {}
         if step2_data:
-            initial_data = {
-                'jenjang': Jenjang_Pendidikan.objects.filter(id=step2_data.get('jenjang')).first(),
-                'semester': Semester.objects.filter(id=step2_data.get('semester')).first(),
-                'dosen_pembimbing1': Dosen.objects.filter(id=step2_data.get('dosen_pembimbing1')).first(),
-                'dosen_pembimbing2': Dosen.objects.filter(id=step2_data.get('dosen_pembimbing2')).first(),
-                'dosen_pembimbing3': Dosen.objects.filter(id=step2_data.get('dosen_pembimbing3')).first(),
-            }
-
-            if step2_data.get('kegiatan_pa_diambil'):
-                kegiatan_ids = step2_data['kegiatan_pa_diambil']
+            # Ambil data dari session jika ada
+            semester_id = step2_data.get('semester')
+            if semester_id:
+                try:
+                    initial_data['semester'] = Semester.objects.get(id=semester_id)
+                except Semester.DoesNotExist:
+                    pass
+            
+            dosen1_id = step2_data.get('dosen_pembimbing1')
+            if dosen1_id:
+                try:
+                    initial_data['dosen_pembimbing1'] = Dosen.objects.get(id=dosen1_id)
+                except Dosen.DoesNotExist:
+                    pass
+            
+            dosen2_id = step2_data.get('dosen_pembimbing2')
+            if dosen2_id:
+                try:
+                    initial_data['dosen_pembimbing2'] = Dosen.objects.get(id=dosen2_id)
+                except Dosen.DoesNotExist:
+                    pass
+            
+            dosen3_id = step2_data.get('dosen_pembimbing3')
+            if dosen3_id:
+                try:
+                    initial_data['dosen_pembimbing3'] = Dosen.objects.get(id=dosen3_id)
+                except Dosen.DoesNotExist:
+                    pass
+            
+            kegiatan_ids = step2_data.get('kegiatan_pa_diambil', [])
+            if kegiatan_ids:
                 initial_data['kegiatan_pa_diambil'] = Kegiatan_PA.objects.filter(id__in=kegiatan_ids)
-
-        form = Step2Form(request.POST or None, initial=initial_data)
+        # === SAMPAI SINI ===
+        
+        # Buat form dengan jenjang_obj dan initial_data
+        form = Step2Form(request.POST or None, initial=initial_data, jenjang_obj=jenjang_obj)
 
         if request.method == 'POST' and form.is_valid():
             data = form.cleaned_data
+            
+            # Ambil semester untuk mendapatkan namanya
+            semester_obj = data.get('semester')
+            
+            # Ambil daftar kegiatan PA untuk summary
+            kegiatan_list = data.get('kegiatan_pa_diambil', [])
+            kegiatan_nama_list = [k.nama_kegiatan for k in kegiatan_list]
+            
             save_data = {
-                'jenjang': data['jenjang'].id if data['jenjang'] else None,
-                'semester': data['semester'].id if data['semester'] else None,
+                'jenjang_id': jenjang_id,
+                'jenjang_nama': jenjang_obj.nama_jenjang if jenjang_obj else None,
+                'prodi_id': prodi_id,
+                'prodi_nama': step1_data.get('prodi_nama'),
+                'kelas_id': kelas_id,
+                'kelas_nama': step1_data.get('kelas_nama'),
+                'semester': semester_obj.id if semester_obj else None,
+                'semester_nama': semester_obj.nama_semester if semester_obj else None,
+                'semester_nomor': semester_obj.nomor_semester if semester_obj else None,
                 'dosen_pembimbing1': data['dosen_pembimbing1'].id if data['dosen_pembimbing1'] else None,
                 'dosen_pembimbing2': data['dosen_pembimbing2'].id if data['dosen_pembimbing2'] else None,
                 'dosen_pembimbing3': data['dosen_pembimbing3'].id if data['dosen_pembimbing3'] else None,
-                'kegiatan_pa_diambil': [k.id for k in data['kegiatan_pa_diambil']]
+                'kegiatan_pa_diambil': [k.id for k in kegiatan_list],
+                'kegiatan_pa_nama': kegiatan_nama_list,
             }
             request.session['step2_data'] = save_data
             return redirect('register_step', step=3)
         
-        progress = 67  # 67% untuk step 2
+        progress = 67
         return render(request, 'mahasiswa/register_step2.html', {
-            'form': form, 
-            'step': step, 
-            'progress': progress
+            'form': form,
+            'step': step,
+            'progress': progress,
+            'jenjang_obj': jenjang_obj,
+            'prodi_obj': prodi_obj,
+            'dosen_list': Dosen.objects.all().order_by('nama_dosen'),  
         })
 
     # ==================== STEP 3: FOTO & FINALISASI ====================
@@ -127,217 +250,314 @@ def register_wizard(request, step=1):
             messages.warning(request, "Sesi kadaluarsa. Ulangi dari awal.")
             return redirect('register_step', step=1)
 
-        form = Step3Form(request.POST or None, request.FILES or None)
-
+        # PERBAIKAN: Handle POST request untuk submit
         if request.method == 'POST':
-            # Debug: print data yang diterima
-            print(f"DEBUG: POST data diterima")
-            print(f"DEBUG: Files diterima: {request.FILES.getlist('file_path')}")
-            
-            uploaded_files = request.FILES.getlist('file_path')
-            
-            # Validasi minimal 10 file
-            if len(uploaded_files) < 10:
-                messages.error(request, f"Minimal 10 foto wajah diperlukan. Anda hanya mengupload {len(uploaded_files)} foto.")
-            else:
-                # Validasi setiap file
-                valid_files = []
-                invalid_files = []
-                
-                for file in uploaded_files:
-                    # Validasi ukuran file (max 5MB) dan tipe file
-                    if file.size > 5 * 1024 * 1024:
-                        invalid_files.append(f"{file.name} - Ukuran terlalu besar (max 5MB)")
-                    elif not file.name.lower().endswith(('.jpg', '.jpeg', '.png')):
-                        invalid_files.append(f"{file.name} - Format tidak didukung (harus .jpg, .jpeg, atau .png)")
-                    else:
-                        valid_files.append(file)
-
-                print(f"DEBUG: Valid files: {len(valid_files)}, Invalid files: {len(invalid_files)}")
-                
-                if len(valid_files) < 10:
-                    messages.error(request, f"Hanya {len(valid_files)} foto yang valid. Minimal 10 foto diperlukan.")
-                    if invalid_files:
-                        messages.warning(request, "File tidak valid: " + ", ".join(invalid_files[:3]))
-                else:
-                    try:
-                        with transaction.atomic():
-                            # 1. BUAT USER (AKUN)
-                            nim = step1_data['nim']
-                            
-                            # Periksa lagi apakah user sudah ada (safety check)
-                            User = get_user_model()
-                            if User.objects.filter(username=nim).exists():
-                                messages.error(request, f"NIM {nim} sudah terdaftar!")
-                                return redirect('register_step', step=3)
-                            
-                            if User.objects.filter(email=step1_data['email']).exists():
-                                messages.error(request, f"Email {step1_data['email']} sudah terdaftar!")
-                                return redirect('register_step', step=3)
-                            
-                            user = User.objects.create_user(
-                                username=nim,
-                                email=step1_data['email'],
-                                password=step1_data['password'],
-                                nama_lengkap=step1_data['nama_lengkap'],
-                                nrp=nim,
-                                role='mahasiswa',
-                                status_akun='pending',
-                                is_active=False  # Nonaktif sampai admin approve
-                            )
-                            print(f"DEBUG: User created: {user.username}")
-
-                            # 2. AMBIL DATA FK
-                            jenjang = Jenjang_Pendidikan.objects.get(id=step2_data['jenjang'])
-                            semester = Semester.objects.get(id=step2_data['semester'])
-
-                            # 3. BUAT MAHASISWA
-                            mhs = Mahasiswa.objects.create(
-                                user=user,
-                                nim=nim,
-                                jenjang_pendidikan=jenjang,
-                                semester=semester,
-                                kelas=step1_data['kelas'],
-                                angkatan=step1_data['angkatan'],
-                                jurusan=step1_data.get('jurusan', ''),
-                                sks_total_tempuh=0
-                            )
-                            print(f"DEBUG: Mahasiswa created: {mhs.nim}")
-
-                            # 4. SIMPAN DOSEN PEMBIMBING
-                            dosen_ids = [
-                                (step2_data['dosen_pembimbing1'], 'pembimbing1'),
-                                (step2_data['dosen_pembimbing2'], 'pembimbing2'),
-                                (step2_data['dosen_pembimbing3'], 'pembimbing3') if step2_data.get('dosen_pembimbing3') else None
-                            ]
-                            
-                            for d_data in dosen_ids:
-                                if d_data and d_data[0]:  # Jika ada data dan id dosen tidak None
-                                    d_id, tipe = d_data
-                                    try:
-                                        d_obj = Dosen.objects.get(id=d_id)
-                                        Mahasiswa_Dosen.objects.create(
-                                            mahasiswa=mhs, 
-                                            dosen=d_obj, 
-                                            tipe_pembimbing=tipe
-                                        )
-                                        print(f"DEBUG: Dosen {tipe} added: {d_obj.nama_dosen}")
-                                    except Dosen.DoesNotExist:
-                                        print(f"WARNING: Dosen dengan id {d_id} tidak ditemukan")
-
-                            # 5. SIMPAN KEGIATAN PA
-                            kp_ids = step2_data.get('kegiatan_pa_diambil', [])
-                            if kp_ids:
-                                try:
-                                    kegiatan_objects = Kegiatan_PA.objects.filter(id__in=kp_ids)
-                                    mhs.kegiatan_pa.set(kegiatan_objects)
-                                    print(f"DEBUG: {kegiatan_objects.count()} kegiatan PA ditambahkan")
-                                    
-                                    for kp in kegiatan_objects:
-                                        Status_Pemenuhan_SKS.objects.create(
-                                            mahasiswa=mhs,
-                                            kegiatan_pa=kp,
-                                            jam_target=kp.target_jam,
-                                            jumlah_sks=kp.jumlah_sks
-                                        )
-                                except Exception as e:
-                                    print(f"ERROR creating kegiatan PA: {e}")
-
-                            # 6. BUAT PENGAJUAN PENDAFTARAN
-                            Pengajuan_Pendaftaran.objects.create(
-                                mahasiswa=mhs, 
-                                status_pengajuan='pending'
-                            )
-                            print(f"DEBUG: Pengajuan pendaftaran created")
-
-                            # 7. SIMPAN SEMUA FOTO
-                            foto_count = 0
-                            for i, file_gambar in enumerate(valid_files):
-                                FotoWajah.objects.create(
-                                    mahasiswa=mhs,
-                                    file_path=file_gambar,
-                                    keterangan=f"Foto registrasi ke-{i+1}"
-                                )
-                                foto_count += 1
-                            
-                            print(f"DEBUG: {foto_count} foto berhasil disimpan")
-
-                            # 8. SIMPAN EMAIL UNTUK HALAMAN PERSETUJUAN
-                            request.session['registrasi_email'] = step1_data['email']
-                            request.session['registrasi_nama'] = step1_data['nama_lengkap']
-                            
-                            # 9. HAPUS SESSION DATA REGISTRASI
-                            request.session.pop('step1_data', None)
-                            request.session.pop('step2_data', None)
-                            
-                            # 10. TAMPILKAN SUKSES DAN REDIRECT
-                            messages.success(request, "Pendaftaran berhasil! Data Anda sedang menunggu persetujuan admin.")
-                            return redirect('registrasi_complete')
-
-                    except Exception as e:
-                        print(f"ERROR SAVE: {e}")
-                        import traceback
-                        traceback.print_exc()  # Print traceback untuk debugging
-                        messages.error(request, f"Gagal menyimpan: {str(e)}")
-
-        progress = 100 
+            # Panggil fungsi submit_registration
+            return submit_registration(request)
+        
+        form = Step3Form()
+        progress = 100
         
         return render(request, 'mahasiswa/register_step3.html', {
             'form': form, 
             'step': step, 
-            'progress': progress, 
-            'uploaded_files': []
+            'progress': progress,
         })
+        
+@csrf_exempt
+def submit_registration(request):
+    print("="*50)
+    print("SUBMIT REGISTRATION CALLED")
+    print(f"Method: {request.method}")
+    print(f"FILES keys: {request.FILES.keys()}")
+    print(f"POST keys: {request.POST.keys()}")
+    print("="*50)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'})
+    
+    User = get_user_model()
+    
+    try:
+        # Ambil data dari session
+        step1_data = request.session.get('step1_data', {})
+        step2_data = request.session.get('step2_data', {})
+        
+        if not step1_data or not step2_data:
+            messages.error(request, 'Session expired. Please start over.')
+            return redirect('register_step', step=1)
+        
+        # File
+        face_photos = request.FILES.getlist('foto_wajah')
+        id_card_photo = request.FILES.get('foto_kartu_identitas')
+        
+        if len(face_photos) < 10:
+            messages.error(request, f'Minimal 10 foto wajah diperlukan. Anda hanya upload {len(face_photos)}.')
+            return redirect('register_step', step=3)
+        
+        if not id_card_photo:
+            messages.error(request, 'Foto kartu identitas wajib diupload.')
+            return redirect('register_step', step=3)
+        
+        # Validasi file
+        valid_face_files = []
+        for file in face_photos:
+            if file.size > 5 * 1024 * 1024:
+                messages.error(request, f'File {file.name} terlalu besar')
+                return redirect('register_step', step=3)
+            if not file.name.lower().endswith(('.jpg', '.jpeg', '.png')):
+                messages.error(request, f'Format {file.name} tidak didukung')
+                return redirect('register_step', step=3)
+            valid_face_files.append(file)
+        
+        nim = step1_data.get('nim')
+        email = step1_data.get('email')
+        
+        # ================= CEK EXISTING =================
+        existing_user = User.objects.filter(username=nim).first()
+        
+        if existing_user:
+            if existing_user.status_akun == 'pending':
+                messages.error(request, f'NIM {nim} masih dalam proses verifikasi.')
+                return redirect('register_step', step=1)
+            elif existing_user.status_akun == 'aktif' and existing_user.is_active:
+                messages.error(request, f'NIM {nim} sudah terdaftar dan aktif.')
+                return redirect('register_step', step=1)
+        
+        existing_email = User.objects.filter(email=email).first()
+        if existing_email and existing_email != existing_user:
+            if existing_email.status_akun == 'pending':
+                messages.error(request, f'Email {email} masih dalam proses verifikasi.')
+                return redirect('register_step', step=1)
+            elif existing_email.status_akun == 'aktif' and existing_email.is_active:
+                messages.error(request, f'Email {email} sudah terdaftar dan aktif.')
+                return redirect('register_step', step=1)
+        
+        # ================= TRANSACTION =================
+        with transaction.atomic():
+
+            # ===== HAPUS USER LAMA (DITOLAK) =====
+            if existing_user and existing_user.status_akun == 'ditolak':
+                print(f"DELETE user lama: {nim}")
+                
+                try:
+                    old_mahasiswa = Mahasiswa.objects.get(user=existing_user)
+
+                    old_mahasiswa.foto_wajah.all().delete()
+
+                    if hasattr(old_mahasiswa, 'pengajuan_pendaftaran'):
+                        old_mahasiswa.pengajuan_pendaftaran.delete()
+
+                    old_mahasiswa.delete()
+
+                except Mahasiswa.DoesNotExist:
+                    pass
+
+                existing_user.delete()
+                existing_user = None  # 🔥 penting
+
+            # ===== HAPUS EMAIL LAMA JIKA DITOLAK =====
+            if existing_email and existing_email.status_akun == 'ditolak':
+                print(f"DELETE email lama: {email}")
+                
+                try:
+                    old_mahasiswa = Mahasiswa.objects.get(user=existing_email)
+
+                    old_mahasiswa.foto_wajah.all().delete()
+
+                    if hasattr(old_mahasiswa, 'pengajuan_pendaftaran'):
+                        old_mahasiswa.pengajuan_pendaftaran.delete()
+
+                    old_mahasiswa.delete()
+
+                except Mahasiswa.DoesNotExist:
+                    pass
+
+                existing_email.delete()
+
+            # ===== SAFETY NET (ANTI NYANGKUT) =====
+            User.objects.filter(username=nim).delete()
+
+            # ===== CREATE USER BARU =====
+            user = User.objects.create_user(
+                username=nim,
+                email=email,
+                password=step1_data.get('password'),
+                nama_lengkap=step1_data.get('nama_lengkap'),
+                nrp=nim,
+                role='mahasiswa',
+                status_akun='pending',
+                is_active=False
+            )
+
+            # ===== FK =====
+            jenjang = Jenjang_Pendidikan.objects.filter(id=step2_data.get('jenjang_id')).first()
+            prodi_obj = Prodi.objects.filter(id=step2_data.get('prodi_id')).first()
+            semester = Semester.objects.filter(id=step2_data.get('semester')).first()
+            kelas_obj = Kelas.objects.filter(id=step2_data.get('kelas_id')).first()
+
+            # ===== MAHASISWA =====
+            mhs = Mahasiswa.objects.create(
+                user=user,
+                nim=nim,
+                jenjang_pendidikan=jenjang,
+                prodi=prodi_obj,
+                semester=semester,
+                kelas=kelas_obj,
+                jurusan=step2_data.get('prodi_nama', ''),
+                sks_total_tempuh=0,
+                foto_ktm=id_card_photo
+            )
+
+            # ===== DOSEN =====
+            dosen_ids = [
+                (step2_data.get('dosen_pembimbing1'), 'pembimbing1'),
+                (step2_data.get('dosen_pembimbing2'), 'pembimbing2'),
+                (step2_data.get('dosen_pembimbing3'), 'pembimbing3'),
+            ]
+
+            for dosen_id, tipe in dosen_ids:
+                if dosen_id:
+                    d_obj = Dosen.objects.filter(id=dosen_id).first()
+                    if d_obj:
+                        Mahasiswa_Dosen.objects.create(
+                            mahasiswa=mhs,
+                            dosen=d_obj,
+                            tipe_pembimbing=tipe
+                        )
+
+            # ===== KEGIATAN PA =====
+            kp_ids = step2_data.get('kegiatan_pa_diambil', [])
+            if kp_ids:
+                kegiatan_objects = Kegiatan_PA.objects.filter(id__in=kp_ids)
+                mhs.kegiatan_pa.set(kegiatan_objects)
+
+                for kp in kegiatan_objects:
+                    Status_Pemenuhan_SKS.objects.create(
+                        mahasiswa=mhs,
+                        kegiatan_pa=kp,
+                        jam_target=kp.target_jam,
+                        jumlah_sks=kp.jumlah_sks
+                    )
+
+            # ===== FOTO WAJAH =====
+            for i, file_gambar in enumerate(valid_face_files):
+                FotoWajah.objects.create(
+                    mahasiswa=mhs,
+                    file_path=file_gambar,
+                    keterangan=f"Foto registrasi ke-{i+1}"
+                )
+
+            # ===== PENGAJUAN =====
+            Pengajuan_Pendaftaran.objects.create(
+                mahasiswa=mhs,
+                status_pengajuan='pending'
+            )
+
+            # ===== SESSION =====
+            request.session['registrasi_email'] = email
+            request.session['registrasi_nama'] = step1_data.get('nama_lengkap')
+
+            request.session.pop('step1_data', None)
+            request.session.pop('step2_data', None)
+
+            messages.success(request, 'Pendaftaran berhasil! Menunggu approval admin.')
+            return redirect('registrasi_complete')
+
+    except Exception as e:
+        print(f"ERROR submit_registration: {e}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f'Terjadi kesalahan: {str(e)}')
+        return redirect('register_step', step=3)
+    
+def get_registration_summary(request):
+    """API untuk mendapatkan ringkasan data registrasi"""
+    try:
+        step1_data = request.session.get('step1_data', {})
+        step2_data = request.session.get('step2_data', {})
+        
+        return JsonResponse({
+            'success': True,
+            'step1': {
+                'nama_lengkap': step1_data.get('nama_lengkap', ''),
+                'nim': step1_data.get('nim', ''),
+                'email': step1_data.get('email', ''),
+                'kelas_nama': step1_data.get('kelas_nama', ''),
+            },
+            'step2': {
+                'prodi_nama': step2_data.get('prodi_nama', ''),
+                'jenjang_nama': step2_data.get('jenjang_nama', ''),
+                'semester_nama': step2_data.get('semester_nama', ''),
+                'kegiatan_pa_list': ', '.join(step2_data.get('kegiatan_pa_nama', [])),
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 def login_view(request):
+    # HAPUS CAPTCHA LAMA DARI SESSION (hanya untuk GET request pertama)
+    if request.method == 'GET':
+        if request.session.session_key:
+            cache_key = f'captcha_{request.session.session_key}'
+            cache.delete(cache_key)
+    
+    # Generate CAPTCHA untuk session
+    if not request.session.session_key:
+        request.session.create()
+    
     if request.method == 'POST':
-        u = request.POST.get("username")
-        p = request.POST.get("password")
-        user = authenticate(request, username=u, password=p)
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        captcha_input = request.POST.get("captcha_input", "")
+        
+        # VALIDASI CAPTCHA (TIDAK menghapus cache)
+        is_captcha_valid = verify_captcha(request.session.session_key, captcha_input)
+        
+        if not is_captcha_valid:
+            messages.error(request, 'CAPTCHA salah. Silakan coba lagi.')
+            # JANGAN hapus CAPTCHA, biarkan user coba lagi dengan CAPTCHA yang sama
+            return redirect('login')
+        
+        # Autentikasi user
+        user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            # Cek jika status akun masih pending
+            # Cek status akun pending
             if getattr(user, 'status_akun', '') == 'pending':
                 messages.warning(request, 'Akun Anda masih menunggu verifikasi admin.')
+                # CAPTCHA valid tapi akun pending - HAPUS CAPTCHA (sudah terpakai)
+                cache_key = f'captcha_{request.session.session_key}'
+                cache.delete(cache_key)
                 return redirect('login')
             
+            # LOGIN BERHASIL - HAPUS CAPTCHA
+            cache_key = f'captcha_{request.session.session_key}'
+            cache.delete(cache_key)
+            
+            # Login user
             login(request, user)
+            
             # Redirect berdasarkan role
-            if getattr(user, 'role', '') == 'mahasiswa': 
+            if getattr(user, 'role', '') == 'mahasiswa':
                 return redirect('profil_mahasiswa')
-            elif getattr(user, 'role', '') == 'admin' or user.is_superuser: 
-                # PERBAIKAN DI SINI: Redirect ke admin_dashboard bukan kamera_presensi_mhs
+            elif getattr(user, 'role', '') == 'admin' or user.is_superuser:
                 return redirect('admin_dashboard')
-            else: 
+            else:
                 return redirect('login')
         else:
+            # AUTHENTICATION GAGAL - JANGAN HAPUS CAPTCHA
             messages.error(request, 'Login Gagal. Cek kembali username dan password.')
+            # Biarkan CAPTCHA tetap ada untuk percobaan berikutnya
+            return redirect('login')
     
-    return render(request, 'login.html')
-    if request.method == 'POST':        
-        u = request.POST.get("username")    
-        p = request.POST.get("password")    
-        user = authenticate(request, username=u, password=p)
-        
-        if user is not None:
-            # Cek jika status akun masih pending
-            if getattr(user, 'status_akun', '') == 'pending':
-                messages.warning(request, 'Akun Anda masih menunggu verifikasi admin.')
-                return redirect('login')
-            
-            login(request, user)
-            # Redirect berdasarkan role
-            if getattr(user, 'role', '') == 'mahasiswa': 
-                return redirect('profil_mahasiswa')
-            elif getattr(user, 'role', '') == 'admin' or user.is_superuser: 
-                return redirect('kamera_presensi_mhs')
-            else: 
-                return redirect('login')
-        else:
-            messages.error(request, 'Login Gagal. Cek kembali username dan password.')
+    # GET request - buat CAPTCHA baru (force refresh)
+    captcha_data = get_or_create_captcha(request.session.session_key, force_refresh=True)
     
-    return render(request, 'login.html')    
-
+    return render(request, 'login.html', {
+        'captcha_image': captcha_data['image']
+    })
+    
 def registrasi_complete(request):
     """Halaman konfirmasi setelah registrasi selesai"""
     # Ambil email dari session
@@ -348,7 +568,6 @@ def registrasi_complete(request):
 
     return render(request, 'mahasiswa/persetujuandaftar.html', {'user_email': email})
 
-# GANTI fungsi edit_profil di views.py dengan ini:
 @login_required
 def edit_profil(request, nim):
     if request.method == 'POST':
@@ -360,6 +579,9 @@ def edit_profil(request, nim):
             user = request.user
             mahasiswa = Mahasiswa.objects.get(user=user)
             
+            # Simpan kegiatan PA lama sebelum update
+            old_kegiatan_ids = set(mahasiswa.kegiatan_pa.values_list('id', flat=True))
+            
             # Update user data
             user.nama_lengkap = request.POST.get('nama')
             user.email = request.POST.get('email')
@@ -368,28 +590,34 @@ def edit_profil(request, nim):
             password = request.POST.get('password')
             confirm_password = request.POST.get('confirm_password')
             
-            if password and confirm_password:
-                if password == confirm_password:
-                    user.set_password(password)
-                else:
+            if password:
+                if len(password) < 6:
+                    return JsonResponse({'success': False, 'error': 'Password minimal 6 karakter'})
+                if password != confirm_password:
                     return JsonResponse({'success': False, 'error': 'Password tidak sama'})
+                user.set_password(password)
             
             user.save()
             
-            # Update mahasiswa data
-            mahasiswa.kelas = request.POST.get('kelas')
-            mahasiswa.angkatan = request.POST.get('angkatan') 
+            # Update kelas
+            kelas_id = request.POST.get('kelas')
+            if kelas_id:
+                try:
+                    kelas_obj = Kelas.objects.get(id=kelas_id)
+                    mahasiswa.kelas = kelas_obj
+                except Kelas.DoesNotExist:
+                    return JsonResponse({'success': False, 'error': 'Kelas tidak valid'})
             
-            # PERBAIKAN 1: Update semester dengan benar (cari instance Semester)
+            # Update semester
             semester_id = request.POST.get('semester')
             if semester_id:
                 try:
                     semester_obj = Semester.objects.get(id=semester_id)
-                    mahasiswa.semester = semester_obj  # Assign instance, bukan string
+                    mahasiswa.semester = semester_obj
                 except Semester.DoesNotExist:
                     return JsonResponse({'success': False, 'error': 'Semester tidak valid'})
             
-            # Update jenjang jika diubah
+            # Update jenjang
             jenjang_id = request.POST.get('jenjang')
             if jenjang_id:
                 try:
@@ -405,27 +633,93 @@ def edit_profil(request, nim):
             if kegiatan_pa_selected:
                 try:
                     kegiatan_ids = json.loads(kegiatan_pa_selected)
+                    new_kegiatan_ids = set(kegiatan_ids)
                     kegiatan_objects = Kegiatan_PA.objects.filter(id__in=kegiatan_ids)
-                    mahasiswa.kegiatan_pa.set(kegiatan_objects)
                     
-                    # Update atau buat Status_Pemenuhan_SKS untuk setiap kegiatan
-                    for kegiatan in kegiatan_objects:
-                        Status_Pemenuhan_SKS.objects.update_or_create(
-                            mahasiswa=mahasiswa,
-                            kegiatan_pa=kegiatan,
-                            defaults={
-                                'jam_target': kegiatan.target_jam,
-                                'jumlah_sks': kegiatan.jumlah_sks
-                            }
-                        )
-                except json.JSONDecodeError:
-                    pass
+                    # Validasi minimal 1 kegiatan
+                    if len(kegiatan_ids) == 0:
+                        return JsonResponse({'success': False, 'error': 'Minimal pilih 1 kegiatan PA'})
+                    
+                    # CEK APAKAH KEGIATAN PA BERUBAH
+                    kegiatan_changed = (old_kegiatan_ids != new_kegiatan_ids)
+                    
+                    if kegiatan_changed:
+                        print(f"⚠️ Kegiatan PA berubah! Old: {old_kegiatan_ids}, New: {new_kegiatan_ids}")
+                        print(f"🔄 Mereset progress SKS untuk mahasiswa {mahasiswa.user.nama_lengkap}")
+                        
+                        # HAPUS SEMUA PRESENSI LAMA
+                        deleted_count, _ = Presensi.objects.filter(mahasiswa=mahasiswa).delete()
+                        print(f"🗑️ Menghapus {deleted_count} presensi lama")
+                        
+                        # HAPUS SEMUA VERIFICATION LOGS
+                        VerificationLog.objects.filter(mahasiswa=mahasiswa).delete()
+                        
+                        # HAPUS SEMUA DURASI
+                        Durasi.objects.filter(presensi__mahasiswa=mahasiswa).delete()
+                        
+                        # RESET Status_Pemenuhan_SKS (akan dibuat ulang dengan kegiatan baru)
+                        Status_Pemenuhan_SKS.objects.filter(mahasiswa=mahasiswa).delete()
+                        
+                        # Update kegiatan PA yang dipilih
+                        mahasiswa.kegiatan_pa.set(kegiatan_objects)
+                        
+                        # Buat Status_Pemenuhan_SKS baru untuk setiap kegiatan
+                        for kegiatan in kegiatan_objects:
+                            Status_Pemenuhan_SKS.objects.create(
+                                mahasiswa=mahasiswa,
+                                kegiatan_pa=kegiatan,
+                                jam_target=kegiatan.target_jam,
+                                jumlah_sks=kegiatan.jumlah_sks,
+                                jam_tercapai=0,  # Reset ke 0
+                                status_pemenuhan='belum memenuhi'
+                            )
+                        
+                        print(f"✅ Progress SKS direset, status baru dibuat untuk {len(kegiatan_objects)} kegiatan")
+                        
+                    else:
+                        # Tidak ada perubahan kegiatan, update normal
+                        mahasiswa.kegiatan_pa.set(kegiatan_objects)
+                        
+                        # Update Status_Pemenuhan_SKS untuk kegiatan yang masih ada
+                        for kegiatan in kegiatan_objects:
+                            Status_Pemenuhan_SKS.objects.update_or_create(
+                                mahasiswa=mahasiswa,
+                                kegiatan_pa=kegiatan,
+                                defaults={
+                                    'jam_target': kegiatan.target_jam,
+                                    'jumlah_sks': kegiatan.jumlah_sks
+                                }
+                            )
+                        
+                        # Hapus status untuk kegiatan yang tidak dipilih lagi
+                        Status_Pemenuhan_SKS.objects.filter(
+                            mahasiswa=mahasiswa
+                        ).exclude(
+                            kegiatan_pa__in=kegiatan_objects
+                        ).delete()
+                    
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error: {e}")
+                    return JsonResponse({'success': False, 'error': 'Data kegiatan tidak valid'})
             
-            return JsonResponse({'success': True, 'message': 'Profil berhasil diperbarui'})
+            # Re-autentikasi user jika password diubah
+            if password:
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, user)
             
+            message = 'Profil berhasil diperbarui'
+            if 'kegiatan_changed' in locals() and kegiatan_changed:
+                message = 'Profil berhasil diperbarui. Progress SKS telah direset ke 0 karena perubahan kegiatan PA.'
+            
+            return JsonResponse({'success': True, 'message': message})
+            
+        except Mahasiswa.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Data mahasiswa tidak ditemukan'})
         except Exception as e:
+            import traceback
             print(f"Error saving profile: {e}")
-            return JsonResponse({'success': False, 'error': str(e)})
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'error': f'Terjadi kesalahan: {str(e)}'})
     
     # Jika GET request, tetap render template
     return render(request, 'mahasiswa/edit_profil.html')
@@ -636,7 +930,10 @@ def checkin_presensi(request):
             mahasiswa_id = data.get('mahasiswa_id')
             foto_base64 = data.get('foto')
             
-            # Validasi input
+            print(f"\n🔴 [checkin_presensi] DIPANGGIL!")
+            print(f"   Mahasiswa ID: {mahasiswa_id}")
+            print(f"   Timestamp: {datetime.now()}")
+            
             if not mahasiswa_id or not foto_base64:
                 return JsonResponse({
                     'success': False,
@@ -656,33 +953,26 @@ def checkin_presensi(request):
                     'message': f'Gagal decode foto: {str(e)}'
                 })
             
-            # Get mahasiswa
             mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
             today = date.today()
             
-            # PERBAIKAN: CEK SESSION AKTIF - Pastikan tidak ada yang belum checkout
-            # Gunakan filter yang lebih ketat
+            # CEK SESSION AKTIF
             existing_presensi = Presensi.objects.filter(
                 mahasiswa=mahasiswa,
                 tanggal_presensi=today,
                 jam_checkout__isnull=True
-            )
+            ).exclude(session_status='completed')
             
             if existing_presensi.exists():
-                # Jika ada lebih dari 1, perbaiki dulu
                 if existing_presensi.count() > 1:
                     print(f"⚠️ Terdeteksi {existing_presensi.count()} session aktif! Membersihkan...")
-                    # Ambil yang terbaru untuk dipertahankan
                     latest = existing_presensi.order_by('-jam_checkin').first()
-                    # Nonaktifkan yang lain
-                    now_local = timezone.localtime(timezone.now())
+                    now_local = datetime.now()
                     for session in existing_presensi.exclude(id=latest.id):
                         session.jam_checkout = now_local.time()
                         session.session_status = 'auto_checkout'
                         session.save()
-                        print(f"✅ Menonaktifkan session duplikat ID: {session.id}")
                     
-                    # Gunakan yang terbaru sebagai session aktif
                     active_session = latest
                 else:
                     active_session = existing_presensi.first()
@@ -697,63 +987,64 @@ def checkin_presensi(request):
                     }
                 })
             
-            # SIMPAN FOTO KE DATASET
+            # SIMPAN FOTO
             foto_wajah = FotoWajah.objects.create(
                 mahasiswa=mahasiswa,
                 file_path=foto_data,
                 keterangan=f'Check-in {datetime.now().strftime("%d/%m/%Y %H:%M")}'
             )
             
-            # PERBAIKAN: Gunakan waktu lokal untuk check-in
-            now_utc = timezone.now()
-            now_local = timezone.localtime(now_utc)
+            now_local = datetime.now()
             
-            # BUAT PRESENSI BARU
+            # HITUNG DEADLINE (10 MENIT DARI SEKARANG)
+            monitoring_deadline = now_local + timedelta(minutes=10)
+            
+            # BUAT PRESENSI dengan status 'waiting_monitoring'
             presensi = Presensi.objects.create(
                 mahasiswa=mahasiswa,
                 kegiatan_pa=None,
                 tanggal_presensi=today,
                 jam_checkin=now_local.time(),
                 foto_checkin=foto_data,
-                last_verified_at=now_utc,
+                last_verified_at=now_local,
                 terakhir_terdeteksi=now_local.time(),
-                failure_count=0,
-                session_status='active'
+                consecutive_failures=0,
+                session_status='waiting_monitoring',  # PENTING!
+                monitoring_deadline=monitoring_deadline,  # PENTING!
+                sudah_verifikasi=False
             )
             
-            # BUAT VERIFICATION LOG UNTUK CHECK-IN
             VerificationLog.objects.create(
                 mahasiswa=mahasiswa,
                 presensi=presensi,
-                timestamp=now_utc,
+                timestamp=datetime.now(),
                 status=True,
                 is_liveness_real=True,
                 failure_count=0,
                 foto=foto_data
             )
             
-            # HITUNG DURASI SEMENTARA
             Durasi.objects.create(
                 presensi=presensi,
                 waktu_durasi=timedelta(seconds=0)
             )
             
-            # LOG UNTUK DEBUG
             print(f"\n=== CHECK-IN BERHASIL ===")
             print(f"Mahasiswa: {mahasiswa.user.nama_lengkap} ({mahasiswa.nim})")
             print(f"Presensi ID: {presensi.id}")
-            print(f"Waktu Lokal: {now_local.strftime('%H:%M:%S')}")
-            print(f"Jam Check-in tersimpan: {presensi.jam_checkin}")
+            print(f"Session Status: waiting_monitoring")
+            print(f"Monitoring Deadline: {monitoring_deadline.strftime('%H:%M:%S')}")
             print(f"==========================\n")
             
             return JsonResponse({
                 'success': True,
-                'message': 'Check-in berhasil! Monitoring akan aktif secara otomatis.',
+                'message': 'Check-in berhasil! Anda memiliki waktu 10 menit untuk memulai monitoring.',
                 'data': {
                     'presensi_id': presensi.id,
                     'jam_checkin': presensi.jam_checkin.strftime('%H:%M'),
                     'session_status': presensi.session_status,
-                    'failure_count': presensi.failure_count,
+                    'monitoring_deadline': monitoring_deadline.isoformat(),
+                    'consecutive_failures': presensi.consecutive_failures,
                     'last_verified_at': presensi.last_verified_at.isoformat() if presensi.last_verified_at else None
                 }
             })
@@ -832,126 +1123,262 @@ def debug_presensi_data(request):
 @csrf_exempt
 def detect_liveness_frame(request):
     """
-    API endpoint untuk liveness detection - VERSI AGREGAT (SIMPLE)
+    API endpoint untuk deteksi liveness - UPDATED VERSION
     """
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            frame_base64 = data.get('frame')
-            mahasiswa_id = data.get('mahasiswa_id')
-            action = data.get('action')
-            
-            if not frame_base64:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'No frame provided',
-                    'status': 'ERROR'
-                })
-            
-            # Process frame dengan liveness detection (import dari modul liveness)
-            from liveness_detection import process_frame_liveness
-            result = process_frame_liveness(frame_base64)
-            
-            # AUTO-SAVE PRESENSI HANYA JIKA STATUS = REAL & FACE MATCHED
-            if result.get('status') == 'REAL' and mahasiswa_id and action:
-                # --- TAMBAHAN: FACE RECOGNITION DENGAN INSIGHTFACE (ArcFace) ---
-                from .face_recognition_utils import verify_face_with_insightface
-                from liveness_detection import reset_detection_state
-                
-                # OPTIMASI: Kirim face box ke utility recognition
-                box = result.get('box')
-                recognition_result = verify_face_with_insightface(frame_base64, mahasiswa_id, face_box=box)
-                
-                if not recognition_result.get('verified'):
-                    # Jika gagal recognition, balikkan ke liveness (reset blink)
-                    reset_detection_state()
-                    result['status'] = 'NOT_RECOGNIZED'
-                    result['message'] = recognition_result.get('message', 'Identity not matched')
-                    result['verified'] = False
-                    result['blink_count'] = 0 # Reset di response juga
-                    return JsonResponse(result) 
-                
-                # Update result with recognition info & Student Name
-                mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
-                result['recognition_score'] = float(1 - recognition_result.get('distance', 1.0))
-                result['nama_mahasiswa'] = mahasiswa.user.nama_lengkap or mahasiswa.user.username
-                # ---------------------------------------------------
-
-                try:
-                    today = date.today()
-                    
-                    if action == 'checkin':
-                        # Cek apakah sudah ada presensi yang belum check-out hari ini
-                        existing_presensi = Presensi.objects.filter(
-                            mahasiswa=mahasiswa,
-                            tanggal_presensi=today,
-                            jam_checkout__isnull=True
-                        ).first()
-                        
-                        if existing_presensi:
-                            result['message'] = 'Masih ada sesi yang belum check-out'
-                            return JsonResponse(result)
-                        
-                        # Simpan foto check-in
-                        format_ext = frame_base64.split(';base64,')[0].split('/')[-1] if ';base64,' in frame_base64 else 'jpg'
-                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                        filename = f'checkin_{mahasiswa_id}_{timestamp}.{format_ext}'
-                        
-                        imgstr = frame_base64.split(';base64,')[1] if ';base64,' in frame_base64 else frame_base64
-                        foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
-                        
-                        # Buat presensi baru tanpa kegiatan_pa
-                        presensi = Presensi.objects.create(
-                            mahasiswa=mahasiswa,
-                            kegiatan_pa=None,  # NULL karena agregat
-                            tanggal_presensi=today,
-                            jam_checkin=datetime.now().time(),
-                            foto_checkin=foto_data
-                        )
-                        
-                        result['presensi_id'] = presensi.id
-                        result['saved'] = True
-                        result['action'] = 'checkin'
-                        
-                    elif action == 'checkout':
-                        # Update foto check-out
-                        presensi = Presensi.objects.filter(
-                            mahasiswa=mahasiswa,
-                            tanggal_presensi=today,
-                            jam_checkout__isnull=True
-                        ).first()
-                        
-                        if presensi:
-                            format_ext = frame_base64.split(';base64,')[0].split('/')[-1] if ';base64,' in frame_base64 else 'jpg'
-                            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                            filename = f'checkout_{mahasiswa_id}_{timestamp}.{format_ext}'
-                            
-                            imgstr = frame_base64.split(';base64,')[1] if ';base64,' in frame_base64 else frame_base64
-                            foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
-                            
-                            presensi.jam_checkout = datetime.now().time()
-                            presensi.foto_checkout = foto_data
-                            presensi.save()
-                            
-                            result['presensi_id'] = presensi.id
-                            result['saved'] = True
-                            result['action'] = 'checkout'
-                
-                except Exception as save_error:
-                    print(f"[ERROR] Failed to save presensi: {save_error}")
-                    result['save_error'] = str(save_error)
-            
-            return JsonResponse(result)
-            
-        except Exception as e:
-            print(f"[ERROR] detect_liveness_frame: {e}")
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'})
+    
+    try:
+        data = json.loads(request.body)
+        frame_base64 = data.get('frame')
+        mahasiswa_id = data.get('mahasiswa_id')
+        action = data.get('action')
+        
+        if not frame_base64:
             return JsonResponse({
-                'success': False,
-                'error': str(e),
+                'success': False, 
+                'error': 'No frame provided', 
                 'status': 'ERROR'
             })
-    
-    return JsonResponse({'success': False, 'error': 'Method not allowed'})
+        
+        # Gunakan mahasiswa_id sebagai session_id untuk state terpisah per user
+        session_id = str(mahasiswa_id) if mahasiswa_id else "default"
+        
+        # Panggil liveness detection dengan session_id
+        from liveness_detection import process_frame_liveness, reset_detection_state
+        result = process_frame_liveness(frame_base64, session_id=session_id)
+        
+        # ====================== HANDLE SPOOF ======================
+        if result.get('status') == 'SPOOF':
+            print(f"[SPOOF] ❌ Spoof detected for session {session_id}")
+            return JsonResponse({
+                **result,
+                'stop_detection': True,
+                'force_close_modal': True,
+                'should_save': False,
+                'message': 'SPOOF DETECTED! Please use your real face.'
+            })
+        
+        # ====================== HANDLE NO FACE ======================
+        if result.get('status') == 'NO_FACE':
+            return JsonResponse({
+                **result,
+                'verified': False,
+                'should_save': False
+            })
+        
+        # ====================== HANDLE LIVENESS_CHECK ======================
+        if result.get('status') == 'LIVENESS_CHECK':
+            return JsonResponse({
+                **result,
+                'verified': False,
+                'should_save': False
+            })
+        
+        # ====================== HANDLE REAL ======================
+        if result.get('status') == 'REAL' and result.get('verified'):
+            # Validasi mahasiswa_id
+            if not mahasiswa_id:
+                return JsonResponse({
+                    'success': True,
+                    'status': 'ERROR',
+                    'message': 'No student selected',
+                    'verified': False,
+                    'should_save': False
+                })
+            
+            # Lakukan face recognition
+            from .face_recognition_utils import verify_face_with_insightface
+            
+            box = result.get('box')
+            recognition_result = verify_face_with_insightface(
+                frame_base64, 
+                mahasiswa_id, 
+                face_box=box
+            )
+            
+            # Face tidak cocok
+            if not recognition_result.get('verified'):
+                print(f"[RECOGNITION] ❌ Face mismatch for mahasiswa {mahasiswa_id}")
+                reset_detection_state(session_id)
+                return JsonResponse({
+                    'success': True,
+                    'status': 'NOT_RECOGNIZED',
+                    'message': 'Wajah tidak cocok dengan data mahasiswa!',
+                    'verified': False,
+                    'blink_count': result.get('blink_count', 0),
+                    'spoof_score': result.get('spoof_score', 0),
+                    'face_detected': True,
+                    'box': result.get('box'),
+                    'stop_detection': True,
+                    'force_close_modal': True,
+                    'should_save': False
+                })
+            
+            # Face cocok - lanjut ke save
+            mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
+            today = date.today()
+            
+            result['recognition_score'] = recognition_result.get('recognition_score', 0)
+            result['nama_mahasiswa'] = mahasiswa.user.nama_lengkap or mahasiswa.user.username
+            result['verified'] = True
+            result['should_save'] = True
+            result['mahasiswa_id'] = mahasiswa_id
+            
+            print(f"[RECOGNITION] ✅ Face matched for {result['nama_mahasiswa']}")
+            
+            # ====================== 🔥 CEK SESSION SEBELUM SAVE 🔥 ======================
+            existing_presensi = Presensi.objects.filter(
+                mahasiswa=mahasiswa,
+                tanggal_presensi=today,
+                jam_checkout__isnull=True
+            ).exclude(session_status='completed')
+            
+            # ====================== HANDLE CHECK-IN ======================
+            if action == 'checkin':
+                # 🔥 CEK APAKAH SUDAH ADA SESSION AKTIF 🔥
+                if existing_presensi.exists():
+                    active_session = existing_presensi.first()
+                    print(f"[SESSION] Active session exists for {result['nama_mahasiswa']}, cannot check-in again")
+                    return JsonResponse({
+                        'success': True,
+                        'status': 'SESSION_ACTIVE',
+                        'message': 'Anda masih memiliki sesi aktif! Silakan checkout terlebih dahulu.',
+                        'verified': False,
+                        'stop_detection': True,
+                        'force_close_modal': True,
+                        'should_save': False,
+                        'existing_session': {
+                            'id': active_session.id,
+                            'jam_checkin': active_session.jam_checkin.strftime('%H:%M:%S'),
+                            'session_status': active_session.session_status
+                        }
+                    })
+                
+                # 🔥 BUAT PRESENSI BARU (HANYA 1 KALI) 🔥
+                foto_data = _save_base64_to_file(frame_base64, f'checkin_{mahasiswa_id}')
+                now_local = datetime.now()
+                
+                presensi = Presensi.objects.create(
+                    mahasiswa=mahasiswa,
+                    kegiatan_pa=None,
+                    tanggal_presensi=today,
+                    jam_checkin=now_local.time(),
+                    foto_checkin=foto_data,
+                    last_verified_at=now_local,
+                    terakhir_terdeteksi=now_local.time(),
+                    consecutive_failures=0,
+                    session_status='waiting_monitoring',
+                    monitoring_deadline=now_local + timedelta(minutes=10),
+                    sudah_verifikasi=False
+                )
+                
+                VerificationLog.objects.create(
+                    mahasiswa=mahasiswa,
+                    presensi=presensi,
+                    timestamp=datetime.now(),
+                    status=True,
+                    is_liveness_real=True,
+                    failure_count=0,
+                    foto=foto_data
+                )
+                
+                Durasi.objects.create(
+                    presensi=presensi,
+                    waktu_durasi=timedelta(seconds=0)
+                )
+                
+                result['presensi_id'] = presensi.id
+                result['saved'] = True
+                result['action'] = 'checkin'
+                print(f"[SAVE] ✅ Check-in successful for {mahasiswa.user.nama_lengkap}")
+            
+            # ====================== HANDLE CHECK-OUT ======================
+            elif action == 'checkout':
+                # 🔥 CEK APAKAH ADA SESSION AKTIF 🔥
+                if not existing_presensi.exists():
+                    print(f"[SESSION] No active session for checkout for {result['nama_mahasiswa']}")
+                    return JsonResponse({
+                        'success': True,
+                        'status': 'NO_ACTIVE_SESSION',
+                        'message': 'Tidak ada sesi aktif untuk checkout! Silakan check-in terlebih dahulu.',
+                        'verified': False,
+                        'stop_detection': True,
+                        'force_close_modal': True,
+                        'should_save': False
+                    })
+                
+                presensi = existing_presensi.first()
+                
+                # CEK JANGAN DOUBLE CHECKOUT
+                if presensi.jam_checkout is not None:
+                    print(f"[CHECKOUT] Session already checked out at {presensi.jam_checkout}")
+                    return JsonResponse({
+                        'success': True,
+                        'status': 'ALREADY_CHECKED_OUT',
+                        'message': 'Sesi sudah checkout sebelumnya!',
+                        'verified': False,
+                        'stop_detection': True,
+                        'force_close_modal': True,
+                        'should_save': False
+                    })
+                
+                foto_data = _save_base64_to_file(frame_base64, f'checkout_{mahasiswa_id}')
+                now_local = datetime.now()
+                
+                presensi.jam_checkout = now_local.time()
+                presensi.foto_checkout = foto_data
+                presensi.session_status = 'completed'
+                presensi.save()
+                
+                # Hitung durasi
+                checkin_dt = datetime.combine(today, presensi.jam_checkin)
+                checkout_dt = datetime.combine(today, presensi.jam_checkout)
+                if checkout_dt < checkin_dt:
+                    checkout_dt += timedelta(days=1)
+                durasi = checkout_dt - checkin_dt
+                
+                Durasi.objects.update_or_create(
+                    presensi=presensi,
+                    defaults={'waktu_durasi': durasi}
+                )
+                
+                # Simpan foto ke FotoWajah untuk dataset
+                FotoWajah.objects.create(
+                    mahasiswa=mahasiswa,
+                    file_path=foto_data,
+                    keterangan=f'Check-out {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}'
+                )
+                
+                result['presensi_id'] = presensi.id
+                result['saved'] = True
+                result['action'] = 'checkout'
+                print(f"[SAVE] ✅ Check-out successful for {mahasiswa.user.nama_lengkap}")
+            
+            # Reset state setelah save berhasil
+            reset_detection_state(session_id)
+            
+            return JsonResponse(result)
+        
+        # Default return
+        return JsonResponse(result)
+        
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] JSON decode error: {e}")
+        return JsonResponse({
+            'success': False, 
+            'error': 'Invalid JSON',
+            'status': 'ERROR'
+        })
+    except Exception as e:
+        print(f"[ERROR] detect_liveness_frame: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'status': 'ERROR'
+        })
 
 @csrf_exempt
 def detect_face_registration(request):
@@ -1041,7 +1468,10 @@ def detect_face_registration(request):
 @login_required
 def periodic_verify(request):
     """
-    API endpoint untuk verifikasi periodik setiap 5 menit.
+    API endpoint untuk verifikasi periodik
+    - Jika status 'waiting_monitoring': verifikasi pertama, jika berhasil pindah ke 'monitoring_active'
+    - Jika lewat deadline 10 menit: AUTO CHECKOUT
+    - Jika status 'monitoring_active': verifikasi periodik tiap 5 menit, auto checkout jika 2x gagal
     """
     if request.method != 'POST':
         return JsonResponse({
@@ -1050,16 +1480,9 @@ def periodic_verify(request):
         })
     
     try:
-        # Parse request body
         data = json.loads(request.body)
         frame_base64 = data.get('frame')
         presensi_id = data.get('presensi_id')
-        
-        if not frame_base64:
-            return JsonResponse({
-                "success": False, 
-                "message": "Frame tidak ditemukan"
-            })
         
         # Validasi user adalah mahasiswa
         if request.user.role != 'mahasiswa':
@@ -1085,8 +1508,9 @@ def periodic_verify(request):
             presensi = Presensi.objects.filter(
                 mahasiswa=mahasiswa,
                 tanggal_presensi=today,
-                jam_checkout__isnull=True,
-                session_status='active'
+                jam_checkout__isnull=True
+            ).exclude(
+                session_status='completed'
             ).order_by('-jam_checkin').first()
         
         if not presensi:
@@ -1094,12 +1518,57 @@ def periodic_verify(request):
                 "success": False, 
                 "message": "Tidak ada sesi presensi aktif. Silakan check-in terlebih dahulu.",
                 "session_status": "none",
-                "clear_storage": True  # Tambahkan flag untuk membersihkan localStorage
+                "clear_storage": True
             })
         
-        # UPDATE STATUS SESSION KE 'verifying'
-        presensi.session_status = 'verifying'
-        presensi.save(update_fields=['session_status'])
+        now = datetime.now()
+        
+        # ==================== CEK DEADLINE 10 MENIT ====================
+        if presensi.session_status == 'waiting_monitoring':
+            if presensi.monitoring_deadline and now > presensi.monitoring_deadline:
+                print(f"[DEADLINE] ⚠️ Monitoring tidak dimulai dalam 10 menit! Auto checkout!")
+                
+                presensi.session_status = 'auto_checkout'
+                presensi.jam_checkout = now.time()
+                presensi.consecutive_failures = 0
+                
+                # Hitung durasi
+                checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+                checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
+                if checkout_dt < checkin_dt:
+                    checkout_dt += timedelta(days=1)
+                durasi = checkout_dt - checkin_dt
+                
+                Durasi.objects.update_or_create(
+                    presensi=presensi,
+                    defaults={'waktu_durasi': durasi}
+                )
+                
+                presensi.save()
+                
+                return JsonResponse({
+                    "success": False,
+                    "message": "Auto checkout: Monitoring tidak dimulai dalam 10 menit",
+                    "auto_checked_out": True,
+                    "clear_storage": True,
+                    "redirect": "/riwayat_presensi/"
+                })
+        
+        # ==================== CEK APAKAH SUDAH TERLALU CEPAT ====================
+        MIN_VERIFICATION_INTERVAL = 30
+        if presensi.last_verified_at:
+            time_since_last = (now - presensi.last_verified_at).total_seconds()
+            if time_since_last < MIN_VERIFICATION_INTERVAL and time_since_last > 0:
+                print(f"[VERIFY] ⏱️ Too soon! Only {time_since_last:.1f}s since last verification.")
+                return JsonResponse({
+                    "success": True,
+                    "verified": False,
+                    "message": f"Tunggu {int(MIN_VERIFICATION_INTERVAL - time_since_last)} detik",
+                    "wait_time": int(MIN_VERIFICATION_INTERVAL - time_since_last),
+                    "consecutive_failures": presensi.consecutive_failures,
+                    "last_verified_at": presensi.last_verified_at.isoformat(),
+                    "skip_verification": True
+                })
         
         # ==================== LIVENESS DETECTION ====================
         from liveness_detection import (
@@ -1116,7 +1585,6 @@ def periodic_verify(request):
         import numpy as np
         from .face_recognition_utils import verify_face_with_insightface
         
-        # Pastikan detector dan model sudah diinisialisasi
         if detector is None or model is None:
             init_liveness_detection()
             from liveness_detection import detector as d_init, model as m_init
@@ -1124,7 +1592,6 @@ def periodic_verify(request):
         else:
             d, m = detector, model
         
-        # Decode frame base64
         frame = decode_base64_image(frame_base64)
         if frame is None:
             return JsonResponse({
@@ -1132,82 +1599,55 @@ def periodic_verify(request):
                 "message": "Gagal decode gambar"
             })
         
-        # Apply gamma correction
         frame_gamma = apply_gamma_correction(frame, GAMMA_VALUE)
-        
-        # Konversi ke RGB untuk face detection
         rgb = cv2.cvtColor(frame_gamma, cv2.COLOR_BGR2RGB)
-        
-        # Detect faces
         detections = d.detect_faces(rgb)
         
-        # Inisialisasi variabel hasil
         is_real = False
         verified = False
         face_box = None
         face_detected = len(detections) > 0
+        multiple_faces = len(detections) > 1
         recognition_score = 0
         nama_mahasiswa = None
         
-        # Proses deteksi wajah
-        if face_detected:
-            # Cek multiple faces
-            multiple_faces = len(detections) > 1
-            
-            # Ambil deteksi terbaik
+        verification_success = False
+        
+        if face_detected and not multiple_faces:
             best_det = max(detections, key=lambda x: x['confidence'])
             
             if best_det and best_det['confidence'] > 0.5:
                 x, y, w, h = best_det['box']
                 face_box = {'x': int(x), 'y': int(y), 'w': int(w), 'h': int(h)}
-                
-                # Crop face untuk liveness detection
                 face = frame_gamma[max(0, y):y+h, max(0, x):x+w]
                 
                 if face.size > 0:
-                    # Resize face untuk model liveness
                     face_resized = cv2.resize(face, (IMG_SIZE, IMG_SIZE))
                     face_input = face_resized / 255.0
                     face_input = np.expand_dims(face_input, axis=0)
-                    
-                    # Liveness prediction
                     spoof_score = float(m.predict(face_input, verbose=0)[0][0])
                     is_real = spoof_score >= SPOOF_THRESHOLD
                     
-                    # Face Recognition hanya jika liveness real
-                    if is_real and not multiple_faces:
+                    if is_real:
                         try:
                             recognition_result = verify_face_with_insightface(
                                 frame_base64, 
                                 mahasiswa.id, 
                                 face_box=face_box
                             )
-                            
                             verified = recognition_result.get('verified', False)
                             recognition_score = recognition_result.get('recognition_score', 0)
                             nama_mahasiswa = recognition_result.get('nama_mahasiswa')
-                            
                         except Exception as e:
                             print(f"[PERIODIC] Recognition error: {e}")
                             verified = False
-                            recognition_score = 0
+                
+                verification_success = face_detected and not multiple_faces and is_real and verified
         
-        # ==================== TENTUKAN HASIL VERIFIKASI ====================
-        verification_success = face_detected and not multiple_faces and is_real and verified
+        # ==================== UPDATE DATA ====================
+        now_local = datetime.now()
         
-        # Tentukan pesan berdasarkan kondisi
-        if not face_detected:
-            msg = "Wajah tidak terdeteksi"
-        elif multiple_faces:
-            msg = "Terdeteksi lebih dari satu wajah"
-        elif not is_real:
-            msg = "Spoofing terdeteksi"
-        elif not verified:
-            msg = "Identitas wajah tidak cocok"
-        else:
-            msg = "Verifikasi berhasil"
-        
-        # ==================== SIMPAN FOTO KE DATABASE ====================
+        # SIMPAN FOTO KE DATABASE
         timestamp_str = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename_verif = f'verif_{mahasiswa.nim}_{timestamp_str}.jpg'
         
@@ -1216,65 +1656,82 @@ def periodic_verify(request):
         else:
             imgstr_verif = frame_base64
             
-        foto_data_verif = ContentFile(
-            base64.b64decode(imgstr_verif), 
-            name=filename_verif
-        )
+        foto_data_verif = ContentFile(base64.b64decode(imgstr_verif), name=filename_verif)
         
-        # ==================== UPDATE SESSION ====================
-        now_utc = timezone.now()
-        now_local = timezone.localtime(now_utc)
+        presensi.last_verified_at = now_local
         
-        # 1. UPDATE last_verified_at
-        presensi.last_verified_at = now_utc
-        
-        # 2. UPDATE failure_count
-        if verification_success:
-            presensi.failure_count = 0
+        if face_detected:
             presensi.terakhir_terdeteksi = now_local.time()
-        else:
-            presensi.failure_count += 1
         
-        # 3. UPDATE session_status dan auto checkout
         auto_checked_out = False
         checkout_time_str = None
+        message = ""
         
-        if presensi.failure_count >= 2:
-            # PERBAIKAN: Auto checkout
-            presensi.session_status = 'auto_checkout'
-            presensi.jam_checkout = now_local.time()
-            presensi.foto_checkout = foto_data_verif
-            
-            # Hitung durasi
-            checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
-            checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
-            
-            if checkout_dt < checkin_dt:
-                checkout_dt += timedelta(days=1)
-            
-            durasi = checkout_dt - checkin_dt
-            
-            # Update Durasi
-            Durasi.objects.update_or_create(
-                presensi=presensi,
-                defaults={'waktu_durasi': durasi}
-            )
-            
-            auto_checked_out = True
-            checkout_time_str = presensi.jam_checkout.strftime('%H:%M:%S')
-            
-            print(f"[PERIODIC] AUTO CHECKOUT - ID: {presensi.id}")
-            print(f"[PERIODIC] Tanggal: {presensi.tanggal_presensi}")
-            print(f"[PERIODIC] Check-in: {presensi.jam_checkin}")
-            print(f"[PERIODIC] Check-out: {presensi.jam_checkout}")
-            print(f"[PERIODIC] Durasi: {durasi}")
-        else:
-            presensi.session_status = 'active'
+        # ==================== LOGIKA BERDASARKAN SESSION STATUS ====================
+        
+        if presensi.session_status == 'waiting_monitoring':
+            # INI VERIFIKASI PERTAMA KALI
+            if verification_success:
+                # ✅ BERHASIL: Pindah ke monitoring_active
+                presensi.session_status = 'monitoring_active'
+                presensi.consecutive_failures = 0
+                presensi.sudah_verifikasi = True
+                message = "Verifikasi pertama berhasil! Monitoring dimulai."
+                print(f"[VERIFY] ✅ First verification SUCCESS! Status berubah ke monitoring_active")
+            else:
+                # ❌ GAGAL: Catat failure
+                presensi.consecutive_failures += 1
+                message = f"Verifikasi gagal: {presensi.consecutive_failures} dari 2 kegagalan"
+                print(f"[VERIFY] ❌ First verification FAILED! failures={presensi.consecutive_failures}")
+                
+                # Jika sudah 2x gagal dalam grace period, auto checkout
+                if presensi.consecutive_failures >= 2:
+                    print(f"[VERIFY] 🚨 2 failures during grace period! Auto checkout!")
+                    presensi.session_status = 'auto_checkout'
+                    presensi.jam_checkout = now_local.time()
+                    presensi.foto_checkout = foto_data_verif
+                    auto_checked_out = True
+                    checkout_time_str = now_local.strftime('%H:%M:%S')
+                    message = "Auto checkout: 2x kegagalan verifikasi"
+        
+        elif presensi.session_status == 'monitoring_active':
+            # MONITORING AKTIF: Verifikasi periodik tiap 5 menit
+            if verification_success:
+                presensi.consecutive_failures = 0
+                message = "Verifikasi berhasil"
+                print(f"[VERIFY] ✅ SUCCESS - Reset failures to 0")
+            else:
+                presensi.consecutive_failures += 1
+                print(f"[VERIFY] ❌ FAILED - failures = {presensi.consecutive_failures}")
+                
+                if not face_detected:
+                    message = "Wajah tidak terdeteksi"
+                elif multiple_faces:
+                    message = "Terdeteksi lebih dari satu wajah"
+                elif not is_real:
+                    message = "Spoofing terdeteksi"
+                elif not verified:
+                    message = "Identitas wajah tidak cocok"
+                else:
+                    message = "Verifikasi gagal"
+                
+                if presensi.consecutive_failures >= 2:
+                    print(f"[VERIFY] 🚨 AUTO CHECKOUT TRIGGERED - 2 consecutive failures!")
+                    presensi.session_status = 'auto_checkout'
+                    presensi.jam_checkout = now_local.time()
+                    presensi.foto_checkout = foto_data_verif
+                    auto_checked_out = True
+                    checkout_time_str = now_local.strftime('%H:%M:%S')
+                    message = f"Auto checkout: 2x kegagalan verifikasi berturut-turut"
         
         # Simpan perubahan
-        update_fields = ['last_verified_at', 'failure_count', 'session_status', 'terakhir_terdeteksi']
+        update_fields = ['last_verified_at', 'consecutive_failures', 'session_status']
+        if face_detected:
+            update_fields.append('terakhir_terdeteksi')
         if auto_checked_out:
             update_fields.extend(['jam_checkout', 'foto_checkout'])
+        if presensi.session_status == 'monitoring_active' and verification_success:
+            update_fields.append('sudah_verifikasi')
         
         presensi.save(update_fields=update_fields)
         
@@ -1282,69 +1739,49 @@ def periodic_verify(request):
         VerificationLog.objects.create(
             mahasiswa=mahasiswa,
             presensi=presensi,
-            timestamp=now_utc,
+            timestamp=datetime.now(),
             status=verification_success,
             is_liveness_real=is_real,
-            failure_count=presensi.failure_count,
+            failure_count=presensi.consecutive_failures,
             foto=foto_data_verif
         )
         
-        # ==================== HITUNG NEXT VERIFICATION ====================
+        # Hitung kapan next verification
         VERIFICATION_INTERVAL = 5 * 60
         next_verification_time = presensi.last_verified_at + timedelta(seconds=VERIFICATION_INTERVAL)
-        time_left = max(0, int((next_verification_time - now_utc).total_seconds()))
+        time_until_next = max(0, int((next_verification_time - datetime.now()).total_seconds()))
         
-        # ==================== RETURN RESPONSE ====================
+        # ==================== RESPONSE ====================
         response_data = {
             "success": True,
             "verified": verification_success,
             "is_real": is_real,
             "face_detected": face_detected,
-            "multiple_faces": multiple_faces if 'multiple_faces' in locals() else False,
-            "failure_count": presensi.failure_count,
+            "multiple_faces": multiple_faces,
+            "consecutive_failures": presensi.consecutive_failures,
             "auto_checked_out": auto_checked_out,
             "session_status": presensi.session_status,
-            "message": msg,
-            "time_left": time_left,
-            "next_verification": next_verification_time.isoformat(),
-            "last_verified_at": presensi.last_verified_at.isoformat(),
+            "message": message,
             "presensi_id": presensi.id,
             "checkout_time": checkout_time_str,
+            "last_verified_at": presensi.last_verified_at.isoformat(),
+            "next_verification_at": next_verification_time.isoformat(),
+            "time_until_next": time_until_next,
             "details": {
                 "liveness": "REAL" if is_real else "SPOOF" if face_detected else "NO_FACE",
                 "recognition": "MATCHED" if verification_success else "MISMATCH" if face_detected and is_real else "SKIPPED",
                 "faces": len(detections) if detections is not None else 0,
-                "recognition_score": recognition_score if verification_success else 0
-            },
-            "clear_storage": auto_checked_out  # Tambahkan flag untuk membersihkan localStorage
+                "recognition_score": recognition_score if verification_success else 0,
+            }
         }
         
-        # Redirect URL
         if auto_checked_out:
-            response_data["warning"] = "Anda telah di-checkout otomatis karena gagal verifikasi 2 kali berturut-turut"
+            response_data["warning"] = "Anda telah di-checkout otomatis"
             response_data["redirect"] = "/riwayat_presensi/"
+            response_data["clear_storage"] = True
         
         return JsonResponse(response_data)
 
-    except json.JSONDecodeError:
-        return JsonResponse({
-            "success": False, 
-            "message": "Format JSON tidak valid",
-            "clear_storage": False
-        })
-    except Mahasiswa.DoesNotExist:
-        return JsonResponse({
-            "success": False, 
-            "message": "Data mahasiswa tidak ditemukan",
-            "clear_storage": False
-        })
-    except Presensi.DoesNotExist:
-        return JsonResponse({
-            "success": False,
-            "message": "Session presensi tidak ditemukan",
-            "session_status": "not_found",
-            "clear_storage": True  # Session tidak ditemukan, bersihkan localStorage
-        })
     except Exception as e:
         import traceback
         print(f"[periodic_verify Error] {str(e)}")
@@ -1355,6 +1792,33 @@ def periodic_verify(request):
             "auto_checked_out": False,
             "clear_storage": False
         })
+        
+@require_http_methods(["GET"])
+@csrf_exempt
+def get_semester_by_jenjang(request, jenjang_id):
+    """API untuk mendapatkan semester berdasarkan jenjang"""
+    try:
+        jenjang = Jenjang_Pendidikan.objects.get(id=jenjang_id)
+        jenjang_nama = jenjang.nama_jenjang
+        
+        if "D3" in jenjang_nama:
+            jenjang_kode = 'D3'
+        elif "D4" in jenjang_nama:
+            jenjang_kode = 'D4'
+        elif "S2" in jenjang_nama:
+            jenjang_kode = 'S2'
+        else:
+            jenjang_kode = None
+        
+        if jenjang_kode:
+            semesters = Semester.objects.filter(jenjang=jenjang_kode).order_by('nomor_semester')
+            semester_list = [{'id': s.id, 'nama_semester': s.nama_semester} for s in semesters]
+        else:
+            semester_list = []
+        
+        return JsonResponse({'success': True, 'semesters': semester_list})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e), 'semesters': []})
 
 @login_required
 def get_session_status(request):
@@ -1372,17 +1836,17 @@ def get_session_status(request):
         mahasiswa = get_object_or_404(Mahasiswa, user=request.user)
         today = date.today()
         
-        # PERBAIKAN: Cari session aktif hari ini (belum checkout)
-        # Gunakan .latest() atau .first() untuk memastikan hanya 1
+        # Cari session aktif hari ini (belum checkout)
         active_session = Presensi.objects.filter(
             mahasiswa=mahasiswa,
             tanggal_presensi=today,
             jam_checkout__isnull=True
-        ).order_by('-jam_checkin').first()  # Ambil yang terbaru
+        ).exclude(
+            session_status='completed'
+        ).order_by('-jam_checkin').first()
         
         if not active_session:
-            # PERBAIKAN: Jika tidak ada session aktif hari ini, cek apakah ada session aktif dari hari sebelumnya
-            # yang masih aktif (kemungkinan bug)
+            # Bersihkan session lama
             old_active = Presensi.objects.filter(
                 mahasiswa=mahasiswa,
                 jam_checkout__isnull=True
@@ -1391,9 +1855,8 @@ def get_session_status(request):
             ).order_by('-tanggal_presensi', '-jam_checkin').first()
             
             if old_active:
-                # Auto checkout session lama
                 print(f"⚠️ Menemukan session lama yang masih aktif: {old_active.id}")
-                now_local = timezone.localtime(timezone.now())
+                now_local = datetime.now()
                 old_active.jam_checkout = now_local.time()
                 old_active.session_status = 'auto_checkout'
                 old_active.save()
@@ -1403,11 +1866,30 @@ def get_session_status(request):
                 'success': True,
                 'has_active_session': False,
                 'message': 'Tidak ada session aktif',
-                'clear_storage': True  # Minta frontend bersihkan storage
+                'clear_storage': True
             })
         
-        # PERBAIKAN: Pastikan tidak ada session aktif lain untuk hari yang sama
-        # Jika ada, kita nonaktifkan yang lain
+        # 🔥🔥🔥 TAMBAHKAN INI: CEK DEADLINE DI API INI JUGA 🔥🔥🔥
+        from django.utils import timezone
+        now = timezone.now()
+        
+        if active_session.session_status == 'waiting_monitoring':
+            if active_session.monitoring_deadline and now > active_session.monitoring_deadline:
+                print(f"[AUTO CHECKOUT via API] Deadline lewat untuk session {active_session.id}")
+                
+                active_session.session_status = 'auto_checkout'
+                active_session.jam_checkout = now.time()
+                active_session.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'has_active_session': False,
+                    'clear_storage': True,
+                    'auto_checked_out': True,
+                    'message': 'Sesi di-checkout karena tidak memulai monitoring dalam 10 menit'
+                })
+        
+        # Bersihkan session duplikat
         other_active = Presensi.objects.filter(
             mahasiswa=mahasiswa,
             tanggal_presensi=today,
@@ -1415,66 +1897,83 @@ def get_session_status(request):
         ).exclude(id=active_session.id)
         
         if other_active.exists():
-            print(f"⚠️ Menemukan {other_active.count()} session aktif lain untuk hari yang sama")
-            now_local = timezone.localtime(timezone.now())
+            print(f"⚠️ Menemukan {other_active.count()} session aktif lain")
+            now_local = datetime.now()
             for session in other_active:
                 session.jam_checkout = now_local.time()
                 session.session_status = 'auto_checkout'
                 session.save()
-                print(f"✅ Menonaktifkan session duplikat ID: {session.id}")
         
-        # Konfigurasi verifikasi
-        VERIFICATION_INTERVAL = 5 * 60  # 5 menit dalam detik
+        import pytz
         
-        # Hitung next verification
-        now = timezone.now()
+        WIB = pytz.timezone('Asia/Jakarta')
         
-        if active_session.last_verified_at:
-            next_verification = active_session.last_verified_at + timedelta(seconds=VERIFICATION_INTERVAL)
-        else:
-            # Belum pernah diverifikasi, hitung dari check-in
-            checkin_datetime = timezone.make_aware(
-                datetime.combine(active_session.tanggal_presensi, active_session.jam_checkin)
-            )
-            next_verification = checkin_datetime + timedelta(seconds=VERIFICATION_INTERVAL)
+        def to_wib(dt):
+            if dt is None:
+                return None
+            if timezone.is_naive(dt):
+                return WIB.localize(dt)
+            return dt.astimezone(WIB)
         
-        # Hitung sisa waktu
-        if next_verification > now:
-            time_left = int((next_verification - now).total_seconds())
-        else:
-            time_left = 0
+        now_wib = to_wib(now)
+        checkin_dt = datetime.combine(active_session.tanggal_presensi, active_session.jam_checkin)
+        checkin_wib = to_wib(checkin_dt)
         
         # Hitung durasi session
-        checkin_dt = timezone.make_aware(
-            datetime.combine(active_session.tanggal_presensi, active_session.jam_checkin)
-        )
-        duration_seconds = int((now - checkin_dt).total_seconds())
+        duration_seconds = int((now_wib - checkin_wib).total_seconds())
+        if duration_seconds < 0:
+            duration_seconds = 0
         
-        # Siapkan data session
+        # HITUNG SISA WAKTU BERDASARKAN SESSION STATUS
+        VERIFICATION_INTERVAL = 5 * 60
+        GRACE_PERIOD_MINUTES = 10
+        
+        deadline_seconds_left = 0
+        next_verification_seconds_left = 0
+        
+        if active_session.session_status == 'waiting_monitoring':
+            if active_session.monitoring_deadline:
+                deadline_seconds_left = max(0, int((active_session.monitoring_deadline - now).total_seconds()))
+        
+        elif active_session.session_status == 'monitoring_active':
+            if active_session.last_verified_at:
+                last_verified_wib = to_wib(active_session.last_verified_at)
+                next_verification_wib = last_verified_wib + timedelta(seconds=VERIFICATION_INTERVAL)
+                next_verification_seconds_left = max(0, int((next_verification_wib - now_wib).total_seconds()))
+            else:
+                next_verification_seconds_left = VERIFICATION_INTERVAL
+        
+        # Cek apakah sudah pernah verifikasi
+        sudah_verifikasi = VerificationLog.objects.filter(
+            presensi=active_session
+        ).exists()
+        
         session_data = {
             'id': active_session.id,
             'checkin_time': active_session.jam_checkin.strftime('%H:%M:%S'),
-            'checkin_datetime': checkin_dt.isoformat(),
+            'checkin_datetime': checkin_wib.isoformat(),
             'duration_seconds': duration_seconds,
-            'time_left': time_left,
-            'failure_count': active_session.failure_count,
+            'consecutive_failures': active_session.consecutive_failures,
             'session_status': active_session.session_status,
-            'last_verified_at': active_session.last_verified_at.isoformat() if active_session.last_verified_at else None,
+            'last_verified_at': to_wib(active_session.last_verified_at).isoformat() if active_session.last_verified_at else None,
             'terakhir_terdeteksi': active_session.terakhir_terdeteksi.strftime('%H:%M:%S') if active_session.terakhir_terdeteksi else None,
+            'sudah_verifikasi': sudah_verifikasi,
+            'deadline_seconds_left': deadline_seconds_left,
+            'next_verification_seconds_left': next_verification_seconds_left,
+            'monitoring_deadline': active_session.monitoring_deadline.isoformat() if active_session.monitoring_deadline else None,
         }
         
-        # Ambil 5 log terakhir
+        # Ambil 10 log terakhir
         recent_logs = VerificationLog.objects.filter(
             presensi=active_session
-        ).order_by('-timestamp')[:5]
+        ).order_by('-timestamp')[:10]
 
         logs_data = []
         for log in recent_logs:
-            wib_time = timezone.localtime(log.timestamp)
-            
+            log_time_wib = to_wib(log.timestamp)
             logs_data.append({
                 'id': log.id,
-                'timestamp': wib_time.isoformat(),
+                'timestamp': log_time_wib.isoformat(),
                 'status': log.status,
                 'is_liveness_real': log.is_liveness_real,
                 'failure_count': log.failure_count,
@@ -1489,7 +1988,8 @@ def get_session_status(request):
             'logs': logs_data,
             'config': {
                 'verification_interval': VERIFICATION_INTERVAL,
-                'max_failures': 2
+                'max_consecutive_failures': 2,
+                'grace_period_minutes': GRACE_PERIOD_MINUTES
             }
         })
         
@@ -1506,6 +2006,67 @@ def get_session_status(request):
             'success': False,
             'error': str(e)
         })
+        
+@csrf_exempt
+@login_required
+def auto_checkout_timeout(request):
+    """
+    API untuk auto checkout ketika mahasiswa tidak memulai monitoring dalam 10 menit
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Method not allowed'})
+    
+    try:
+        data = json.loads(request.body)
+        presensi_id = data.get('presensi_id')
+        reason = data.get('reason', 'timeout_no_monitoring')
+        
+        if not presensi_id:
+            return JsonResponse({'success': False, 'message': 'presensi_id required'})
+        
+        mahasiswa = get_object_or_404(Mahasiswa, user=request.user)
+        
+        presensi = get_object_or_404(
+            Presensi,
+            id=presensi_id,
+            mahasiswa=mahasiswa,
+            jam_checkout__isnull=True
+        )
+        
+        now_local = datetime.now()
+        
+        # Lakukan auto checkout
+        presensi.jam_checkout = now_local.time()
+        presensi.session_status = 'auto_checkout'
+        presensi.consecutive_failures = 0
+        
+        # Hitung durasi
+        checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
+        checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
+        
+        if checkout_dt < checkin_dt:
+            checkout_dt += timedelta(days=1)
+        
+        durasi = checkout_dt - checkin_dt
+        
+        Durasi.objects.update_or_create(
+            presensi=presensi,
+            defaults={'waktu_durasi': durasi}
+        )
+        
+        presensi.save()
+        
+        print(f"[AUTO CHECKOUT] Mahasiswa {mahasiswa.user.nama_lengkap} - {reason}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Auto checkout: {reason}',
+            'checkout_time': presensi.jam_checkout.strftime('%H:%M:%S')
+        })
+        
+    except Exception as e:
+        print(f"Error in auto_checkout_timeout: {e}")
+        return JsonResponse({'success': False, 'message': str(e)})
 
 @login_required
 def get_verification_logs(request):
@@ -1633,83 +2194,6 @@ def calculate_aggregate_progress(mahasiswa):
             for kegiatan in kegiatan_pa_list
         ]
     }
-
-@csrf_exempt
-@login_required
-def checkout_presensi(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            mahasiswa_id = data.get('mahasiswa_id')
-            foto_base64 = data.get('foto')
-
-            if foto_base64:
-                format, imgstr = foto_base64.split(';base64,')
-                ext = format.split('/')[-1]
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f'checkout_{mahasiswa_id}_{timestamp}.{ext}'
-                foto_data = ContentFile(base64.b64decode(imgstr), name=filename)
-
-            mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
-
-            presensi = Presensi.objects.filter(
-                mahasiswa=mahasiswa,
-                tanggal_presensi=date.today(),
-                jam_checkout__isnull=True
-            ).order_by('-jam_checkin').first()
-
-            if not presensi:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Tidak ada sesi check-in yang aktif'
-                })
-
-            presensi.jam_checkout = datetime.now().time()
-
-            if foto_base64:
-                presensi.foto_checkout = foto_data
-
-            presensi.save()
-
-            # Hitung dan simpan durasi (tetap pakai Durasi untuk riwayat)
-            if presensi.jam_checkin and presensi.jam_checkout:
-                checkin_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkin)
-                checkout_dt = datetime.combine(presensi.tanggal_presensi, presensi.jam_checkout)
-                if checkout_dt < checkin_dt:
-                    checkout_dt += timedelta(days=1)
-                durasi = checkout_dt - checkin_dt
-
-                Durasi.objects.update_or_create(
-                    presensi=presensi,
-                    defaults={'waktu_durasi': durasi}
-                )
-
-            if foto_base64:
-                FotoWajah.objects.create(
-                    mahasiswa=mahasiswa,
-                    file_path=foto_data,
-                    keterangan=f'Check-out {datetime.now().strftime("%d/%m/%Y %H:%M")}'
-                )
-
-            return JsonResponse({
-                'success': True,
-                'message': 'Check-out berhasil',
-                'data': {
-                    'jam_checkout': presensi.jam_checkout.strftime('%H:%M'),
-                    'presensi_id': presensi.id
-                }
-            })
-
-        except Exception as e:
-            import traceback
-            return JsonResponse({
-                'success': False,
-                'message': f'Error: {str(e)}',
-                'trace': traceback.format_exc()
-            })
-
-    return JsonResponse({'success': False, 'message': 'Method not allowed'})
-
 # Modifikasi fungsi checkout_presensi untuk langsung update jam_tercapai
 @csrf_exempt
 @login_required
@@ -2073,8 +2557,7 @@ def get_presensi_today(request):
             'success': False,
             'error': str(e)
         }, status=500)
-
-# accounts/views.py - Tambahkan di akhir file
+        
 @login_required
 def profil_mahasiswa(request):
     user = request.user
@@ -2082,17 +2565,14 @@ def profil_mahasiswa(request):
         mahasiswa = Mahasiswa.objects.select_related(
             'jenjang_pendidikan', 
             'user',
-            'semester'
+            'semester',
+            'kelas'
         ).prefetch_related('kegiatan_pa').get(user=user)
         
         nama_lengkap = user.nama_lengkap or user.get_full_name() or user.username
         nrp = user.nrp or user.username
         
-        # Debug: Cek kegiatan PA yang sudah dipilih
         kegiatan_pa_selected = list(mahasiswa.kegiatan_pa.all())
-        print(f"Kegiatan PA untuk {nama_lengkap}: {[k.id for k in kegiatan_pa_selected]}")
-        
-        # PERBAIKAN 2: Kirim kegiatan_ids_json ke template
         import json
         kegiatan_ids = [k.id for k in kegiatan_pa_selected]
         
@@ -2114,9 +2594,22 @@ def profil_mahasiswa(request):
         # Get all data for dropdowns
         dosen_list = Dosen.objects.all().order_by('nama_dosen')
         jenjang_list = Jenjang_Pendidikan.objects.all()
+        kelas_list = Kelas.objects.filter(is_active=True).order_by('nama_kelas')
         
-        # PERBAIKAN 3: Kirim semester_list, bukan semester_range
-        semester_list = Semester.objects.all()
+        # PERBAIKAN: Siapkan semester_list_json untuk initial load
+        semester_list_json = []
+        if mahasiswa.jenjang_pendidikan:
+            jenjang_nama = mahasiswa.jenjang_pendidikan.nama_jenjang
+            if "D3" in jenjang_nama:
+                semesters = Semester.objects.filter(jenjang='D3').order_by('nomor_semester')
+            elif "D4" in jenjang_nama:
+                semesters = Semester.objects.filter(jenjang='D4').order_by('nomor_semester')
+            elif "S2" in jenjang_nama:
+                semesters = Semester.objects.filter(jenjang='S2').order_by('nomor_semester')
+            else:
+                semesters = []
+            
+            semester_list_json = [{'id': s.id, 'nama_semester': s.nama_semester} for s in semesters]
         
         context = {
             'mahasiswa': {
@@ -2125,17 +2618,18 @@ def profil_mahasiswa(request):
                 'email': user.email,
                 'jenjang': mahasiswa.jenjang_pendidikan.nama_jenjang if mahasiswa.jenjang_pendidikan else '',
                 'jenjang_pendidikan': mahasiswa.jenjang_pendidikan,
-                'kelas': mahasiswa.kelas,
+                'kelas': mahasiswa.kelas.nama_kelas if mahasiswa.kelas else '',
+                'kelas_obj': mahasiswa.kelas,
                 'semester': mahasiswa.semester.nama_semester if mahasiswa.semester else '',
-                'semester_id': mahasiswa.semester.id if mahasiswa.semester else '',  # ID semester
-                'angkatan': mahasiswa.angkatan,
+                'semester_id': mahasiswa.semester.id if mahasiswa.semester else '',
                 'kegiatan_pa': kegiatan_pa_selected,
             },
             'dosen_pembimbing': dosen_pembimbing,
             'dosen_list': dosen_list,
             'jenjang_list': jenjang_list,
-            'semester_list': semester_list,  # Kirim list semester
-            'kegiatan_ids_json': json.dumps(kegiatan_ids),  # Kirim JSON
+            'kelas_list': kelas_list,
+            'semester_list_json': json.dumps(semester_list_json),  # Tambahkan ini!
+            'kegiatan_ids_json': json.dumps(kegiatan_ids),
         }
         
     except Mahasiswa.DoesNotExist as e:
@@ -2145,7 +2639,8 @@ def profil_mahasiswa(request):
             'dosen_pembimbing': [],
             'dosen_list': [],
             'jenjang_list': [],
-            'semester_list': [],
+            'kelas_list': [],
+            'semester_list_json': '[]',
             'kegiatan_ids_json': '[]',
         }
         
@@ -2767,14 +3262,12 @@ def approval_pendaftaran(request):
     
     search_query = request.GET.get('search', '').strip()
     
-    # Query dengan select_related untuk optimasi
     pendaftaran_list = Pengajuan_Pendaftaran.objects.select_related(
         'mahasiswa__user', 
         'mahasiswa__jenjang_pendidikan',
         'mahasiswa__semester'
     ).all()
     
-    # Filter berdasarkan search
     if search_query:
         pendaftaran_list = pendaftaran_list.filter(
             Q(mahasiswa__user__nama_lengkap__icontains=search_query) |
@@ -2782,7 +3275,6 @@ def approval_pendaftaran(request):
             Q(mahasiswa__user__email__icontains=search_query)
         )
     
-    # Urutkan berdasarkan status (pending dulu) lalu created_at
     from django.db.models import Case, When, Value, IntegerField
     pendaftaran_list = pendaftaran_list.annotate(
         status_order=Case(
@@ -2794,36 +3286,30 @@ def approval_pendaftaran(request):
         )
     ).order_by('status_order', '-created_at')
     
-    # Hitung statistik
     total_pendaftaran = pendaftaran_list.count()
     menunggu_approval = pendaftaran_list.filter(status_pengajuan='pending').count()
     disetujui = pendaftaran_list.filter(status_pengajuan='disetujui').count()
     ditolak = pendaftaran_list.filter(status_pengajuan='ditolak').count()
     
-    # Handle download request
+    # DOWNLOAD
     if 'download' in request.GET:
         mahasiswa_id = request.GET.get('download')
         return download_foto_wajah(request, mahasiswa_id)
     
-    # Jika request AJAX untuk mengambil detail
+    # AJAX GET
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         action = request.GET.get('action', '')
         
         if action == 'detail':
-            mahasiswa_id = request.GET.get('mahasiswa_id')
-            return get_detail_pendaftaran(request, mahasiswa_id)
-        
+            return get_detail_pendaftaran(request, request.GET.get('mahasiswa_id'))
         elif action == 'approve_modal':
-            pengajuan_id = request.GET.get('pengajuan_id')
-            return get_approve_modal(request, pengajuan_id)
-        
+            return get_approve_modal(request, request.GET.get('pengajuan_id'))
         elif action == 'reject_modal':
-            pengajuan_id = request.GET.get('pengajuan_id')
-            return get_reject_modal(request, pengajuan_id)
+            return get_reject_modal(request, request.GET.get('pengajuan_id'))
     
-    # Jika POST untuk update status - PERBAIKAN
+    # ================= POST =================
     if request.method == 'POST':
-        print(f"\n=== DEBUG: POST REQUEST DITERIMA ===")
+        print("\n=== DEBUG: POST REQUEST DITERIMA ===")
         print(f"POST data: {dict(request.POST)}")
         
         pengajuan_id = request.POST.get('pengajuan_id')
@@ -2831,13 +3317,9 @@ def approval_pendaftaran(request):
         alasan_penolakan = request.POST.get('alasan_penolakan', '')
         
         if not pengajuan_id:
-            return JsonResponse({
-                'success': False,
-                'message': 'ID pengajuan tidak ditemukan'
-            })
+            return JsonResponse({'success': False, 'message': 'ID tidak ditemukan'})
         
         try:
-            # DAPATKAN OBJEK DARI DATABASE
             pengajuan = Pengajuan_Pendaftaran.objects.get(id=pengajuan_id)
             mahasiswa = pengajuan.mahasiswa
             user = mahasiswa.user
@@ -2845,99 +3327,161 @@ def approval_pendaftaran(request):
             print(f"DEBUG: Status sebelum: {pengajuan.status_pengajuan}")
             print(f"DEBUG: Mahasiswa: {user.nama_lengkap}")
             
-            # GUNAKAN TRANSACTION ATOMIC UNTUK KONSISTENSI
             with transaction.atomic():
+
+                # ================= APPROVE =================
                 if action == 'approve':
                     pengajuan.status_pengajuan = 'disetujui'
                     pengajuan.alasan_penolakan = ''
+                    pengajuan.updated_at = datetime.now()
                     
-                    # Aktifkan akun mahasiswa
                     user.is_active = True
-                    user.status_akun = 'disetujui'  # Tambahan update status_akun
+                    user.status_akun = 'aktif'
+                    
+                    print("DEBUG: APPROVE dijalankan")
+                    
+                    pengajuan.save()
+                    user.save()
+                    
+                    try:
+                        subject = '✅ Pendaftaran Anda Telah Disetujui'
+                        
+                        context = {
+                            'nama_mahasiswa': user.nama_lengkap,
+                            'nim': user.nrp,
+                            'status': 'disetujui',
+                            'tgl_pengajuan': pengajuan.created_at.strftime('%d %B %Y'),
+                            'tgl_keputusan': datetime.now().strftime('%d %B %Y'),
+                            'pesan': 'Akun Anda telah diaktifkan.',
+                        }
+                        
+                        html_message = render_to_string('email/notifikasi_pendaftaran.html', context)
+                        plain_message = strip_tags(html_message)
+                        
+                        send_mail(
+                            subject,
+                            plain_message,
+                            settings.DEFAULT_FROM_EMAIL,
+                            [user.email],
+                            html_message=html_message,
+                            fail_silently=False,
+                        )
+                        
+                        print(f"✅ Email approve terkirim ke {user.email}")
+                    
+                    except Exception as e:
+                        print(f"❌ Email approve error: {e}")
 
-                    
-                    print(f"DEBUG: Status diubah menjadi: disetujui")
-                    print(f"DEBUG: User {user.username} diaktifkan")
-                    
-                    messages.success(request, f'Pendaftaran {user.nama_lengkap} berhasil disetujui.')
-                    
+                # ================= REJECT (FULL DEBUG) =================
                 elif action == 'reject':
                     if not alasan_penolakan:
                         return JsonResponse({
                             'success': False,
-                            'message': 'Alasan penolakan harus diisi'
+                            'message': 'Alasan wajib diisi'
                         })
                     
                     pengajuan.status_pengajuan = 'ditolak'
                     pengajuan.alasan_penolakan = alasan_penolakan
+                    pengajuan.updated_at = datetime.now()
                     
-                    # Nonaktifkan akun mahasiswa
                     user.is_active = False
-                    user.status_akun = 'ditolak'  # Tambahan update status_akun
-
+                    user.status_akun = 'nonaktif'
                     
-                    print(f"DEBUG: Status diubah menjadi: ditolak")
-                    print(f"DEBUG: User {user.username} dinonaktifkan")
+                    print("DEBUG: REJECT dijalankan")
                     print(f"DEBUG: Alasan: {alasan_penolakan}")
                     
-                    messages.warning(request, f'Pendaftaran {user.nama_lengkap} ditolak.')
+                    # SAVE DULU
+                    pengajuan.save()
+                    user.save()
+                    
+                    # ===== DEBUG EMAIL =====
+                    print(f"\n📧 [EMAIL DEBUG] Kirim ke: {user.email}")
+                    print(f"📧 Nama: {user.nama_lengkap}")
+                    print(f"📧 NIM: {user.nrp}")
+                    
+                    # CEK TEMPLATE
+                    from django.template.loader import get_template
+                    try:
+                        get_template('email/notifikasi_pendaftaran.html')
+                        print("✅ Template ditemukan")
+                    except Exception as e:
+                        print(f"❌ Template error: {e}")
+                    
+                    try:
+                        subject = '❌ Pendaftaran Anda Ditolak'
+                        
+                        context = {
+                            'nama_mahasiswa': user.nama_lengkap,
+                            'nim': user.nrp,
+                            'status': 'ditolak',
+                            'tgl_pengajuan': pengajuan.created_at.strftime('%d %B %Y'),
+                            'tgl_keputusan': datetime.now().strftime('%d %B %Y'),
+                            'alasan_penolakan': alasan_penolakan,
+                            'pesan': 'Silakan daftar ulang.',
+                        }
+                        
+                        print(f"📧 Context: {context}")
+                        
+                        html_message = render_to_string(
+                            'email/notifikasi_pendaftaran.html', context
+                        )
+                        plain_message = strip_tags(html_message)
+                        
+                        print(f"📧 HTML length: {len(html_message)}")
+                        
+                        result = send_mail(
+                            subject,
+                            plain_message,
+                            settings.DEFAULT_FROM_EMAIL,
+                            [user.email],
+                            html_message=html_message,
+                            fail_silently=False,
+                        )
+                        
+                        print(f"✅ Email reject terkirim ({result})")
+                    
+                    except Exception as e:
+                        print(f"❌❌ EMAIL ERROR: {type(e).__name__}: {e}")
+                        import traceback
+                        traceback.print_exc()
+
                 else:
-                    return JsonResponse({
-                        'success': False,
-                        'message': 'Action tidak valid'
-                    })
-                
-                # SIMPAN PERUBAHAN
-                pengajuan.save()
-                user.save()
-                
-                # TRANSACTION AKAN COMMIT OTOMATIS DI SINI JIKA TIDAK ADA ERROR
-                
-            # Refresh dari database untuk memastikan
-            pengajuan.refresh_from_db()
-            user.refresh_from_db()
-            
-            print(f"DEBUG: Status setelah refresh: {pengajuan.status_pengajuan}")
-            print(f"DEBUG: Updated at: {pengajuan.updated_at}")
-            print(f"DEBUG: User active: {user.is_active}")
-            print("=== DEBUG: SELESAI ===\n")
+                    return JsonResponse({'success': False, 'message': 'Action tidak valid'})
             
             return JsonResponse({
                 'success': True,
-                'message': 'Status pendaftaran berhasil diperbarui',
+                'message': 'Berhasil update status',
                 'new_status': pengajuan.status_pengajuan
             })
-                
+        
         except Pengajuan_Pendaftaran.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': 'Pengajuan tidak ditemukan'
-            })
+            return JsonResponse({'success': False, 'message': 'Data tidak ditemukan'})
+        
         except Exception as e:
-            print(f"ERROR: {str(e)}")
-            return JsonResponse({
-                'success': False,
-                'message': f'Terjadi kesalahan: {str(e)}'
-            })
-    
-    # GET request biasa - tampilkan halaman utama
-    context = {
+            print(f"ERROR BESAR: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    # ================= GET NORMAL =================
+    return render(request, 'admin/approval_pendaftaran.html', {
         'pendaftaran_list': pendaftaran_list,
         'total_pendaftaran': total_pendaftaran,
         'menunggu_approval': menunggu_approval,
         'disetujui': disetujui,
         'ditolak': ditolak,
         'search_query': search_query,
-    }
-    
-    return render(request, 'admin/approval_pendaftaran.html', context)
+    })
 
 def get_detail_pendaftaran(request, mahasiswa_id):
     """Ambil data detail pendaftaran untuk modal"""
     mahasiswa = get_object_or_404(Mahasiswa, id=mahasiswa_id)
     
-    # Ambil semua foto wajah
+    # Ambil semua foto wajah (BUKAN KTM)
     foto_wajah = FotoWajah.objects.filter(mahasiswa=mahasiswa).order_by('-created_at')
+    
+    # Ambil foto KTM dari field mahasiswa
+    foto_ktm = mahasiswa.foto_ktm  # ← Ambil dari model (field foto_ktm)
     
     # Ambil semua dosen pembimbing
     dosen_pembimbing_list = Mahasiswa_Dosen.objects.filter(
@@ -2950,6 +3494,7 @@ def get_detail_pendaftaran(request, mahasiswa_id):
     context = {
         'mahasiswa': mahasiswa,
         'foto_wajah': foto_wajah,
+        'foto_ktm': foto_ktm,  # ← KIRIM sebagai foto_ktm (bukan foto_ktp)
         'dosen_pembimbing_list': dosen_pembimbing_list,
         'kegiatan_pa_list': kegiatan_pa_list,
     }
@@ -3099,7 +3644,7 @@ def export_data_mahasiswa_excel(mahasiswa_list):
     headers = [
         'No', 'NRP', 'Nama Mahasiswa', 'Email', 
         'Jenjang', 'Kelas', 'Semester', 'Jurusan/Prodi',
-        'Angkatan', 'Status', 'Kegiatan SKS', 'Tanggal Daftar'
+        'Status', 'Kegiatan SKS', 'Tanggal Daftar'
     ]
     
     # Tulis header
@@ -3126,7 +3671,6 @@ def export_data_mahasiswa_excel(mahasiswa_list):
             mahasiswa.kelas or "",
             mahasiswa.semester.nama_semester if mahasiswa.semester else "",
             mahasiswa.jurusan or "",
-            mahasiswa.angkatan or "",
             "Aktif" if mahasiswa.user.is_active else "Nonaktif",
             kegiatan_sks,
             mahasiswa.user.date_joined.strftime("%d-%m-%Y %H:%M") if mahasiswa.user.date_joined else ""
@@ -3207,7 +3751,6 @@ def edit_mahasiswa(request, mahasiswa_id):
                 mahasiswa.semester = Semester.objects.get(id=semester_id)
             
             mahasiswa.kelas = request.POST.get('kelas', mahasiswa.kelas)
-            mahasiswa.angkatan = request.POST.get('angkatan', mahasiswa.angkatan)
             mahasiswa.jurusan = request.POST.get('jurusan', mahasiswa.jurusan)
             mahasiswa.save()
             
@@ -3257,6 +3800,604 @@ def hapus_mahasiswa(request, mahasiswa_id):
         'success': False,
         'message': 'Metode tidak diizinkan'
     }, status=405)
+
+@login_required
+def data_dosen(request):
+    """View untuk data dosen admin"""
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        messages.error(request, 'Akses ditolak. Halaman ini untuk admin.')
+        return redirect('admin_dashboard')
+    
+    # Ambil parameter filter dari URL
+    prodi_filter = request.GET.get('prodi', '')
+    search_query = request.GET.get('search', '').strip()
+    
+    # Query dasar
+    dosen_list = Dosen.objects.all()
+    
+    # Filter berdasarkan prodi
+    if prodi_filter:
+        dosen_list = dosen_list.filter(prodi__icontains=prodi_filter)
+    
+    # Filter berdasarkan search (nama, NIP)
+    if search_query:
+        dosen_list = dosen_list.filter(
+            Q(nama_dosen__icontains=search_query) |
+            Q(nip__icontains=search_query) |
+            Q(prodi__icontains=search_query)
+        )
+    
+    # Urutkan berdasarkan nama
+    dosen_list = dosen_list.order_by('nama_dosen')
+    
+    # Hitung statistik
+    total_dosen = dosen_list.count()
+    
+    # Ambil semua prodi unik untuk filter
+    prodi_list = Dosen.objects.values_list('prodi', flat=True).distinct().order_by('prodi')
+    prodi_list = [p for p in prodi_list if p]  # Filter None/empty
+    
+    # Handle export Excel
+    if request.GET.get('export') == 'excel':
+        return export_data_dosen_excel(dosen_list)
+    
+    context = {
+        'dosen_list': dosen_list,
+        'total_dosen': total_dosen,
+        'prodi_filter': prodi_filter,
+        'search_query': search_query,
+        'prodi_list': prodi_list,
+    }
+    
+    return render(request, 'admin/data_dosen.html', context)
+
+@login_required
+def tambah_dosen(request):
+    """View untuk menambah dosen baru"""
+    if request.method == 'POST':
+        try:
+            nip = request.POST.get('nip', '').strip()
+            nama_dosen = request.POST.get('nama_dosen', '').strip()
+            prodi = request.POST.get('prodi', '').strip()
+            
+            if not nip or not nama_dosen or not prodi:
+                return JsonResponse({'success': False, 'message': 'Semua field harus diisi'})
+            
+            # Cek duplikat NIP
+            if Dosen.objects.filter(nip=nip).exists():
+                return JsonResponse({'success': False, 'message': f'NIP {nip} sudah terdaftar'})
+            
+            dosen = Dosen.objects.create(
+                nip=nip,
+                nama_dosen=nama_dosen,
+                prodi=prodi
+            )
+            
+            return JsonResponse({'success': True, 'message': f'Dosen {dosen.nama_dosen} berhasil ditambahkan'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+@login_required
+def edit_dosen(request, dosen_id):
+    """View untuk mengedit dosen"""
+    if request.method == 'POST':
+        try:
+            dosen = get_object_or_404(Dosen, id=dosen_id)
+            
+            nip = request.POST.get('nip', '').strip()
+            nama_dosen = request.POST.get('nama_dosen', '').strip()
+            prodi = request.POST.get('prodi', '').strip()
+            
+            if not nip or not nama_dosen or not prodi:
+                return JsonResponse({'success': False, 'message': 'Semua field harus diisi'})
+            
+            # Cek duplikat NIP (kecuali dengan dirinya sendiri)
+            if Dosen.objects.exclude(id=dosen_id).filter(nip=nip).exists():
+                return JsonResponse({'success': False, 'message': f'NIP {nip} sudah digunakan dosen lain'})
+            
+            dosen.nip = nip
+            dosen.nama_dosen = nama_dosen
+            dosen.prodi = prodi
+            dosen.save()
+            
+            return JsonResponse({'success': True, 'message': 'Data dosen berhasil diperbarui'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+@login_required
+def hapus_dosen(request, dosen_id):
+    """View untuk menghapus dosen"""
+    if request.method == 'POST':
+        try:
+            dosen = get_object_or_404(Dosen, id=dosen_id)
+            
+            # Cek apakah dosen sedang digunakan sebagai pembimbing
+            if Mahasiswa_Dosen.objects.filter(dosen=dosen).exists():
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Tidak dapat menghapus dosen yang masih menjadi pembimbing mahasiswa'
+                })
+            
+            nama_dosen = dosen.nama_dosen
+            dosen.delete()
+            
+            return JsonResponse({'success': True, 'message': f'Dosen {nama_dosen} berhasil dihapus'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+@login_required
+def get_detail_dosen(request, dosen_id):
+    """API untuk mendapatkan detail dosen"""
+    try:
+        dosen = get_object_or_404(Dosen, id=dosen_id)
+        
+        # Hitung jumlah mahasiswa bimbingan
+        jumlah_bimbingan = Mahasiswa_Dosen.objects.filter(dosen=dosen).count()
+        
+        return JsonResponse({
+            'success': True,
+            'dosen': {
+                'id': dosen.id,
+                'nip': dosen.nip,
+                'nama_dosen': dosen.nama_dosen,
+                'prodi': dosen.prodi,
+                'jumlah_bimbingan': jumlah_bimbingan
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+def export_data_dosen_excel(dosen_list):
+    """Export data dosen ke Excel"""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Data Dosen"
+    
+    # Style untuk header
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+    alignment_center = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Header kolom
+    headers = ['No', 'NIP', 'Nama Dosen', 'Program Studi', 'Jumlah Bimbingan']
+    
+    # Tulis header
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = alignment_center
+        cell.border = thin_border
+    
+    # Tulis data
+    for row_num, dosen in enumerate(dosen_list, 2):
+        jumlah_bimbingan = Mahasiswa_Dosen.objects.filter(dosen=dosen).count()
+        
+        data = [
+            row_num - 1,
+            dosen.nip,
+            dosen.nama_dosen,
+            dosen.prodi or '-',
+            jumlah_bimbingan
+        ]
+        
+        for col_num, value in enumerate(data, 1):
+            cell = ws.cell(row=row_num, column=col_num, value=value)
+            cell.border = thin_border
+    
+    # Auto adjust column width
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 30)
+        ws.column_dimensions[column].width = adjusted_width
+    
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"data_dosen_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    wb.save(response)
+    return response
+
+# views.py - Tambahkan fungsi-fungsi berikut
+@login_required
+def master_kelas(request):
+    """View untuk master data kelas admin"""
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        messages.error(request, 'Akses ditolak. Halaman ini untuk admin.')
+        return redirect('admin_dashboard')
+    
+    # Ambil semua data kelas
+    kelas_list = Kelas.objects.all().order_by('nama_kelas')
+    
+    # Filter berdasarkan pencarian
+    search_query = request.GET.get('search', '')
+    if search_query:
+        kelas_list = kelas_list.filter(
+            Q(nama_kelas__icontains=search_query) |
+            Q(kode_kelas__icontains=search_query)
+        )
+    
+    # Hitung statistik
+    total_kelas = Kelas.objects.count()
+    total_kelas_aktif = Kelas.objects.filter(is_active=True).count()
+    total_mahasiswa = Mahasiswa.objects.filter(pengajuan_pendaftaran__status_pengajuan='disetujui').count()
+    
+    context = {
+        'kelas_list': kelas_list,
+        'total_kelas': total_kelas,
+        'total_kelas_aktif': total_kelas_aktif,
+        'total_mahasiswa': total_mahasiswa,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'admin/master_kelas.html', context)
+
+
+@login_required
+def tambah_kelas(request):
+    """View untuk menambah kelas baru"""
+    if request.method == 'POST':
+        try:
+            nama_kelas = request.POST.get('nama_kelas', '').strip().upper()
+            kode_kelas = request.POST.get('kode_kelas', '').strip().upper()
+            is_active = request.POST.get('is_active') == 'on'
+            
+            if not nama_kelas:
+                messages.error(request, 'Nama kelas harus diisi')
+                return redirect('master_kelas')
+            
+            # Jika kode_kelas kosong, gunakan nama_kelas
+            if not kode_kelas:
+                kode_kelas = nama_kelas
+            
+            # Cek duplikat
+            if Kelas.objects.filter(nama_kelas__iexact=nama_kelas).exists():
+                messages.error(request, f'Kelas "{nama_kelas}" sudah ada')
+                return redirect('master_kelas')
+            
+            if Kelas.objects.filter(kode_kelas__iexact=kode_kelas).exists():
+                messages.error(request, f'Kode kelas "{kode_kelas}" sudah digunakan')
+                return redirect('master_kelas')
+            
+            kelas = Kelas.objects.create(
+                nama_kelas=nama_kelas,
+                kode_kelas=kode_kelas,
+                is_active=is_active
+            )
+            messages.success(request, f'Kelas "{kelas.nama_kelas}" berhasil ditambahkan')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+    
+    return redirect('master_kelas')
+
+
+@login_required
+def edit_kelas(request, kelas_id):
+    """View untuk mengedit kelas"""
+    if request.method == 'POST':
+        try:
+            kelas = get_object_or_404(Kelas, id=kelas_id)
+            
+            nama_kelas = request.POST.get('nama_kelas', '').strip().upper()
+            kode_kelas = request.POST.get('kode_kelas', '').strip().upper()
+            is_active = request.POST.get('is_active') == 'on'
+            
+            if not nama_kelas:
+                return JsonResponse({'success': False, 'message': 'Nama kelas harus diisi'})
+            
+            # Jika kode_kelas kosong, gunakan nama_kelas
+            if not kode_kelas:
+                kode_kelas = nama_kelas
+            
+            # Cek duplikat (kecuali dengan dirinya sendiri)
+            if Kelas.objects.exclude(id=kelas_id).filter(nama_kelas__iexact=nama_kelas).exists():
+                return JsonResponse({'success': False, 'message': f'Kelas "{nama_kelas}" sudah ada'})
+            
+            if Kelas.objects.exclude(id=kelas_id).filter(kode_kelas__iexact=kode_kelas).exists():
+                return JsonResponse({'success': False, 'message': f'Kode kelas "{kode_kelas}" sudah digunakan'})
+            
+            kelas.nama_kelas = nama_kelas
+            kelas.kode_kelas = kode_kelas
+            kelas.is_active = is_active
+            kelas.save()
+            
+            return JsonResponse({'success': True, 'message': 'Kelas berhasil diperbarui'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+
+@login_required
+def hapus_kelas(request, kelas_id):
+    """View untuk menghapus kelas"""
+    if request.method == 'POST':
+        try:
+            kelas = get_object_or_404(Kelas, id=kelas_id)
+            
+            # Cek apakah kelas sedang digunakan oleh mahasiswa
+            if Mahasiswa.objects.filter(kelas=kelas).exists():
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Tidak dapat menghapus kelas yang masih digunakan oleh mahasiswa'
+                })
+            
+            nama_kelas = kelas.nama_kelas
+            kelas.delete()
+            
+            return JsonResponse({'success': True, 'message': f'Kelas "{nama_kelas}" berhasil dihapus'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+
+@login_required
+def get_detail_kelas(request, kelas_id):
+    """API untuk mendapatkan detail kelas"""
+    try:
+        kelas = get_object_or_404(Kelas, id=kelas_id)
+        
+        # Hitung jumlah penggunaan
+        mahasiswa_count = Mahasiswa.objects.filter(kelas=kelas).count()
+        
+        return JsonResponse({
+            'success': True,
+            'kelas': {
+                'id': kelas.id,
+                'nama_kelas': kelas.nama_kelas,
+                'kode_kelas': kelas.kode_kelas,
+                'is_active': kelas.is_active,
+                'mahasiswa_count': mahasiswa_count
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+@login_required
+def master_prodi(request):
+    """View untuk master data prodi/jurusan admin"""
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        messages.error(request, 'Akses ditolak. Halaman ini untuk admin.')
+        return redirect('admin_dashboard')
+    
+    # Ambil parameter filter
+    jenjang_filter = request.GET.get('jenjang', '')
+    search_query = request.GET.get('search', '').strip()
+    
+    # Query data prodi
+    prodi_list = Prodi.objects.select_related('jenjang').all()
+    
+    if jenjang_filter:
+        prodi_list = prodi_list.filter(jenjang_id=jenjang_filter)
+    
+    if search_query:
+        prodi_list = prodi_list.filter(
+            Q(nama_prodi__icontains=search_query) |
+            Q(kode_prodi__icontains=search_query)
+        )
+    
+    prodi_list = prodi_list.order_by('jenjang__nama_jenjang', 'kode_prodi')
+    
+    # Statistik
+    total_prodi = prodi_list.count()
+    total_jenjang = Jenjang_Pendidikan.objects.count()
+    total_mahasiswa = Mahasiswa.objects.filter(pengajuan_pendaftaran__status_pengajuan='disetujui').count()
+    
+    # Jenjang list untuk filter
+    jenjang_list = Jenjang_Pendidikan.objects.all()
+    
+    context = {
+        'prodi_list': prodi_list,
+        'jenjang_list': jenjang_list,
+        'total_prodi': total_prodi,
+        'total_jenjang': total_jenjang,
+        'total_mahasiswa': total_mahasiswa,
+        'jenjang_filter': jenjang_filter,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'admin/master_prodi.html', context)
+
+
+@login_required
+def tambah_prodi(request):
+    """View untuk menambah prodi baru"""
+    if request.method == 'POST':
+        try:
+            jenjang_id = request.POST.get('jenjang')
+            kode_prodi = request.POST.get('kode_prodi', '').strip().upper()
+            nama_prodi = request.POST.get('nama_prodi', '').strip()
+            nama_singkat = request.POST.get('nama_singkat', '').strip()
+            
+            if not jenjang_id or not kode_prodi or not nama_prodi:
+                return JsonResponse({'success': False, 'message': 'Semua field harus diisi'})
+            
+            # Cek duplikat
+            if Prodi.objects.filter(kode_prodi=kode_prodi).exists():
+                return JsonResponse({'success': False, 'message': f'Kode prodi {kode_prodi} sudah terdaftar'})
+            
+            prodi = Prodi.objects.create(
+                jenjang_id=jenjang_id,
+                kode_prodi=kode_prodi,
+                nama_prodi=nama_prodi,
+                nama_singkat=nama_singkat or kode_prodi,
+                is_active=True
+            )
+            
+            return JsonResponse({'success': True, 'message': f'Prodi {prodi.nama_prodi} berhasil ditambahkan'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+
+@login_required
+def edit_prodi(request, prodi_id):
+    """View untuk mengedit prodi"""
+    if request.method == 'POST':
+        try:
+            prodi = get_object_or_404(Prodi, id=prodi_id)
+            
+            kode_prodi = request.POST.get('kode_prodi', '').strip().upper()
+            nama_prodi = request.POST.get('nama_prodi', '').strip()
+            nama_singkat = request.POST.get('nama_singkat', '').strip()
+            is_active = request.POST.get('is_active') == 'on'
+            
+            if not kode_prodi or not nama_prodi:
+                return JsonResponse({'success': False, 'message': 'Kode dan nama prodi harus diisi'})
+            
+            # Cek duplikat kode (kecuali dirinya sendiri)
+            if Prodi.objects.exclude(id=prodi_id).filter(kode_prodi=kode_prodi).exists():
+                return JsonResponse({'success': False, 'message': f'Kode prodi {kode_prodi} sudah digunakan prodi lain'})
+            
+            prodi.kode_prodi = kode_prodi
+            prodi.nama_prodi = nama_prodi
+            prodi.nama_singkat = nama_singkat or kode_prodi
+            prodi.is_active = is_active
+            prodi.save()
+            
+            return JsonResponse({'success': True, 'message': 'Prodi berhasil diperbarui'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+
+@login_required
+def hapus_prodi(request, prodi_id):
+    """View untuk menghapus prodi"""
+    if request.method == 'POST':
+        try:
+            prodi = get_object_or_404(Prodi, id=prodi_id)
+            
+            # Cek apakah prodi digunakan mahasiswa
+            if Mahasiswa.objects.filter(prodi=prodi).exists():
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Tidak dapat menghapus prodi yang masih digunakan oleh mahasiswa'
+                })
+            
+            nama_prodi = prodi.nama_prodi
+            prodi.delete()
+            
+            return JsonResponse({'success': True, 'message': f'Prodi {nama_prodi} berhasil dihapus'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+
+@login_required
+def get_detail_prodi(request, prodi_id):
+    """API untuk mendapatkan detail prodi"""
+    try:
+        prodi = get_object_or_404(Prodi.objects.select_related('jenjang'), id=prodi_id)
+        
+        # Hitung jumlah penggunaan
+        mahasiswa_count = Mahasiswa.objects.filter(prodi=prodi).count()
+        
+        return JsonResponse({
+            'success': True,
+            'prodi': {
+                'id': prodi.id,
+                'kode_prodi': prodi.kode_prodi,
+                'nama_prodi': prodi.nama_prodi,
+                'nama_singkat': prodi.nama_singkat,
+                'jenjang_id': prodi.jenjang.id,
+                'jenjang_nama': prodi.jenjang.nama_jenjang,
+                'is_active': prodi.is_active,
+                'mahasiswa_count': mahasiswa_count,
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+def get_registration_summary(request):
+    """API untuk mendapatkan ringkasan data registrasi"""
+    try:
+        step1_data = request.session.get('step1_data', {})
+        step2_data = request.session.get('step2_data', {})
+        
+        return JsonResponse({
+            'success': True,
+            'step1': {
+                'nama_lengkap': step1_data.get('nama_lengkap', ''),
+                'nim': step1_data.get('nim', ''),
+                'email': step1_data.get('email', ''),
+                'kelas_nama': step1_data.get('kelas_nama', ''),
+            },
+            'step2': {
+                'prodi_nama': step2_data.get('prodi_nama', ''),
+                'jenjang_nama': step2_data.get('jenjang_nama', ''),
+                'semester_nama': step2_data.get('semester_nama', ''),
+                'kegiatan_pa_list': step2_data.get('kegiatan_pa_list', ''),
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def get_prodi_by_jenjang(request, jenjang_id):
+    try:
+        prodi_list = Prodi.objects.filter(
+            jenjang_id=jenjang_id,
+            is_active=True
+        ).values('id', 'nama_prodi', 'kode_prodi').order_by('nama_prodi')
+        
+        return JsonResponse({
+            'success': True,
+            'prodi_list': [
+                {'id': p['id'], 'nama': p['nama_prodi'], 'kode': p['kode_prodi']} 
+                for p in prodi_list
+            ]
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False, 
+            'prodi_list': [], 
+            'error': str(e)
+        })
 
 @login_required
 def master_data_wajah(request):
@@ -3392,6 +4533,141 @@ def data_sks(request):
     }
     return render(request, 'admin/data_sks.html', context)
 
+@login_required
+def master_jenjang(request):
+    """View untuk master data jenjang pendidikan"""
+    if not (request.user.role == 'admin' or request.user.is_superuser):
+        messages.error(request, 'Akses ditolak. Halaman ini untuk admin.')
+        return redirect('admin_dashboard')
+    
+    # Ambil semua data jenjang
+    jenjang_list = Jenjang_Pendidikan.objects.all().order_by('nama_jenjang')
+    
+    # Filter berdasarkan pencarian
+    search_query = request.GET.get('search', '')
+    if search_query:
+        jenjang_list = jenjang_list.filter(nama_jenjang__icontains=search_query)
+    
+    # Hitung statistik
+    total_jenjang = jenjang_list.count()
+    total_mahasiswa = Mahasiswa.objects.filter(jenjang_pendidikan__in=jenjang_list).count()
+    total_kegiatan = Kegiatan_PA.objects.filter(jenjang_pendidikan__in=jenjang_list).count()
+    
+    context = {
+        'jenjang_list': jenjang_list,
+        'total_jenjang': total_jenjang,
+        'total_mahasiswa': total_mahasiswa,
+        'total_kegiatan': total_kegiatan,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'admin/master_jenjang.html', context)
+
+@login_required
+def tambah_jenjang(request):
+    """View untuk menambah jenjang pendidikan"""
+    if request.method == 'POST':
+        try:
+            nama_jenjang = request.POST.get('nama_jenjang', '').strip()
+            
+            if not nama_jenjang:
+                messages.error(request, 'Nama jenjang harus diisi')
+                return redirect('master_jenjang')
+            
+            # Cek duplikat
+            if Jenjang_Pendidikan.objects.filter(nama_jenjang__iexact=nama_jenjang).exists():
+                messages.error(request, f'Jenjang "{nama_jenjang}" sudah ada')
+                return redirect('master_jenjang')
+            
+            jenjang = Jenjang_Pendidikan.objects.create(nama_jenjang=nama_jenjang)
+            messages.success(request, f'Jenjang "{jenjang.nama_jenjang}" berhasil ditambahkan')
+            
+        except Exception as e:
+            messages.error(request, f'Terjadi kesalahan: {str(e)}')
+    
+    return redirect('master_jenjang')
+
+@login_required
+def edit_jenjang(request, jenjang_id):
+    """View untuk mengedit jenjang pendidikan"""
+    if request.method == 'POST':
+        try:
+            jenjang = get_object_or_404(Jenjang_Pendidikan, id=jenjang_id)
+            nama_jenjang_baru = request.POST.get('nama_jenjang', '').strip()
+            
+            if not nama_jenjang_baru:
+                return JsonResponse({'success': False, 'message': 'Nama jenjang harus diisi'})
+            
+            # Cek duplikat (kecuali dengan dirinya sendiri)
+            if Jenjang_Pendidikan.objects.exclude(id=jenjang_id).filter(nama_jenjang__iexact=nama_jenjang_baru).exists():
+                return JsonResponse({'success': False, 'message': f'Jenjang "{nama_jenjang_baru}" sudah ada'})
+            
+            jenjang.nama_jenjang = nama_jenjang_baru
+            jenjang.save()
+            
+            return JsonResponse({'success': True, 'message': 'Jenjang berhasil diperbarui'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+@login_required
+def hapus_jenjang(request, jenjang_id):
+    """View untuk menghapus jenjang pendidikan"""
+    if request.method == 'POST':
+        try:
+            jenjang = get_object_or_404(Jenjang_Pendidikan, id=jenjang_id)
+            
+            # Cek apakah jenjang sedang digunakan
+            if Mahasiswa.objects.filter(jenjang_pendidikan=jenjang).exists():
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Tidak dapat menghapus jenjang yang masih digunakan oleh mahasiswa'
+                })
+            
+            if Kegiatan_PA.objects.filter(jenjang_pendidikan=jenjang).exists():
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Tidak dapat menghapus jenjang yang masih digunakan oleh kegiatan SKS'
+                })
+            
+            nama_jenjang = jenjang.nama_jenjang
+            jenjang.delete()
+            
+            return JsonResponse({'success': True, 'message': f'Jenjang "{nama_jenjang}" berhasil dihapus'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': 'Method not allowed'})
+
+@login_required
+def get_detail_jenjang(request, jenjang_id):
+    """API untuk mendapatkan detail jenjang"""
+    try:
+        jenjang = get_object_or_404(Jenjang_Pendidikan, id=jenjang_id)
+        
+        # Hitung jumlah penggunaan
+        mahasiswa_count = Mahasiswa.objects.filter(jenjang_pendidikan=jenjang).count()
+        kegiatan_count = Kegiatan_PA.objects.filter(jenjang_pendidikan=jenjang).count()
+        
+        return JsonResponse({
+            'success': True,
+            'jenjang': {
+                'id': jenjang.id,
+                'nama_jenjang': jenjang.nama_jenjang,
+                'mahasiswa_count': mahasiswa_count,
+                'kegiatan_count': kegiatan_count
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+        
 @login_required
 def tambah_kegiatan_sks(request):
     """View untuk menambah kegiatan SKS baru"""
@@ -3764,3 +5040,21 @@ def rekap_presensi(request):
     }
     
     return render(request, 'admin/rekap_presensi.html', context)
+
+def _save_base64_to_file(base64_str, prefix):
+    """Helper function to save base64 image to ContentFile"""
+    try:
+        # Handle both formats: with and without data:image prefix
+        if ';base64,' in base64_str:
+            format, imgstr = base64_str.split(';base64,')
+            ext = format.split('/')[-1]
+        else:
+            imgstr = base64_str
+            ext = 'jpg'  # default extension
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]
+        filename = f'{prefix}_{timestamp}.{ext}'
+        return ContentFile(base64.b64decode(imgstr), name=filename)
+    except Exception as e:
+        print(f"[ERROR] _save_base64_to_file: {e}")
+        raise

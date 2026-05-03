@@ -41,11 +41,17 @@
         
         .photo-item {
             position: relative;
-            width: 120px;
-            height: 120px;
-            border-radius: 8px;
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 2px solid #dee2e6;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        
+        .photo-item:hover {
+            transform: scale(1.05);
         }
         
         .photo-item img {
@@ -56,18 +62,19 @@
         
         .photo-remove {
             position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 24px;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.7);
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: rgba(239, 68, 68, 0.9);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            z-index: 2;
         }
         
         .guideline-list {
@@ -102,7 +109,6 @@
             margin-right: 8px;
         }
         
-        /* Important note with special styling */
         .important-note {
             background-color: #FEFCEA;
             border: 1px solid #FCF193;
@@ -123,7 +129,6 @@
             margin-bottom: 4px;
         }
         
-        /* Login link plain text without background */
         .login-link-text {
             text-align: center;
             margin-top: 20px;
@@ -131,11 +136,11 @@
         }
         
         .login-link-text p {
-            color: #000000; /* Black */
+            color: #000000;
         }
         
         .login-link-text a {
-            color: #4b5cf2; /* Purple */
+            color: #4b5cf2;
             font-weight: bold;
             text-decoration: none;
         }
@@ -166,7 +171,7 @@
             height: 100%;
             z-index: 5;
             pointer-events: none;
-            transform: scaleX(-1); /* Mirror to match video */
+            transform: scaleX(-1);
         }
 
         .face-status-badge {
@@ -212,38 +217,6 @@
             color: #334155;
         }
         
-        .photo-item {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid #fff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        
-        .photo-item:hover {
-            transform: scale(1.05);
-        }
-        
-        .photo-remove {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 20px;
-            height: 20px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 14px;
-            z-index: 2;
-        }
-        
         .btn-primary {
             background-color: #2563eb;
             border-color: #2563eb;
@@ -251,23 +224,16 @@
             border-radius: 10px;
         }
         
-        .btn-outline-primary {
-            border-radius: 10px;
-            padding: 10px 20px;
+        .id-card-preview {
+            max-width: 200px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            padding: 5px;
         }
-
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 40px 20px;
-            background-color: #f8fafc;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .upload-area:hover {
-            border-color: #3b82f6;
-            background-color: #f0f9ff;
-            transform: translateY(-2px);
+        .id-card-preview img {
+            width: 100%;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -349,6 +315,9 @@
                     <form method="post" enctype="multipart/form-data" id="upload-form">
                         {% csrf_token %}
                         
+                        <!-- Hidden input untuk menyimpan files -->
+                        <input type="file" id="id_foto_wajah" name="foto_wajah" accept=".jpg,.jpeg,.png" multiple class="d-none">
+                        
                         <div class="tab-content" id="methodTabContent">
                             <!-- Upload Pane -->
                             <div class="tab-pane fade show active" id="upload-pane" role="tabpanel" aria-labelledby="upload-tab">
@@ -360,13 +329,6 @@
                                         <h5 class="mb-2">{% trans "Click to upload photos or drag & drop" %}</h5>
                                         <p class="text-muted mb-0">JPG, PNG ({% trans "Max. 5MB per file" %})</p>
                                         <p class="text-muted small mt-2">{% trans "You can select multiple files at once." %}</p>
-                                        
-                                        <input type="file" 
-                                               id="id_file_path" 
-                                               name="file_path" 
-                                               accept=".jpg,.jpeg,.png" 
-                                               multiple
-                                               class="d-none">
                                     </div>
                                 </div>
                             </div>
@@ -390,10 +352,10 @@
                                         <canvas id="canvas" class="d-none"></canvas>
                                         
                                         <div class="d-flex justify-content-center gap-2 mt-3">
-                                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold" id="capture-btn">
+                                            <button type="button" class="btn btn-primary px-4 py-2 fw-bold" id="capture-btn" disabled>
                                                 <i class="bi bi-camera-fill me-2"></i>{% trans "Capture Photo" %}
                                             </button>
-                                            <button type="button" class="btn btn-outline-primary px-4 py-2" id="auto-capture-btn">
+                                            <button type="button" class="btn btn-outline-primary px-4 py-2" id="auto-capture-btn" disabled>
                                                 <i class="bi bi-lightning-auto me-2"></i>{% trans "Auto 10 Photos" %}
                                             </button>
                                             <button type="button" class="btn btn-outline-danger" id="stop-camera-btn">
@@ -407,12 +369,25 @@
                             </div>
                         </div>
 
+                        <!-- ID Card Upload -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{% trans "Identity Card Student (KTM)" %} :<span class="text-danger">*</span></label>
+                            <div class="upload-area" id="id-card-area" style="padding: 30px 20px;">
+                                <i class="bi bi-card-image text-primary" style="font-size: 36px;"></i>
+                                <h6 class="mb-2">{% trans "Click to upload ID card photo" %}</h6>
+                                <p class="text-muted small mb-0">JPG, PNG ({% trans "Max. 5MB" %})</p>
+                                <input type="file" id="id_foto_kartu" name="foto_kartu_identitas" accept=".jpg,.jpeg,.png" class="d-none">
+                            </div>
+                            <div id="id-card-preview" class="id-card-preview"></div>
+                        </div>
+
                         <div class="mb-4">
                             <h6 class="fw-bold mb-2">{% trans "Guidelines" %}:</h6>
                             <ul class="guideline-list text-muted small">
                                 <li>{% trans "Plain background, good lighting" %}</li>
                                 <li>{% trans "Upload or capture at least 10 photos" %}</li>
                                 <li>{% trans "Vary your expressions and head angles slightly" %}</li>
+                                <li>{% trans "ID card photo must be clear and readable" %}</li>
                             </ul>
                         </div>
 
@@ -425,7 +400,6 @@
                             </span>
                         </div>
 
-                        <!-- Important note -->
                         <div class="important-note mb-4">
                             <div class="d-flex align-items-start">
                                 <span class="photo-counter">!</span>
@@ -461,15 +435,16 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const dropArea = document.getElementById('drop-area');
-    const fileInput = document.getElementById('id_file_path');
     const photoPreview = document.getElementById('photo-preview-container');
     const photoCountNumber = document.getElementById('photo-count-number');
     const submitBtn = document.getElementById('submit-btn');
     const form = document.getElementById('upload-form');
+    const facePhotoInput = document.getElementById('id_foto_wajah');
     
     // Camera elements
     const startCameraBtn = document.getElementById('start-camera-btn');
@@ -484,38 +459,24 @@ document.addEventListener("DOMContentLoaded", function() {
     const faceCanvas = document.getElementById('face-canvas');
     const faceStatus = document.getElementById('face-status');
     
+    // ID Card elements
+    const idCardArea = document.getElementById('id-card-area');
+    const idCardInput = document.getElementById('id_foto_kartu');
+    const idCardPreview = document.getElementById('id-card-preview');
+    
     const MIN_PHOTOS = 10;
     let files = [];
+    let idCardFile = null;
     let stream = null;
     let isCapturing = false;
     let faceDetected = false;
     let detectionInterval = null;
-    let lastBox = null;
 
     // --- UPLOAD LOGIC ---
-    dropArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', function() { handleFiles(this.files); });
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
-    });
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.add('border-primary');
-            dropArea.style.backgroundColor = '#f0f7ff';
-        });
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => {
-            dropArea.classList.remove('border-primary');
-            dropArea.style.backgroundColor = '';
-        });
-    });
-
-    dropArea.addEventListener('drop', (e) => {
-        handleFiles(e.dataTransfer.files);
+    dropArea.addEventListener('click', () => facePhotoInput.click());
+    
+    facePhotoInput.addEventListener('change', function() { 
+        handleFiles(this.files); 
     });
 
     function handleFiles(selectedFiles) {
@@ -523,12 +484,13 @@ document.addEventListener("DOMContentLoaded", function() {
             const file = selectedFiles[i];
             if (!file.type.match('image.*')) continue;
             if (file.size > 5 * 1024 * 1024) continue;
+            if (files.length >= 20) break;
             files.push(file);
         }
         updateUI();
     }
 
-    // --- CAMERA LOGIC ---
+    // --- CAMERA LOGIC (sama seperti sebelumnya) ---
     async function startCamera() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ 
@@ -538,7 +500,6 @@ document.addEventListener("DOMContentLoaded", function() {
             cameraPlaceholder.classList.add('d-none');
             videoWrapper.classList.remove('d-none');
             
-            // Wait for video to be ready to set canvas size
             video.onloadedmetadata = () => {
                 faceCanvas.width = video.videoWidth;
                 faceCanvas.height = video.videoHeight;
@@ -546,7 +507,7 @@ document.addEventListener("DOMContentLoaded", function() {
             };
         } catch (err) {
             console.error("Error accessing camera:", err);
-            alert("{% trans 'Cannot access camera. Please make sure you have given permission.' %}");
+            alert("Cannot access camera. Please make sure you have given permission.");
         }
     }
 
@@ -563,24 +524,18 @@ document.addEventListener("DOMContentLoaded", function() {
         captureStatus.textContent = '';
     }
 
-    // --- MTCNN FACE DETECTION LOGIC (BACKEND CALL) ---
     function startFaceDetection() {
         if (detectionInterval) clearInterval(detectionInterval);
         
         detectionInterval = setInterval(async () => {
             if (!stream || video.paused || video.ended) return;
             
-            // Capture current frame for detection
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = video.videoWidth;
             tempCanvas.height = video.videoHeight;
             const ctx = tempCanvas.getContext('2d');
-            
-            // We mirror the detection frame to match what's on screen if needed, 
-            // but backend MTCNN doesn't care about flip. 
-            // However, drawImage(video) gives the raw frame (not flipped by CSS).
             ctx.drawImage(video, 0, 0);
-            const frameBase64 = tempCanvas.toDataURL('image/jpeg', 0.5); // Low quality for speed
+            const frameBase64 = tempCanvas.toDataURL('image/jpeg', 0.5);
             
             try {
                 const response = await fetch('/api/detect-face-registration/', {
@@ -596,27 +551,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 if (data.success && data.face_detected) {
                     faceDetected = true;
-                    lastBox = data.box;
                     updateFaceStatus(true);
                     drawFaceBox(data.box);
-                    // Enable buttons
                     if (!isCapturing) {
                         captureBtn.disabled = false;
                         autoCaptureBtn.disabled = false;
                     }
                 } else {
                     faceDetected = false;
-                    lastBox = null;
                     updateFaceStatus(false);
                     clearFaceCanvas();
-                    // Disable buttons
                     captureBtn.disabled = true;
                     autoCaptureBtn.disabled = true;
                 }
             } catch (err) {
                 console.error("Detection error:", err);
             }
-        }, 500); // Check every 500ms
+        }, 500);
     }
 
     function stopFaceDetection() {
@@ -631,11 +582,11 @@ document.addEventListener("DOMContentLoaded", function() {
     function updateFaceStatus(detected) {
         if (detected) {
             faceStatus.className = 'face-status-badge face-detected';
-            faceStatus.innerHTML = '<i class="bi bi-person-check-fill me-1"></i>{% trans "FACE DETECTED" %}';
+            faceStatus.innerHTML = '<i class="bi bi-person-check-fill me-1"></i>FACE DETECTED';
             captureBtn.classList.replace('btn-primary', 'btn-success');
         } else {
             faceStatus.className = 'face-status-badge face-not-detected';
-            faceStatus.innerHTML = '<i class="bi bi-person-x-fill me-1"></i>{% trans "FACE NOT DETECTED" %}';
+            faceStatus.innerHTML = '<i class="bi bi-person-x-fill me-1"></i>FACE NOT DETECTED';
             captureBtn.classList.replace('btn-success', 'btn-primary');
         }
     }
@@ -645,22 +596,21 @@ document.addEventListener("DOMContentLoaded", function() {
         const ctx = faceCanvas.getContext('2d');
         ctx.clearRect(0, 0, faceCanvas.width, faceCanvas.height);
         
-        ctx.strokeStyle = '#22c55e'; // Green
+        ctx.strokeStyle = '#22c55e';
         ctx.lineWidth = 3;
         ctx.strokeRect(box.x, box.y, box.w, box.h);
         
-        // Add corners
         ctx.fillStyle = '#22c55e';
-        const cs = 15; // corner size
-        const t = 4; // thickness
-        // Top-left
-        ctx.fillRect(box.x, box.y, cs, t); ctx.fillRect(box.x, box.y, t, cs);
-        // Top-right
-        ctx.fillRect(box.x + box.w - cs, box.y, cs, t); ctx.fillRect(box.x + box.w - t, box.y, t, cs);
-        // Bottom-left
-        ctx.fillRect(box.x, box.y + box.h - t, cs, t); ctx.fillRect(box.x, box.y + box.h - cs, t, cs);
-        // Bottom-right
-        ctx.fillRect(box.x + box.w - cs, box.y + box.h - t, cs, t); ctx.fillRect(box.x + box.w - t, box.y + box.h - cs, t, cs);
+        const cs = 15;
+        const t = 4;
+        ctx.fillRect(box.x, box.y, cs, t);
+        ctx.fillRect(box.x, box.y, t, cs);
+        ctx.fillRect(box.x + box.w - cs, box.y, cs, t);
+        ctx.fillRect(box.x + box.w - t, box.y, t, cs);
+        ctx.fillRect(box.x, box.y + box.h - t, cs, t);
+        ctx.fillRect(box.x, box.y + box.h - cs, t, cs);
+        ctx.fillRect(box.x + box.w - cs, box.y + box.h - t, cs, t);
+        ctx.fillRect(box.x + box.w - t, box.y + box.h - cs, t, cs);
     }
 
     function clearFaceCanvas() {
@@ -671,7 +621,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function capturePhoto(silent = false) {
         if (!stream || !faceDetected) {
-            if (!faceDetected && !silent) alert("{% trans 'Face not detected! Please look at the camera clearly.' %}");
+            if (!faceDetected && !silent) alert("Face not detected! Please look at the camera clearly.");
             return false;
         }
         
@@ -679,7 +629,6 @@ document.addEventListener("DOMContentLoaded", function() {
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         
-        // Drawer uses mirror because video is mirrored via CSS
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -689,7 +638,6 @@ document.addEventListener("DOMContentLoaded", function() {
             files.push(file);
             updateUI();
             
-            // Flash effect
             video.classList.add('opacity-50');
             setTimeout(() => video.classList.remove('opacity-50'), 100);
         }, 'image/jpeg', 0.9);
@@ -698,7 +646,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     async function autoCapture() {
         if (isCapturing || !faceDetected) {
-            if (!faceDetected) alert("{% trans 'Please position your face in the frame first.' %}");
+            if (!faceDetected) alert("Please position your face in the frame first.");
             return;
         }
         
@@ -716,32 +664,30 @@ document.addEventListener("DOMContentLoaded", function() {
                 autoCaptureBtn.disabled = false;
                 captureBtn.disabled = !faceDetected;
                 if (count >= totalToTake) {
-                    captureStatus.textContent = "{% trans 'Auto capture finished!' %}";
+                    captureStatus.textContent = "Auto capture finished!";
                     setTimeout(() => { if (!isCapturing) captureStatus.textContent = ""; }, 3000);
                 }
                 return;
             }
             
-            // Capture only if face is currently detected
             if (faceDetected) {
-                const success = capturePhoto(true); // Silent mode
+                const success = capturePhoto(true);
                 if (success) {
                     count++;
-                    captureStatus.textContent = `{% trans 'Capturing' %} ${count} / ${totalToTake}...`;
+                    captureStatus.textContent = `Capturing ${count} / ${totalToTake}...`;
                 }
             } else {
-                captureStatus.textContent = "{% trans 'Waiting for face...' %}";
+                captureStatus.textContent = "Waiting for face...";
             }
-        }, 1000); // Take a photo every 1 second if face detected
+        }, 1000);
     }
 
     startCameraBtn.addEventListener('click', startCamera);
     stopCameraBtn.addEventListener('click', stopCamera);
-    captureBtn.addEventListener('click', capturePhoto);
+    captureBtn.addEventListener('click', () => capturePhoto(false));
     autoCaptureBtn.addEventListener('click', autoCapture);
 
     // Tab switch handling
-    const cameraTab = document.getElementById('camera-tab');
     document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
         tab.addEventListener('shown.bs.tab', (e) => {
             if (e.target.id !== 'camera-tab') {
@@ -750,9 +696,19 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
+    // --- ID CARD UPLOAD ---
+    idCardArea.addEventListener('click', () => idCardInput.click());
+    idCardInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            idCardFile = e.target.files[0];
+            const url = URL.createObjectURL(idCardFile);
+            idCardPreview.innerHTML = `<img src="${url}" alt="ID Card">`;
+            updateUI();
+        }
+    });
+
     // --- SHARED UI LOGIC ---
     function updateUI() {
-        // Update Preview
         photoPreview.innerHTML = '';
         files.forEach((file, index) => {
             const url = URL.createObjectURL(file);
@@ -760,18 +716,16 @@ document.addEventListener("DOMContentLoaded", function() {
             photoItem.className = 'photo-item';
             photoItem.innerHTML = `
                 <img src="${url}" alt="Preview ${index + 1}">
-                <div class="photo-remove" onclick="removePhoto(${index})">
+                <div class="photo-remove" data-index="${index}">
                     <i class="bi bi-x"></i>
                 </div>
             `;
             photoPreview.appendChild(photoItem);
-            // We should ideally revoke objects URLs to avoid memory leaks, 
-            // but for a wizard page it's usually fine.
         });
 
-        // Update Count
         photoCountNumber.textContent = files.length;
-        if (files.length >= MIN_PHOTOS) {
+        
+        if (files.length >= MIN_PHOTOS && idCardFile) {
             photoCountNumber.parentElement.classList.remove('text-primary');
             photoCountNumber.parentElement.classList.add('text-success');
             submitBtn.disabled = false;
@@ -784,30 +738,52 @@ document.addEventListener("DOMContentLoaded", function() {
             submitBtn.classList.add('btn-secondary');
             submitBtn.classList.remove('btn-dark-custom');
         }
+        
+        document.querySelectorAll('.photo-remove').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const index = parseInt(this.dataset.index);
+                files.splice(index, 1);
+                updateUI();
+            });
+        });
     }
 
-    window.removePhoto = function(index) {
-        files.splice(index, 1);
-        updateUI();
-    };
-
+    // =====================================================
+    // SUBMIT FORM - SEDERHANA, LANGSUNG SUBMIT
+    // =====================================================
     form.addEventListener('submit', function(e) {
+        // Validasi
         if (files.length < MIN_PHOTOS) {
             e.preventDefault();
-            alert(`{% trans 'Minimum 10 photos required.' %}`);
-            return;
+            alert(`Minimal ${MIN_PHOTOS} foto wajah diperlukan. Anda memiliki ${files.length} foto.`);
+            return false;
         }
-
+        
+        if (!idCardFile) {
+            e.preventDefault();
+            alert("Foto kartu identitas Mahasiswa (KTM) wajib diupload");
+            return false;
+        }
+        
+        // Transfer files ke input form
         const dataTransfer = new DataTransfer();
         files.forEach(file => dataTransfer.items.add(file));
-        fileInput.files = dataTransfer.files;
+        facePhotoInput.files = dataTransfer.files;
         
+        // Matikan kamera sebelum submit
         stopCamera();
+        
+        // Tampilkan loading
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Processing..." %}';
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+        
+        // Form akan submit secara normal
+        return true;
     });
+    
+    updateUI();
 });
 </script>
-
 </body>
 </html>

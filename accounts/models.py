@@ -22,6 +22,55 @@ class Jenjang_Pendidikan(models.Model):
         verbose_name = _("Education Level")
         verbose_name_plural = _("Education Levels")
 
+# models.py - Tambahkan di bagian setelah model Jenjang_Pendidikan
+class Prodi(models.Model):
+    """
+    Master data program studi / jurusan yang berelasi dengan jenjang pendidikan
+    """
+    jenjang = models.ForeignKey(
+        Jenjang_Pendidikan, 
+        on_delete=models.CASCADE,
+        related_name='prodi_set',
+        verbose_name=_("Education Level")
+    )
+    kode_prodi = models.CharField(
+        _("Program Code"), 
+        max_length=20, 
+        unique=True,
+        help_text=_("Example: D4-TE, D3-TI, S2-TE")
+    )
+    nama_prodi = models.CharField(
+        _("Program Name"), 
+        max_length=255,
+        help_text=_("Full name of study program")
+    )
+    nama_singkat = models.CharField(
+        _("Short Name"), 
+        max_length=50, 
+        blank=True,
+        help_text=_("Short name/abbreviation")
+    )
+    is_active = models.BooleanField(
+        _("Active"), 
+        default=True,
+        help_text=_("Whether this study program is still active")
+    )
+    created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Updated At"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Study Program")
+        verbose_name_plural = _("Study Programs")
+        ordering = ['jenjang__nama_jenjang', 'kode_prodi']
+        unique_together = ['jenjang', 'kode_prodi']
+    
+    def __str__(self):
+        return f"{self.kode_prodi} - {self.nama_prodi}"
+    
+    def save(self, *args, **kwargs):
+        if not self.nama_singkat:
+            self.nama_singkat = self.kode_prodi
+        super().save(*args, **kwargs)
 class Tahun_Ajaran(models.Model):
     nama_tahun_ajaran = models.CharField(_("Academic Year Name"), max_length=100, null=True, blank=True, default=None)
     tanggal_mulai = models.DateField(_("Start Date"))
@@ -39,18 +88,38 @@ class Tahun_Ajaran(models.Model):
         verbose_name = _("Academic Year")
         verbose_name_plural = _("Academic Years")
 
+# models.py - HAPUS class Semester yang lama, ganti dengan ini:
 class Semester(models.Model):
-    nama_semester = models.CharField(_("Semester Name"), max_length=20, unique=True)
-    
-    def __str__(self):
-        return self.nama_semester
+    """Semester berdasarkan jenjang"""
+    JENJANG_CHOICES = [
+        ('D3', 'D3 - Diploma 3'),
+        ('D4', 'D4 - Diploma 4'),
+        ('S2', 'S2 - Magister'),
+    ]
+    jenjang = models.CharField(_("Education Level"), max_length=10, choices=JENJANG_CHOICES)
+    nomor_semester = models.PositiveSmallIntegerField(_("Semester Number"))
+    nama_semester = models.CharField(_("Semester Name"), max_length=20)
     
     class Meta:
         verbose_name = _("Semester")
         verbose_name_plural = _("Semesters")
+        unique_together = ['jenjang', 'nomor_semester']
+    
+    def __str__(self):
+        return f"{self.get_jenjang_display()} - {self.nama_semester}"
+    
+    @classmethod
+    def get_semester_for_jenjang(cls, jenjang_nama):
+        """Ambil semua semester untuk jenjang tertentu"""
+        if 'D3' in jenjang_nama:
+            return cls.objects.filter(jenjang='D3').order_by('nomor_semester')
+        elif 'D4' in jenjang_nama:
+            return cls.objects.filter(jenjang='D4').order_by('nomor_semester')
+        elif 'S2' in jenjang_nama:
+            return cls.objects.filter(jenjang='S2').order_by('nomor_semester')
+        return cls.objects.none()
 
 # --- 2. Akun dan Pengguna (Mahasiswa, Dosen) ---
-
 class Akun(AbstractUser):
     nrp = models.CharField(_("NRP"), max_length=20, unique=True, null=True, blank=True)
     
@@ -75,12 +144,39 @@ class Akun(AbstractUser):
         verbose_name = _("Account")
         verbose_name_plural = _("Accounts")
 
+class Kelas(models.Model):
+    """Kelas global - tidak terkait jenjang atau prodi"""
+    nama_kelas = models.CharField(max_length=10, unique=True)  # A, B, C, D, E
+    kode_kelas = models.CharField(max_length=10, unique=True)  # A, B, C, D, E
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.nama_kelas
+    
+    class Meta:
+        verbose_name = _("Class")
+        verbose_name_plural = _("Classes")
+        ordering = ['nama_kelas']
 class Mahasiswa(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='mahasiswa_profile')
     jenjang_pendidikan = models.ForeignKey(Jenjang_Pendidikan, on_delete=models.SET_NULL, null=True)
+    prodi = models.ForeignKey(
+        Prodi, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        verbose_name=_("Study Program"),
+        help_text=_("Selected study program based on education level")
+    )
     nim = models.CharField(_("Student ID"), max_length=20, unique=True)
     semester = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True)
-    kelas = models.CharField(_("Class"), max_length=50)
+    kelas = models.ForeignKey(
+        Kelas,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Class")
+    )
     sks_total_tempuh = models.IntegerField(_("Total Credits Taken"), default=0, validators=[MinValueValidator(0)])
     angkatan = models.PositiveSmallIntegerField(
         _("Batch Year"),
@@ -94,13 +190,20 @@ class Mahasiswa(models.Model):
     jurusan = models.CharField(_("Major"), max_length=255, null=True, blank=True)
     kegiatan_pa = models.ManyToManyField('Kegiatan_PA', blank=True)
     
+    # FIELD UNTUK FOTO KTM (Kartu Tanda Mahasiswa)
+    foto_ktm = models.ImageField(_("Student ID Card (KTM)"), upload_to='ktm/', null=True, blank=True)
+    
     def __str__(self):
         return self.user.nama_lengkap if self.user.nama_lengkap else self.user.username
+    
+    def get_prodi_display(self):
+        if self.prodi:
+            return self.prodi.nama_prodi
+        return self.jurusan or "-"
     
     class Meta:
         verbose_name = _("Student")
         verbose_name_plural = _("Students")
-
 class Dosen(models.Model):
     nip = models.CharField(_("NIP"), max_length=30, unique=True)
     nama_dosen = models.CharField(_("Lecturer Name"), max_length=150)
@@ -174,30 +277,36 @@ class Status_Pemenuhan_SKS(models.Model):
 
 class Presensi(models.Model):
     mahasiswa = models.ForeignKey(Mahasiswa, on_delete=models.CASCADE)
-    kegiatan_pa = models.ForeignKey(Kegiatan_PA, on_delete=models.SET_NULL, null=True, blank=True)  # UBAH: nullable
+    kegiatan_pa = models.ForeignKey(Kegiatan_PA, on_delete=models.SET_NULL, null=True, blank=True)
     tanggal_presensi = models.DateField(_("Attendance Date"))
     jam_checkin = models.TimeField(_("Check-in Time"), null=True, blank=True)
     jam_checkout = models.TimeField(_("Check-out Time"), null=True, blank=True)
     foto_checkin = models.ImageField(_("Check-in Photo"), upload_to='presensi/checkin/', null=True, blank=True)
     foto_checkout = models.ImageField(_("Check-out Photo"), upload_to='presensi/checkout/', null=True, blank=True)
     terakhir_terdeteksi = models.TimeField(_("Last Detected Time"), null=True, blank=True)
+    sudah_verifikasi = models.BooleanField(default=False)
     last_verified_at = models.DateTimeField(_("Last Verified At"), null=True, blank=True)
-    failure_count = models.IntegerField(_("Failure Count"), default=0)
+    consecutive_failures = models.IntegerField(default=0)
+    
+    # 🔥 UBAH INI - tambahkan 2 field baru
+    SESSION_STATUS_CHOICES = [
+        ('waiting_monitoring', 'Menunggu Monitoring'),
+        ('monitoring_active', 'Monitoring Aktif'),
+        ('auto_checkout', 'Auto Checkout'),
+        ('completed', 'Selesai'),
+    ]
+    
     session_status = models.CharField(
-        _("Session Status"),
         max_length=20,
-        choices=[
-            ('active', _('Active')),
-            ('verifying', _('Verifying')),
-            ('auto_checkout', _('Auto Checked Out')),
-            ('completed', _('Completed'))
-        ],
-        default='active'
+        choices=SESSION_STATUS_CHOICES,
+        default='waiting_monitoring'  # ← UBAH DEFAULTNYA
     )
     
+    # 🔥 TAMBAHKAN FIELD INI
+    monitoring_deadline = models.DateTimeField(null=True, blank=True)
+    
     def __str__(self):
-        return f"Attendance {self.mahasiswa.user.nama_lengkap} - {self.tanggal_presensi}"
-
+        return f"Presensi {self.mahasiswa.user.nama_lengkap} - {self.tanggal_presensi}"
 class VerificationLog(models.Model):
     mahasiswa = models.ForeignKey(Mahasiswa, on_delete=models.CASCADE)
     presensi = models.ForeignKey(Presensi, on_delete=models.CASCADE, related_name='verification_logs', null=True, blank=True)

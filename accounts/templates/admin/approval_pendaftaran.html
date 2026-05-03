@@ -108,26 +108,21 @@
 
     <!-- Daftar Pendaftaran -->
     <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-header bg-white border-0 rounded-top-3 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold">{% trans "List of Student Account Submissions:" %}</h5>
-                <span class="badge bg-primary rounded-pill fs-6">{% trans "Total" %} {{ total_pendaftaran }} {% trans "registrations found" %}</span>
-            </div>
-        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="py-3 ps-4" style="width: 10%;">{% trans "Submission Date" %}</th>
-                            <th class="py-3" style="width: 10%;">{% trans "Approval/Rejection Date" %}</th>
-                            <th class="py-3" style="width: 10%;">{% trans "Face Photo" %}</th>
-                            <th class="py-3" style="width: 15%;">{% trans "Student Name" %}</th>
-                            <th class="py-3" style="width: 10%;">{% trans "Student ID" %}</th>
-                            <th class="py-3" style="width: 10%;">{% trans "Program" %}</th>
-                            <th class="py-3" style="width: 15%;">{% trans "Email" %}</th>
-                            <th class="py-3" style="width: 10%;">{% trans "Status" %}</th>
-                            <th class="py-3 pe-4" style="width: 10%;">{% trans "Action" %}</th>
+                            <th class="py-3 ps-4" style="width: 8%;">{% trans "Submission Date" %}</th>
+                            <th class="py-3" style="width: 8%;">{% trans "Approval/Rejection Date" %}</th>
+                            <th class="py-3" style="width: 8%;">{% trans "Face Photo" %}</th>
+                            <th class="py-3" style="width: 8%;">{% trans "ID Card (KTM)" %}</th>
+                            <th class="py-3" style="width: 12%;">{% trans "Student Name" %}</th>
+                            <th class="py-3" style="width: 8%;">{% trans "Student ID" %}</th>
+                            <th class="py-3" style="width: 12%;">{% trans "Program" %}</th>
+                            <th class="py-3" style="width: 12%;">{% trans "Email" %}</th>
+                            <th class="py-3" style="width: 8%;">{% trans "Status" %}</th>
+                            <th class="py-3 pe-4" style="width: 8%;">{% trans "Action" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -180,22 +175,45 @@
                                     {% endif %}
                                 </div>
                             </td>
-                            
+
+                            <!-- Foto KTM (Kartu Tanda Mahasiswa) -->
+                            <td>
+                                <div class="text-center">
+                                    {% if pendaftaran.mahasiswa.foto_ktm and pendaftaran.mahasiswa.foto_ktm.url %}
+                                    <a href="{{ pendaftaran.mahasiswa.foto_ktm.url }}" target="_blank" class="d-inline-block">
+                                        <img src="{{ pendaftaran.mahasiswa.foto_ktm.url }}" 
+                                             alt="{% trans 'KTM' %}" 
+                                             class="avatar-sm rounded border object-fit-cover"
+                                             style="width: 40px; height: 40px; object-fit: cover;"
+                                             onerror="this.onerror=null;">
+                                    </a>
+                                    {% else %}
+                                    <div class="avatar-sm rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center">
+                                        <i class="fas fa-id-card text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+
                             <!-- Nama Mahasiswa -->
                             <td>
                                 <div class="d-flex flex-column">
                                     <small class="text-break">{{ pendaftaran.mahasiswa.user.nama_lengkap }}</small>
                                 </div>
                             </td>
-                            
+
                             <!-- NRP -->
                             <td>
                                 <span class="badge bg-light text-dark border font-monospace">{{ pendaftaran.mahasiswa.user.nrp }}</span>
                             </td>
-                            
+
                             <!-- Prodi -->
                             <td>
-                                {% if pendaftaran.mahasiswa.jurusan %}
+                                {% if pendaftaran.mahasiswa.prodi %}
+                                <span class="badge bg-info text-white">
+                                    {{ pendaftaran.mahasiswa.prodi.nama_prodi }}
+                                </span>
+                                {% elif pendaftaran.mahasiswa.jurusan %}
                                 <span class="badge bg-info text-white">
                                     {{ pendaftaran.mahasiswa.jurusan }}
                                 </span>
@@ -205,12 +223,12 @@
                                 </span>
                                 {% endif %}
                             </td>
-                            
+
                             <!-- Email -->
                             <td>
                                 <small class="text-break">{{ pendaftaran.mahasiswa.user.email }}</small>
                             </td>
-                            
+
                             <!-- Status -->
                             <td>
                                 {% if pendaftaran.status_pengajuan == 'pending' %}
@@ -227,11 +245,10 @@
                                 </span>
                                 {% endif %}
                             </td>
-                            
+
                             <!-- Aksi -->
                             <td class="pe-4">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <!-- Tombol Detail (Mata) -->
                                     <button type="button" 
                                             class="btn btn-outline-info btn-detail" 
                                             data-bs-toggle="modal" 
@@ -241,7 +258,6 @@
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     
-                                    <!-- Tombol ACC (hanya untuk status pending) -->
                                     {% if pendaftaran.status_pengajuan == 'pending' %}
                                     <button type="button" 
                                             class="btn btn-outline-success btn-approve" 
@@ -252,7 +268,6 @@
                                         <i class="fas fa-check"></i>
                                     </button>
                                     
-                                    <!-- Tombol Tolak (hanya untuk status pending) -->
                                     <button type="button" 
                                             class="btn btn-outline-danger btn-reject" 
                                             data-bs-toggle="modal" 
@@ -263,7 +278,6 @@
                                     </button>
                                     {% endif %}
                                     
-                                    <!-- Tombol Download -->
                                     <button type="button" 
                                             class="btn btn-outline-primary btn-download" 
                                             data-mahasiswa-id="{{ pendaftaran.mahasiswa.id }}"
@@ -277,7 +291,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="9" class="text-center py-5">
+                            <td colspan="10" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
                                     <h5 class="mb-2">{% trans "No registration data" %}</h5>
@@ -304,7 +318,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-0" id="detailModalBody">
-                <!-- Konten akan dimuat via AJAX -->
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">{% trans "Loading" %}...</span>
@@ -324,7 +337,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="approveModalBody">
-                <!-- Konten akan dimuat via AJAX -->
                 <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">{% trans "Loading" %}...</span>
@@ -348,7 +360,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="rejectModalBody">
-                <!-- Konten akan dimuat via AJAX -->
                 <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">{% trans "Loading" %}...</span>
@@ -436,8 +447,11 @@
     .modal-footer {
         padding: 1rem 1.5rem;
     }
+    
+    .object-fit-cover {
+        object-fit: cover;
+    }
 
-    /* Responsif untuk tabel */
     @media (max-width: 992px) {
         .table-responsive {
             font-size: 0.9rem;
@@ -467,116 +481,19 @@
         }
     }
 
-    #detailModal .modal-title {
-        font-weight: 600;
-    }
-
-    #detailModal .card {
-        transition: transform 0.2s;
-    }
-
-    #detailModal .card:hover {
-        transform: translateY(-2px);
-    }
-
-    /* Gaya untuk search */
-    .search-form .input-group:focus-within {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-    }
-
-    /* Gaya untuk stats cards */
-    .icon-circle {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-        
-    /* Responsif untuk mobile */
-    @media (max-width: 768px) {
-        .table-responsive {
-            border: 0;
+    @media (max-width: 576px) {
+        .row-cols-sm-3 > .col {
+            flex: 0 0 50%;
+            max-width: 50%;
         }
         
-        .table thead {
-            display: none;
-        }
-        
-        .table tr {
-            display: block;
-            margin-bottom: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        
-        .table td {
-            display: block;
-            text-align: right;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f8f9fa;
-        }
-        
-        .table td::before {
-            content: attr(data-label);
-            float: left;
-            font-weight: 600;
-            color: #6c757d;
-        }
-        
-        .btn-group {
-            display: flex;
-            justify-content: flex-end;
-        }
-        
-        .btn-group .btn {
+        .modal-xl .modal-body {
             padding: 0.5rem;
-        }
-        
-        .modal-dialog {
-            margin: 0.5rem;
-        }
-
-                /* Responsif untuk modal detail */
-        @media (max-width: 768px) {
-            .avatar-lg {
-                width: 60px !important;
-                height: 60px !important;
-            }
-            
-            .avatar-md {
-                width: 40px !important;
-                height: 40px !important;
-            }
-            
-            .modal-xl .modal-body {
-                padding: 1rem;
-            }
-            
-            .row-cols-lg-5 > .col {
-                flex: 0 0 33.333333%;
-                max-width: 33.333333%;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .row-cols-sm-3 > .col {
-                flex: 0 0 50%;
-                max-width: 50%;
-            }
-            
-            .modal-xl .modal-body {
-                padding: 0.5rem;
-            }
         }
     }
 </style>
 
 <script>
-// CSRF Token untuk AJAX
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -594,14 +511,12 @@ function getCookie(name) {
 const csrftoken = getCookie('csrftoken');
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle search dengan debounce
     const searchInput = document.getElementById('searchInput');
     const searchForm = document.getElementById('searchForm');
     const clearSearch = document.getElementById('clearSearch');
     
     if (searchInput) {
         let searchTimeout;
-        
         searchInput.addEventListener('input', function(e) {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
@@ -611,7 +526,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 800);
         });
         
-        // Enter untuk search langsung
         searchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -636,46 +550,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const mahasiswaId = button.getAttribute('data-mahasiswa-id');
             const modalBody = detailModal.querySelector('.modal-body');
             
-            // Load content via AJAX
             fetch(`?action=detail&mahasiswa_id=${mahasiswaId}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => {
-                // Cek jika response adalah HTML (bukan JSON)
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("text/html") !== -1) {
-                    return response.text();
-                } else {
-                    throw new Error("Response bukan HTML");
-                }
-            })
+            .then(response => response.text())
             .then(html => {
                 modalBody.innerHTML = html;
             })
             .catch(error => {
                 console.error('Error loading detail:', error);
-                modalBody.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        {% trans "Failed to load data. Please try again." %}<br>
-                        {% trans "Error" %}: ${error.message}
-                    </div>
-                `;
+                modalBody.innerHTML = `<div class="alert alert-danger">Error loading data. Please try again.</div>`;
             });
         });
         
-        // Reset modal saat ditutup
         detailModal.addEventListener('hidden.bs.modal', function() {
             const modalBody = detailModal.querySelector('.modal-body');
-            modalBody.innerHTML = `
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">{% trans "Loading" %}...</span>
-                    </div>
-                </div>
-            `;
+            modalBody.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>`;
         });
     }
     
@@ -686,30 +578,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (approveModal) {
         approveModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
-            const pengajuanId = button.getAttribute('data-pengajuan-id');
-            currentApproveId = pengajuanId;
+            currentApproveId = button.getAttribute('data-pengajuan-id');
             const modalBody = approveModal.querySelector('.modal-body');
             
-            fetch(`?action=approve_modal&pengajuan_id=${pengajuanId}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+            fetch(`?action=approve_modal&pengajuan_id=${currentApproveId}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.text())
             .then(html => {
                 modalBody.innerHTML = html;
             })
             .catch(error => {
-                modalBody.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        {% trans "Failed to load data. Please try again." %}
-                    </div>
-                `;
+                modalBody.innerHTML = `<div class="alert alert-danger">Error loading data</div>`;
             });
         });
         
-        // Tombol konfirmasi approve
         document.getElementById('confirmApprove').addEventListener('click', function() {
             const formData = new FormData();
             formData.append('pengajuan_id', currentApproveId);
@@ -718,39 +601,28 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const submitButton = this;
             const originalText = submitButton.innerHTML;
-            
-            // Show loading
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Processing" %}...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitButton.disabled = true;
             
             fetch('', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(approveModal);
-                    modal.hide();
-                    
-                    showAlert('{% trans "Registration successfully approved!" %}', 'success');
-                    
-                    // Reload page after 1.5 seconds
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                    bootstrap.Modal.getInstance(approveModal).hide();
+                    alert(data.message || 'Approved successfully!');
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    showAlert(data.message || '{% trans "An error occurred" %}', 'error');
+                    alert(data.message || 'Error occurred');
                     submitButton.innerHTML = originalText;
                     submitButton.disabled = false;
                 }
             })
             .catch(error => {
-                showAlert('{% trans "Network error occurred" %}', 'error');
+                alert('Network error occurred');
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
             });
@@ -764,40 +636,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if (rejectModal) {
         rejectModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
-            const pengajuanId = button.getAttribute('data-pengajuan-id');
-            currentRejectId = pengajuanId;
+            currentRejectId = button.getAttribute('data-pengajuan-id');
             const modalBody = rejectModal.querySelector('.modal-body');
             
-            fetch(`?action=reject_modal&pengajuan_id=${pengajuanId}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+            fetch(`?action=reject_modal&pengajuan_id=${currentRejectId}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.text())
             .then(html => {
                 modalBody.innerHTML = html;
             })
             .catch(error => {
-                modalBody.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        {% trans "Failed to load data. Please try again." %}
-                    </div>
-                `;
+                modalBody.innerHTML = `<div class="alert alert-danger">Error loading data</div>`;
             });
         });
         
-        // Tombol konfirmasi reject
         document.getElementById('confirmReject').addEventListener('click', function() {
             const alasanField = document.getElementById('alasanPenolakan');
             const alasan = alasanField ? alasanField.value.trim() : '';
             
             if (!alasan) {
-                showAlert('{% trans "Rejection reason must be filled" %}', 'error');
-                if (alasanField) {
-                    alasanField.classList.add('is-invalid');
-                    alasanField.focus();
-                }
+                alert('Rejection reason must be filled');
+                if (alasanField) alasanField.classList.add('is-invalid');
                 return;
             }
             
@@ -809,150 +669,42 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const submitButton = this;
             const originalText = submitButton.innerHTML;
-            
-            // Show loading
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Processing" %}...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             submitButton.disabled = true;
             
             fetch('', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Close modal
-                    const modal = bootstrap.Modal.getInstance(rejectModal);
-                    modal.hide();
-                    
-                    showAlert('{% trans "Registration successfully rejected!" %}', 'success');
-                    
-                    // Reload page after 1.5 seconds
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                    bootstrap.Modal.getInstance(rejectModal).hide();
+                    alert(data.message || 'Rejected successfully!');
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    showAlert(data.message || '{% trans "An error occurred" %}', 'error');
+                    alert(data.message || 'Error occurred');
                     submitButton.innerHTML = originalText;
                     submitButton.disabled = false;
                 }
             })
             .catch(error => {
-                showAlert('{% trans "Network error occurred" %}', 'error');
+                alert('Network error occurred');
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
             });
         });
     }
     
-    // Handle download button di tabel
+    // Handle download button
     const downloadButtons = document.querySelectorAll('.btn-download');
     downloadButtons.forEach(button => {
         button.addEventListener('click', function() {
             const mahasiswaId = this.getAttribute('data-mahasiswa-id');
-            const nama = this.getAttribute('data-nama');
-            const nrp = this.getAttribute('data-nrp');
-            downloadFotoWajah(mahasiswaId, nama, nrp, this);
+            window.open(`?download=${mahasiswaId}`, '_blank');
         });
     });
-    
-    // Remove invalid class when typing in reject modal
-    document.addEventListener('input', function(e) {
-        if (e.target.id === 'alasanPenolakan' && e.target.value.trim()) {
-            e.target.classList.remove('is-invalid');
-        }
-    });
-    
-    // Fungsi untuk download foto
-    function downloadFotoWajah(mahasiswaId, nama, nrp, button) {
-        const originalText = button.innerHTML;
-        
-        // Show loading
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        button.disabled = true;
-        
-        // Create iframe untuk download
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = `?download=${mahasiswaId}`;
-        document.body.appendChild(iframe);
-        
-        // Reset button setelah 2 detik (asumsi download sudah dimulai)
-        setTimeout(() => {
-            button.innerHTML = originalText;
-            button.disabled = false;
-            document.body.removeChild(iframe);
-            showAlert('{% trans "Photo download started successfully" %}', 'success');
-        }, 2000);
-    }
-    
-    // Fungsi untuk menampilkan alert
-    function showAlert(message, type) {
-        // Remove existing alerts
-        const existingAlert = document.querySelector('.alert-dismissible.position-fixed');
-        if (existingAlert) {
-            existingAlert.remove();
-        }
-        
-        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-        
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
-        alertDiv.style.cssText = `
-            top: 20px;
-            right: 20px;
-            z-index: 1060;
-            min-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-radius: 8px;
-        `;
-        
-        alertDiv.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="fas ${icon} me-2 fs-5"></i>
-                <div class="flex-grow-1">${message}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        document.body.appendChild(alertDiv);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 5000);
-    }
-    
-    // Make table responsive on mobile
-    function makeTableResponsive() {
-        if (window.innerWidth < 768) {
-            const tableCells = document.querySelectorAll('tbody td');
-            const headers = [
-                '{% trans "Face Photo" %}', 
-                '{% trans "Student Name" %}', 
-                '{% trans "Student ID" %}', 
-                '{% trans "Program" %}', 
-                '{% trans "Email" %}', 
-                '{% trans "Status" %}', 
-                '{% trans "Action" %}'
-            ];
-            
-            tableCells.forEach((cell, index) => {
-                const headerIndex = index % headers.length;
-                cell.setAttribute('data-label', headers[headerIndex]);
-            });
-        }
-    }
-    
-    // Run on load and resize
-    makeTableResponsive();
-    window.addEventListener('resize', makeTableResponsive);
 });
 </script>
 {% endblock %}

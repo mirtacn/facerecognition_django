@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Login - Attendance & Credit Management System" %}</title>
+    <title>Login - Attendance & Credit Management System</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -128,10 +128,6 @@
             margin-bottom: 8px;
         }
 
-        .logo-img {
-            margin-bottom: 20px;
-        }
-
         .subtitle {
             color: #6b7280;
             font-size: 15px;
@@ -170,7 +166,10 @@
             min-width: 300px;
         }
 
-        /* Responsive */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
         @media (max-width: 768px) {
             .left-image {
                 min-height: 300px;
@@ -238,24 +237,24 @@
                     <img src="{% static 'img/logoMSECTnih.png' %}" alt="Logo MSECT" width="180px">
                 </div>
                 <h1 class="system-title">
-                    {% trans "Attendance & Credit Management System PA Lab MSECT" %}<br>
-                    <span style="color: #93c5fd;">{% trans "Face Recognition" %}</span>
+                    Attendance & Credit Management System PA Lab MSECT<br>
+                    <span style="color: #93c5fd;">Face Recognition</span>
                 </h1>
                 
                 <p class="system-description">
-                    {% trans "Integrated system for attendance management, credit assessment, and final project student progress monitoring." %}
+                    Integrated system for attendance management, credit assessment, and final project student progress monitoring.
                 </p>
 
                 <ul class="feature-list">
-                    <li>{% trans "Attendance using Face Recognition" %}</li>
-                    <li>{% trans "Credit Progress Monitoring" %}</li>
-                    <li>{% trans "Final Project Activity Management" %}</li>
+                    <li>Attendance using Face Recognition</li>
+                    <li>Credit Progress Monitoring</li>
+                    <li>Final Project Activity Management</li>
                 </ul>
 
                 <div class="mt-4 pt-3 border-top border-light border-opacity-25">
                     <p class="small mb-0 opacity-75">
                         <i class="bi bi-shield-check me-2"></i>
-                        {% trans "Encrypted & secure system" %}
+                        Encrypted & secure system
                     </p>
                 </div>
             </div>
@@ -265,34 +264,36 @@
         <div class="col-md-6">
             <div class="form-section">
                 <div class="text-center mb-4">
-                    <h3 class="title">{% trans "Welcome!" %}</h3>
-                    <p class="subtitle">{% trans "Please login to access your account" %}</p>
+                    <h3 class="title">Welcome!</h3>
+                    <p class="subtitle">Please login to access your account</p>
                 </div>
 
                 <form method="POST" id="loginForm">
                     {% csrf_token %}
 
-                    <div class="mb-4">
-                        <label class="form-label">{% trans "NRP" %} :</label>
+                    <!-- NRP Field -->
+                    <div class="form-group">
+                        <label class="form-label">NRP :</label>
                         <div class="position-relative">
                             <i class="bi bi-person-fill input-icon"></i>
                             <input type="text" 
                                    name="username" 
                                    class="form-control" 
-                                   placeholder="{% trans 'Enter NRP' %}"
+                                   placeholder="Enter NRP"
                                    required
                                    autocomplete="username">
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label">{% trans "Password" %} :</label>
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label class="form-label">Password :</label>
                         <div class="position-relative">
                             <i class="bi bi-lock-fill input-icon"></i>
                             <input type="password" 
                                    name="password" 
                                    class="form-control" 
-                                   placeholder="{% trans 'Enter password' %}"
+                                   placeholder="Enter password"
                                    required
                                    autocomplete="current-password"
                                    id="passwordInput">
@@ -305,17 +306,51 @@
                         </div>
                     </div>
 
-                    <div class="d-grid gap-2">
+                    <!-- CAPTCHA Field -->
+                    <div class="form-group">
+                        <label class="form-label">CAPTCHA :</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="flex-grow-1">
+                                <div class="position-relative">
+                                    <i class="bi bi-shield-lock-fill input-icon"></i>
+                                    <input type="text" 
+                                        name="captcha_input" 
+                                        class="form-control" 
+                                        placeholder="Enter CAPTCHA code"
+                                        required
+                                        id="captchaInput"
+                                        autocomplete="off">
+                                </div>
+                            </div>
+                            
+                            <img src="{% if captcha_image %}{{ captcha_image }}{% else %}data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='48' viewBox='0 0 130 48'%3E%3Crect width='130' height='48' fill='%23f0f0f0'/%3E%3Ctext x='10' y='30' font-family='Arial' font-size='20' fill='%23333'%3ECAPTCHA%3C/text%3E%3C/svg%3E{% endif %}" 
+                                alt="CAPTCHA" 
+                                id="captchaImage" 
+                                style="height: 48px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; width: auto; min-width: 130px; background: #f8f9fa;"
+                                title="Click to refresh">
+                            
+                            <button type="button" 
+                                    class="btn btn-outline-secondary" 
+                                    id="refreshCaptchaBtn"
+                                    style="height: 48px; width: 48px; border-radius: 8px;">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Login Button -->
+                    <div class="d-grid gap-2 mt-4">
                         <button type="submit" class="btn btn-login" id="loginButton">
-                            <span id="buttonText">{% trans "Login" %}</span>
+                            <span id="buttonText">Login</span>
                             <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
                         </button>
                     </div>
 
+                    <!-- Register Link -->
                     <div class="login-footer">
                         <p class="mb-2 small">
-                            {% trans "Don't have an account?" %}
-                            <a href="{% url 'register' %}" class="fw-bold">{% trans "Register new account" %}</a>
+                            Don't have an account?
+                            <a href="{% url 'register' %}" class="fw-bold">Register new account</a>
                         </p>
                     </div>
                 </form>
@@ -352,10 +387,11 @@
         const spinner = document.getElementById('loadingSpinner');
         
         button.disabled = true;
-        buttonText.textContent = "{% trans 'Processing...' %}";
+        buttonText.textContent = "Processing...";
         spinner.classList.remove('d-none');
     });
 
+    // Auto close alerts
     document.addEventListener('DOMContentLoaded', function() {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
@@ -364,6 +400,67 @@
                 bsAlert.close();
             }, 5000);
         });
+    });
+    // Refresh CAPTCHA functionality
+    function refreshCaptcha() {
+        console.log("Refreshing CAPTCHA...");
+        
+        const captchaImage = document.getElementById('captchaImage');
+        const captchaInput = document.getElementById('captchaInput');
+        
+        // Loading state
+        captchaImage.style.opacity = '0.5';
+        
+        // Tambahkan timestamp untuk mencegah cache browser
+        const timestamp = new Date().getTime();
+        
+        fetch('/refresh-captcha/?_=' + timestamp, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Cache-Control': 'no-cache'
+            }
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            captchaImage.style.opacity = '1';
+            
+            if (data.success && data.captcha_image) {
+                // Update gambar
+                captchaImage.src = data.captcha_image;
+                // Kosongkan input
+                captchaInput.value = '';
+                console.log("CAPTCHA refreshed successfully");
+            } else {
+                console.error("Failed to refresh CAPTCHA");
+                // Fallback: reload page
+                window.location.reload();
+            }
+        })
+        .catch(function(error) {
+            console.error("Error:", error);
+            captchaImage.style.opacity = '1';
+            // Fallback: reload page
+            // window.location.reload();
+        });
+    }
+
+    // Pasang event listeners dengan aman
+    document.addEventListener('DOMContentLoaded', function() {
+        const captchaImage = document.getElementById('captchaImage');
+        const refreshBtn = document.getElementById('refreshCaptchaBtn');
+        
+        if (captchaImage) {
+            captchaImage.onclick = refreshCaptcha;
+        }
+        if (refreshBtn) {
+            refreshBtn.onclick = refreshCaptcha;
+        }
+        
+        // Optional: Refresh CAPTCHA saat halaman dimuat
+        setTimeout(refreshCaptcha, 100);
     });
 </script>
 

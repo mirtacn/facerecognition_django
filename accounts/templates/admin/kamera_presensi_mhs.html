@@ -403,6 +403,36 @@
     transform: scaleX(-1); /* membalik mirror → jadi normal */
     -webkit-transform: scaleX(-1); /* untuk Safari/iOS */
   }
+
+    /* Tambahkan di style section */
+  .modal.fade .modal-dialog {
+      transition: transform 0.2s ease-out;
+  }
+
+  .modal.fade.show .modal-dialog {
+      transform: none;
+  }
+
+  /* Animasi untuk status box */
+  #detectionStatusBox {
+      transition: all 0.3s ease;
+  }
+
+  /* Notifikasi slide yang lebih smooth */
+  .alert-notification {
+      animation: slideInRight 0.3s ease-out forwards;
+  }
+
+  @keyframes slideInRight {
+      from {
+          transform: translateX(100%);
+          opacity: 0;
+      }
+      to {
+          transform: translateX(0);
+          opacity: 1;
+      }
+  }
 </style>
 
 <script>
@@ -417,8 +447,10 @@
       let isLivenessDetected = false;
       let presensiId = null;
       let lastDetectionResult = null;
-
+      let isProcessingSave = false; 
+      let isModalOpen = false;
       let cameraModal = null;
+
       document.addEventListener('DOMContentLoaded', function () {
           cameraModal = new bootstrap.Modal(document.getElementById('cameraModal'));
           captureCanvas = document.getElementById('captureCanvas');
@@ -454,16 +486,32 @@
           }
       }
 
+      let lastRequestTime = 0;
+      const REQUEST_THROTTLE_MS = 500;
       // Real-time liveness detection every 500ms
       function startLivenessDetection() {
           if (livenessInterval) clearInterval(livenessInterval);
 
           livenessInterval = setInterval(async function () {
               try {
+                  const now = Date.now();
+
+                  // ================= THROTTLE =================
+                  if (now - lastRequestTime < REQUEST_THROTTLE_MS) {
+                      console.log('⏳ Throttling request...');
+                      return;
+                  }
+                  lastRequestTime = now;
+
                   const video = document.getElementById('cameraPreview');
                   if (!video || !video.srcObject) return;
+                  
+                  // JANGAN PROSES JIKA SEDANG SAVE
+                  if (isProcessingSave) {
+                      console.log('Skip detection - already saving');
+                      return;
+                  }
 
-                  // Capture frame untuk detection
                   captureCanvas.width = video.videoWidth;
                   captureCanvas.height = video.videoHeight;
                   const captureCtx = captureCanvas.getContext('2d');
@@ -471,11 +519,14 @@
 
                   const frameBase64 = captureCanvas.toDataURL('image/jpeg', 0.8);
 
-                  // Setup draw canvas dengan ukuran video
                   drawCanvas.width = video.videoWidth;
                   drawCanvas.height = video.videoHeight;
 
-                  // Kirim ke backend
+                  if (currentMahasiswaId === null) {
+                      console.log('No active student selected');
+                      return;
+                  }
+
                   const response = await fetch('{% url "detect_liveness_frame" %}', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -490,14 +541,57 @@
                   lastDetectionResult = result;
 
                   if (result.success) {
-                      // Gambar hasil detection
                       drawDetectionResult(result);
                       updateDetectionUI(result);
 
-                      // Auto save ketika REAL terdeteksi & belum disimpan
-                      if (result.status === 'REAL' && !isLivenessDetected && result.verified) {
+                      // CEK FLAG STOP DETECTION DARI BACKEND
+                      if (result.stop_detection === true) {
+                          console.log('Stop detection requested by backend');
+                          if (livenessInterval) clearInterval(livenessInterval);
+                          livenessInterval = null;
+                          
+                          if (result.force_close_modal === true) {
+                              setTimeout(() => {
+                                  if (cameraModal) cameraModal.hide();
+                              }, 1500);
+                          }
+                          return;
+                      }
+
+                      // ========== KRITIKAL: HANYA SAVE JIKA REAL DAN VERIFIED ==========
+                      // JANGAN PERNAH SAVE UNTUK STATUS LAIN
+                      if (result.status === 'REAL' && result.verified === true && !isLivenessDetected && !isProcessingSave) {
+                          console.log('✅ WILL SAVE - REAL and VERIFIED');
                           isLivenessDetected = true;
+                          isProcessingSave = true;
                           await autoSubmitPresensi(frameBase64, result);
+                          isProcessingSave = false;
+                      } else if (result.status !== 'REAL') {
+                          console.log(`⏭️ Skip save - status: ${result.status}, verified: ${result.verified}`);
+                          
+                          // TAMPILKAN NOTIFIKASI UNTUK SPOOF ATAU NOT_RECOGNIZED
+                          if (result.status === 'SPOOF') {
+                              showNotification('✗ SPOOFING TERDETEKSI! (Foto kertas / HP / Video)', 'danger');
+                              updateDetectionStatus('✗ SPOOF DETECTED - Akses Ditolak', '#dc3545');
+                              
+                              if (livenessInterval) clearInterval(livenessInterval);
+                              livenessInterval = null;
+                              
+                              setTimeout(() => {
+                                  if (cameraModal) cameraModal.hide();
+                              }, 1500);
+                          } 
+                          else if (result.status === 'NOT_RECOGNIZED') {
+                              showNotification('✗ WAJAH TIDAK COCOK dengan data mahasiswa! Silakan coba lagi.', 'warning');
+                              updateDetectionStatus('✗ FACE DOES NOT MATCH - Akses Ditolak', '#fd7e14');
+                              
+                              if (livenessInterval) clearInterval(livenessInterval);
+                              livenessInterval = null;
+                              
+                              setTimeout(() => {
+                                  if (cameraModal) cameraModal.hide();
+                              }, 1500);
+                          }
                       }
                   }
               } catch (error) {
@@ -597,21 +691,23 @@
 
           if (result.status === 'REAL') {
               const matchPercent = result.recognition_score ? (result.recognition_score * 100).toFixed(0) + '%' : 'N/A';
-              const displayHeader = `⏳ PROSES FACE RECOGNITION...`;
-              const displayName = result.nama_mahasiswa ? `<br/><strong style="font-size: 1.1em;">✓ ${result.nama_mahasiswa}</strong>` : '';
-              statusText = `<strong style="color: #28a745;">${displayHeader}</strong>${displayName}<br/>Identity matched (${matchPercent})<br/><small>Liveness: ${result.spoof_score.toFixed(2)}</small>`;
+              statusText = `<strong style="color: #28a745;">✓ REAL - Identity Matched</strong><br/>${result.nama_mahasiswa || ''} (${matchPercent})`;
               color = '#28a745';
-          } else if (result.status === 'NOT_RECOGNIZED') {
-              statusText = `<strong style="color: #fd7e14;">✗ NOT RECOGNIZED</strong><br/>Face does not match ID<br/><small>Please look straight at camera</small>`;
+          } 
+          else if (result.status === 'NOT_RECOGNIZED') {
+              statusText = `<strong style="color: #fd7e14;">✗ FACE DOES NOT MATCH</strong><br/>Wajah tidak cocok dengan data mahasiswa<br/><small>Silakan coba lagi dengan wajah yang sama</small>`;
               color = '#fd7e14';
-          } else if (result.status === 'SPOOF') {
+          } 
+          else if (result.status === 'SPOOF') {
               statusText = `<strong style="color: #dc3545;">✗ SPOOF DETECTED</strong><br/>Fake face pattern detected<br/><small>Score: ${result.spoof_score.toFixed(3)}</small>`;
               color = '#dc3545';
-          } else if (result.status === 'LIVENESS_CHECK') {
-              statusText = `<strong style="color: #ffc107;">⏳ LIVENESS CHECK...</strong><br/>Blinks: ${result.blink_count}/2<br/><small>Score: ${result.spoof_score.toFixed(2)}</small>`;
+          } 
+          else if (result.status === 'LIVENESS_CHECK') {
+              statusText = `<strong style="color: #ffc107;">⏳ LIVENESS CHECK...</strong><br/>Blinks: ${result.blink_count}/2`;
               color = '#ffc107';
-          } else if (result.status === 'NO_FACE') {
-              statusText = `<strong style="color: #6c757d;">📹 NO FACE</strong><br/>Position face to camera`;
+          } 
+          else if (result.status === 'NO_FACE') {
+              statusText = `<strong style="color: #6c757d;">📹 NO FACE DETECTED</strong>`;
               color = '#6c757d';
           }
 
@@ -626,39 +722,105 @@
               statusBox.style.backgroundColor = color + '15';
           }
       }
-
-      // Auto submit presensi
+      
       async function autoSubmitPresensi(frameBase64, result) {
           try {
-              if (!frameBase64 || !currentMahasiswaId) return;
+              // ================= DOUBLE CHECK EKSTRA =================
+              // PASTIKAN INI BENAR-BENAR REAL
+              if (result.status !== 'REAL' || result.verified !== true) {
+                  console.log(`🚫 BLOCKED SAVE - Invalid state: status=${result.status}, verified=${result.verified}`);
+                  isProcessingSave = false;
+                  return;
+              }
 
-              if (livenessInterval) clearInterval(livenessInterval);
+              // ================= VALIDASI TAMBAHAN (ID MATCH) =================
+              if (currentMahasiswaId === null || currentMahasiswaId != result.mahasiswa_id) {
+                  console.log(`🚫 BLOCKED SAVE - Mahasiswa ID mismatch: expected=${currentMahasiswaId}, got=${result.mahasiswa_id}`);
+                  isProcessingSave = false;
+                  return;
+              }
 
-              updateDetectionStatus(`✓ Saving to database...`, '#17a2b8');
-              showNotification(`✓ Welcome, ${result.nama_mahasiswa}! Saving attendance...`, 'success');
+              // CEK SHOULD_SAVE
+              if (result.should_save === false) {
+                  console.log('🚫 BLOCKED SAVE - Backend says should_save=false');
+                  isProcessingSave = false;
+                  return;
+              }
 
-              // Jika backend sudah auto-save melalui detect_liveness_frame
+              // CEK SESSION ACTIVE
+              if (result.status === 'SESSION_ACTIVE') {
+                  showNotification('✗ Masih ada sesi aktif! Silakan checkout terlebih dahulu.', 'warning');
+                  updateDetectionStatus('✗ SESSION ACTIVE - Checkout dulu ya', '#fd7e14');
+
+                  if (livenessInterval) clearInterval(livenessInterval);
+                  isLivenessDetected = false;
+                  isProcessingSave = false;
+
+                  setTimeout(() => {
+                      if (cameraModal) cameraModal.hide();
+                  }, 2000);
+                  return;
+              }
+
+              // CEK NO ACTIVE SESSION
+              if (result.status === 'NO_ACTIVE_SESSION') {
+                  showNotification('✗ Tidak ada sesi aktif untuk checkout!', 'warning');
+                  updateDetectionStatus('✗ NO ACTIVE SESSION', '#fd7e14');
+
+                  if (livenessInterval) clearInterval(livenessInterval);
+                  isLivenessDetected = false;
+                  isProcessingSave = false;
+
+                  setTimeout(() => {
+                      if (cameraModal) cameraModal.hide();
+                  }, 2000);
+                  return;
+              }
+
+              // STOP INTERVAL
+              if (livenessInterval) {
+                  clearInterval(livenessInterval);
+                  livenessInterval = null;
+              }
+
+              updateDetectionStatus('✓ Verifikasi Berhasil! Menyimpan presensi...', '#17a2b8');
+              showNotification(
+                  `✓ Verifikasi Berhasil - ${result.nama_mahasiswa || currentMahasiswaNama}`,
+                  'success'
+              );
+
+              // ================= AUTO SAVE =================
               if (result.saved) {
-                  updateDetectionStatus(`✓ Saved successfully!<br/>Name: ${result.nama_mahasiswa}`, '#28a745');
-                  showNotification(`✓ ${currentAction.toUpperCase()} successful for ${result.nama_mahasiswa}`, 'success');
+                  updateDetectionStatus('✓ Presensi tersimpan!', '#28a745');
 
                   if (currentAction === 'checkin') {
                       presensiId = result.presensi_id;
                       updatePresensiUI(currentMahasiswaId, 'checkin', {
                           presensi_id: result.presensi_id,
-                          jam_checkin: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                          jam_checkin: new Date().toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                          })
                       });
                   } else {
                       updatePresensiUI(currentMahasiswaId, 'checkout', {
                           presensi_id: result.presensi_id,
-                          jam_checkout: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                          jam_checkout: new Date().toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                          })
                       });
                   }
 
-                  setTimeout(() => { if (cameraModal) cameraModal.hide(); }, 1500);
+                  setTimeout(() => {
+                      if (cameraModal) cameraModal.hide();
+                      isProcessingSave = false;
+                  }, 1200);
               } else {
-                  // Fallback ke endpoint lama jika belum auto-save
-                  const endpoint = currentAction === 'checkin' ? '{% url "checkin_presensi" %}' : '{% url "checkout_presensi" %}';
+                  // Fallback save via API
+                  const endpoint = currentAction === 'checkin'
+                      ? '{% url "checkin_presensi" %}'
+                      : '{% url "checkout_presensi" %}';
 
                   const response = await fetch(endpoint, {
                       method: 'POST',
@@ -676,7 +838,7 @@
                   const data = await response.json();
 
                   if (data.success) {
-                      updateDetectionStatus('✓ Saved successfully!', '#28a745');
+                      updateDetectionStatus('✓ Presensi tersimpan!', '#28a745');
                       showNotification('✓ Attendance saved successfully!', 'success');
 
                       if (currentAction === 'checkin') {
@@ -686,21 +848,30 @@
                           updatePresensiUI(currentMahasiswaId, 'checkout', data.data);
                       }
 
-                      setTimeout(() => { if (cameraModal) cameraModal.hide(); }, 1500);
+                      setTimeout(() => {
+                          if (cameraModal) cameraModal.hide();
+                          isProcessingSave = false;
+                      }, 1200);
                   } else {
-                      showNotification('✗ ' + data.message, 'danger');
+                      showNotification('✗ ' + (data.message || 'Gagal menyimpan'), 'danger');
                       isLivenessDetected = false;
-                      setTimeout(startLivenessDetection, 1000);
+                      isProcessingSave = false;
+                      setTimeout(() => {
+                          if (cameraModal) cameraModal.hide();
+                      }, 2000);
                   }
               }
+
           } catch (error) {
-              console.error('Error:', error);
-              showNotification('✗ Error: ' + error.message, 'danger');
+              console.error('Error in autoSubmitPresensi:', error);
+              showNotification('✗ Terjadi kesalahan saat menyimpan', 'danger');
               isLivenessDetected = false;
-              setTimeout(startLivenessDetection, 1000);
+              isProcessingSave = false;
+              setTimeout(() => {
+                  if (cameraModal) cameraModal.hide();
+              }, 2000);
           }
       }
-
       // Event listeners
       document.addEventListener('click', function (e) {
           const checkinBtn = e.target.closest('.btn-checkin');
@@ -711,7 +882,9 @@
               presensiId = null;
               document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
               document.getElementById('actionType').textContent = 'CHECK-IN';
-              if (cameraModal) cameraModal.show();
+              if (cameraModal && !isModalOpen) {
+                  cameraModal.show();
+              }
           }
 
           const checkoutBtn = e.target.closest('.btn-checkout');
@@ -722,24 +895,51 @@
               presensiId = checkoutBtn.getAttribute('data-presensi-id') || null;
               document.getElementById('mahasiswaInfo').textContent = currentMahasiswaNama;
               document.getElementById('actionType').textContent = 'CHECK-OUT';
-              if (cameraModal) cameraModal.show();
+              if (cameraModal && !isModalOpen) {
+                  cameraModal.show();
+              }
           }
       });
 
-      // Modal events
       const cameraModalElement = document.getElementById('cameraModal');
       if (cameraModalElement) {
-          cameraModalElement.addEventListener('shown.bs.modal', startCamera);
+          cameraModalElement.addEventListener('shown.bs.modal', function () {
+              isModalOpen = true;
+              startCamera();
+          });
+          
           cameraModalElement.addEventListener('hidden.bs.modal', function () {
+              isModalOpen = false;
+              // Stop camera
               if (currentStream) {
                   currentStream.getTracks().forEach(track => track.stop());
                   currentStream = null;
               }
+              
+              // Stop interval
               if (livenessInterval) {
                   clearInterval(livenessInterval);
                   livenessInterval = null;
               }
+              
+              // RESET SEMUA STATE
               isLivenessDetected = false;
+              isProcessingSave = false;  // TAMBAHKAN INI
+              currentMahasiswaId = null;
+              currentMahasiswaNama = null;
+              currentAction = null;
+              presensiId = null;
+              
+              // Bersihkan canvas
+              const drawCtx = drawCanvas.getContext('2d');
+              if (drawCtx) {
+                  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+              }
+              
+              // Reset detection status
+              updateDetectionStatus('Waiting for detection...', '#6c757d');
+              
+              console.log('Modal closed - all states reset');
           });
       }
 

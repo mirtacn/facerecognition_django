@@ -52,8 +52,34 @@ from accounts.views import (
     detect_face_registration,
     periodic_verify,
     get_verification_logs,
-    get_session_status
-)
+    get_session_status,
+    master_jenjang,
+    tambah_jenjang,
+    edit_jenjang,
+    hapus_jenjang,
+    get_detail_jenjang,
+    data_dosen,
+    tambah_dosen,
+    edit_dosen,
+    hapus_dosen,
+    get_detail_dosen,
+    master_prodi,
+    tambah_prodi,
+    edit_prodi,
+    hapus_prodi,
+    get_detail_prodi,
+    get_prodi_by_jenjang,
+    get_registration_summary,
+    submit_registration,
+    get_semester_by_jenjang,
+    master_kelas,
+    tambah_kelas,
+    edit_kelas,
+    hapus_kelas,
+    get_detail_kelas,
+    auto_checkout_timeout,
+)   
+from accounts.captcha_utils import refresh_captcha 
 
 # =====================================================================
 # URL PATTERNS BARU (NON-PREFIXED i18n) – INI YANG DIREKOMENDASIKAN
@@ -62,6 +88,7 @@ from accounts.views import (
 urlpatterns = [
     # 1. Language switcher – WAJIB di root (tanpa prefix)
     path('i18n/', include('django.conf.urls.i18n')),
+    path('refresh-captcha/', refresh_captcha, name='refresh_captcha'),
 
     # 2. Semua API endpoints (tetap tanpa prefix bahasa)
     path('api/checkin/', checkin_presensi, name='checkin_presensi'),
@@ -73,6 +100,7 @@ urlpatterns = [
     path('api/progress-sks/', get_progress_sks_api, name='api_progress_sks'),
     path('api/kegiatan-pa-by-jenjang/<int:jenjang_id>/', get_kegiatan_pa_by_jenjang, name='kegiatan_pa_api'),
     path('api/hapus-foto-wajah/<int:foto_id>/', hapus_foto_wajah, name='hapus_foto_wajah'),
+    path('api/auto-checkout-timeout/', auto_checkout_timeout, name='auto_checkout_timeout'),
 
     # 3. Media files
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
@@ -93,6 +121,20 @@ urlpatterns += [
     path('admin/master-data-wajah/', master_data_wajah, name='master_data_wajah'),
     path('admin/master-data-wajah/<int:mahasiswa_id>/detail/', get_foto_wajah_detail, name='get_foto_wajah_detail'),
     path('admin/master-data-wajah/<int:mahasiswa_id>/download/', download_all_fotos, name='download_all_fotos'),
+    
+    # Data Dosen (Admin)
+    path('admin/data-dosen/', data_dosen, name='data_dosen'),
+    path('admin/tambah-dosen/', tambah_dosen, name='tambah_dosen'),
+    path('admin/edit-dosen/<int:dosen_id>/', edit_dosen, name='edit_dosen'),
+    path('admin/hapus-dosen/<int:dosen_id>/', hapus_dosen, name='hapus_dosen'),
+    path('admin/get-detail-dosen/<int:dosen_id>/', get_detail_dosen, name='get_detail_dosen'),
+
+    path('admin/master-prodi/', master_prodi, name='master_prodi'),
+    path('admin/tambah-prodi/', tambah_prodi, name='tambah_prodi'),
+    path('admin/edit-prodi/<int:prodi_id>/', edit_prodi, name='edit_prodi'),
+    path('admin/hapus-prodi/<int:prodi_id>/', hapus_prodi, name='hapus_prodi'),
+    path('admin/get-detail-prodi/<int:prodi_id>/', get_detail_prodi, name='get_detail_prodi'),
+    path('api/prodi-by-jenjang/<int:jenjang_id>/', get_prodi_by_jenjang, name='get_prodi_by_jenjang'),
 
     # Data SKS (Admin)
     path('admin/data-sks/', data_sks, name='data_sks'),
@@ -100,7 +142,14 @@ urlpatterns += [
     path('admin/data-sks/<int:kegiatan_id>/edit/', edit_kegiatan_sks, name='edit_kegiatan_sks'),
     path('admin/data-sks/<int:kegiatan_id>/hapus/', hapus_kegiatan_sks, name='hapus_kegiatan_sks'),
     path('admin/data-sks/<int:kegiatan_id>/detail/', get_detail_kegiatan, name='get_detail_kegiatan'),
-
+    
+    # Master Jenjang (Admin) - PERBAIKAN: Ganti views. dengan langsung fungsi
+    path('admin/master-jenjang/', master_jenjang, name='master_jenjang'),
+    path('admin/tambah-jenjang/', tambah_jenjang, name='tambah_jenjang'),
+    path('admin/edit-jenjang/<int:jenjang_id>/', edit_jenjang, name='edit_jenjang'),
+    path('admin/hapus-jenjang/<int:jenjang_id>/', hapus_jenjang, name='hapus_jenjang'),
+    path('admin/get-detail-jenjang/<int:jenjang_id>/', get_detail_jenjang, name='get_detail_jenjang'),
+    
     # Tahun Ajaran (Admin)
     path('admin/data-sks/tahun-ajaran/tambah/', tambah_tahun_ajaran, name='tambah_tahun_ajaran'),
     path('admin/data-sks/tahun-ajaran/<int:tahun_id>/edit/', edit_tahun_ajaran, name='edit_tahun_ajaran'),
@@ -112,6 +161,13 @@ urlpatterns += [
     path('admin/monitoring-presensi/', monitoring_presensi, name='monitoring_presensi'),
     path('admin/status_pemenuhan_sks/', status_pemenuhan_sks, name='status_pemenuhan_sks'),
     path('admin/rekap-presensi/', rekap_presensi, name='rekap_presensi'),
+    
+    # Tambahkan di bagian admin URLs setelah master_prodi
+    path('admin/master-kelas/', master_kelas, name='master_kelas'),
+    path('admin/tambah-kelas/', tambah_kelas, name='tambah_kelas'),
+    path('admin/edit-kelas/<int:kelas_id>/', edit_kelas, name='edit_kelas'),
+    path('admin/hapus-kelas/<int:kelas_id>/', hapus_kelas, name='hapus_kelas'),
+    path('admin/get-detail-kelas/<int:kelas_id>/', get_detail_kelas, name='get_detail_kelas'),
 
     # Mahasiswa URLs
     path('login/', login_view, name='login'),
@@ -130,6 +186,9 @@ urlpatterns += [
     path('monitor-durasi/', monitor_durasi, name='monitor_durasi'),
     path('api/get-session-status/', get_session_status, name='get_session_status'),
     path('api/get-verification-logs/', get_verification_logs, name='get_verification_logs'),
+    path('api/get-registration-summary/', get_registration_summary, name='get_registration_summary'),
+    path('api/submit-registration/', submit_registration, name='submit_registration'),
+    path('api/semester-by-jenjang/<int:jenjang_id>/', get_semester_by_jenjang, name='get_semester_by_jenjang'),
 
     # Root → redirect ke login
     path('', lambda request: redirect('login'), name='home'),

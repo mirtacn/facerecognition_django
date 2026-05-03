@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Notifikasi Pendaftaran</title>
+</head>
+<body style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333; margin: 0; padding: 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #eef2f6; padding: 30px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: {% if status == 'disetujui' %}#22c55e{% else %}#ef4444{% endif %}; padding: 30px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Sistem Presensi Lab MSECT</h1>
+                            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0;">Face Recognition & Liveness Detection Attendance System</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 30px;">
+                            <h2 style="color: #0f172a; margin-top: 0;">
+                                {% if status == 'disetujui' %}
+                                ✅ Pendaftaran Anda Disetujui!
+                                {% else %}
+                                ❌ Pendaftaran Anda Ditolak
+                                {% endif %}
+                            </h2>
+                            
+                            <p>Yth. <strong>{{ nama_mahasiswa }}</strong>,</p>
+                            
+                            <p>Kami informasikan bahwa pendaftaran akun Anda pada Sistem Presensi Lab MSECT telah 
+                            {% if status == 'disetujui' %}
+                            <strong style="color: #22c55e;">DISETUJUI</strong>
+                            {% else %}
+                            <strong style="color: #ef4444;">DITOLAK</strong>
+                            {% endif %}
+                            oleh admin pada tanggal <strong>{{ tgl_keputusan }}</strong>.</p>
+                            
+                            <table style="width: 100%; margin: 20px 0; border-collapse: collapse; background-color: #f8fafc; border-radius: 8px; overflow: hidden;">
+                                <tr>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; width: 40%;">Nama Mahasiswa</td>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">: {{ nama_mahasiswa }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; width: 40%;">NIM/NRP</td>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">: {{ nim }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Tanggal Pengajuan</td>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">: {{ tgl_pengajuan }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Tanggal Keputusan</td>
+                                    <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">: {{ tgl_keputusan }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; font-weight: 600;">Status</td>
+                                    <td style="padding: 12px 16px;">
+                                        : 
+                                        {% if status == 'disetujui' %}
+                                        <span style="background-color: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">DISETUJUI</span>
+                                        {% else %}
+                                        <span style="background-color: #ef4444; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">DITOLAK</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if status == 'ditolak' and alasan_penolakan %}
+                                <tr>
+                                    <td style="padding: 12px 16px; font-weight: 600;">Alasan Penolakan</td>
+                                    <td style="padding: 12px 16px;">: {{ alasan_penolakan }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                            
+                            <p>{{ pesan }}</p>
+                            
+                            {% if status == 'disetujui' %}
+                            <p>Anda sekarang dapat login ke sistem menggunakan:</p>
+                            <ul>
+                                <li><strong>Username:</strong> {{ nim }}</li>
+                                <li><strong>Password:</strong> (password yang Anda daftarkan)</li>
+                            </ul>
+                            <div style="margin: 25px 0; text-align: center;">
+                                <a href="http://127.0.0.1:8000/login/" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Login Sekarang</a>
+                            </div>
+                            {% else %}
+                            <div style="margin: 25px 0; text-align: center;">
+                                <a href="http://127.0.0.1:8000/register/step/1/" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Daftar Ulang</a>
+                            </div>
+                            {% endif %}
+                            
+                            <hr style="margin: 25px 0; border: none; border-top: 1px solid #e2e8f0;">
+                            
+                            <p style="font-size: 12px; color: #64748b; margin: 0;">
+                                Email ini dikirim secara otomatis oleh sistem. Mohon tidak membalas email ini.<br>
+                                Jika ada pertanyaan, silakan hubungi admin.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="margin: 0; font-size: 12px; color: #64748b;">
+                                &copy; {% now "Y" %} Sistem Presensi & SKS. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

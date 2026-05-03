@@ -157,14 +157,12 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">{% trans "Student ID" %}</label>
-                            <input type="text" class="form-control" value="{{ mahasiswa.nrp }}" name="nrp" required
-                                readonly>
+                            <input type="text" class="form-control" value="{{ mahasiswa.nrp }}" name="nrp" required readonly>
                             <small class="text-muted">{% trans "Student ID cannot be changed" %}</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">{% trans "Email" %}</label>
-                            <input type="email" class="form-control" value="{{ mahasiswa.email }}" name="email"
-                                required>
+                            <input type="email" class="form-control" value="{{ mahasiswa.email }}" name="email" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">{% trans "Education Level" %}</label>
@@ -178,34 +176,36 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        
+                        <!-- PERBAIKAN: Class sebagai dropdown dari master kelas -->
                         <div class="col-md-6">
                             <label class="form-label">{% trans "Class" %}</label>
-                            <input type="text" class="form-control" value="{{ mahasiswa.kelas }}" name="kelas" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">{% trans "Semester" %}</label>
-                            <select class="form-select" name="semester" id="semesterSelect" required>
-                                <option value="">{% trans "Select Semester" %}</option>
-                                {% for semester in semester_list %}
-                                <option value="{{ semester.id }}" 
-                                    {% if mahasiswa.semester_id == semester.id %}selected{% endif %}>
-                                    {{ semester.nama_semester }}
+                            <select class="form-select" name="kelas" id="kelasSelect" required>
+                                <option value="">{% trans "Select Class" %}</option>
+                                {% for kelas in kelas_list %}
+                                <option value="{{ kelas.id }}" 
+                                    {% if mahasiswa.kelas_obj and mahasiswa.kelas_obj.id == kelas.id %}selected{% endif %}>
+                                    {{ kelas.nama_kelas }}
                                 </option>
                                 {% endfor %}
                             </select>
                         </div>
+                        
+                        <!-- PERBAIKAN: Semester akan diisi via AJAX -->
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Semester" %}</label>
+                            <select class="form-select" name="semester" id="semesterSelect" required>
+                                <option value="">{% trans "Select Semester" %}</option>
+                                <!-- Semester akan di-load via AJAX berdasarkan jenjang -->
+                            </select>
+                        </div>
+                        
                         <div class="col-12">
                             <label class="form-label">{% trans "Selected PA Activities" %}</label>
                             <div id="kegiatanPAContainer" class="border rounded p-3">
-                                {% if mahasiswa.jenjang_pendidikan %}
-                                <div class="text-center py-3">
-                                    <div class="spinner-border spinner-border-sm text-primary"></div> {% trans "Loading PA activities..." %}
-                                </div>
-                                {% else %}
                                 <div class="text-center text-muted py-3">
                                     {% trans "Select education level first" %}
                                 </div>
-                                {% endif %}
                             </div>
                         </div>
                         <div class="col-12">
@@ -295,23 +295,205 @@
         </div>
     </div>
 </div>
+<!-- Modal Konfirmasi Reset Progress SKS - Warna Merah Menyala -->
+<div class="modal fade" id="confirmResetProgressModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>{% trans "⚠️ Progress Will Be Reset!" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="background: #fff5f5;">
+                <div class="alert alert-danger border-0 shadow-sm">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                    <strong>{% trans "PERHATIAN! Anda akan mengubah pilihan Kegiatan PA!" %}</strong>
+                </div>
+                <p class="fw-bold text-danger">{% trans "Jika Anda melanjutkan:" %}</p>
+                <ul class="text-danger mb-4">
+                    <li><i class="bi bi-x-octagon-fill me-2"></i>{% trans "Semua progress presensi Anda akan DIHAPUS dan diRESET ke 0" %}</li>
+                    <li><i class="bi bi-database-slash me-2"></i>{% trans "Data presensi yang sudah tercatat akan DIHAPUS PERMANEN" %}</li>
+                    <li><i class="bi bi-arrow-counterclockwise me-2"></i>{% trans "Anda harus memulai dari awal dengan kegiatan yang baru dipilih" %}</li>
+                </ul>
+                <div class="card border-warning mb-3">
+                    <div class="card-header bg-warning text-dark">
+                        <i class="bi bi-arrow-left-right me-2"></i>{% trans "Perubahan Kegiatan" %}
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <span class="badge bg-secondary">{% trans "Kegiatan Lama" %}</span>
+                            <div class="mt-1 p-2 bg-light rounded">
+                                <span id="oldKegiatanList" class="text-muted">-</span>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="badge bg-primary">{% trans "Kegiatan Baru" %}</span>
+                            <div class="mt-1 p-2 bg-light rounded">
+                                <span id="newKegiatanList" class="text-primary fw-bold">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-warning small">
+                    <i class="bi bi-info-circle me-2"></i>
+                    {% trans "Tindakan ini TIDAK DAPAT DIBATALKAN. Semua data presensi akan hilang permanen." %}
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> {% trans "Batal" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmResetBtn">
+                    <i class="bi bi-trash3 me-1"></i> {% trans "Ya, Reset Progress Saya!" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Data kegiatan PA yang sudah dipilih sebelumnya - dengan error handling
+    // ============================================================
+    // DATA DARI SERVER
+    // ============================================================
     const currentKegiatanIds = JSON.parse('{{ kegiatan_ids_json|safe }}' || '[]');
+    const currentSemesterId = '{{ mahasiswa.semester_id|default:"" }}';
+    const currentJenjangId = '{{ mahasiswa.jenjang_pendidikan.id|default:"" }}';
+    
+    // Debug info
+    console.log('=== PROFILE DATA ===');
+    console.log('Current student:', '{{ mahasiswa.nama|default:"No name" }}');
+    console.log('Current Jenjang ID:', currentJenjangId);
+    console.log('Current Semester ID:', currentSemesterId);
+    console.log('PA Activity IDs:', currentKegiatanIds);
+    console.log('===================');
 
-    // Debug info ke console
-    console.log('Current student data:', {
-        name: '{{ mahasiswa.nama|default:"No name" }}',
-        student_id: '{{ mahasiswa.nrp|default:"No ID" }}',
-        level_id: '{{ mahasiswa.jenjang_pendidikan.id|default:"0" }}',
-        pa_activity_ids: currentKegiatanIds,
-        pa_activity_count: currentKegiatanIds.length
-    });
+    // ============================================================
+    // FUNGSI LOAD KEGIATAN PA
+    // ============================================================
+    function loadKegiatanPA() {
+        const jenjangId = document.getElementById('jenjangSelect').value;
+        const container = document.getElementById('kegiatanPAContainer');
 
-    // Toggle password fields for profile edit
+        console.log('loadKegiatanPA() - jenjangId:', jenjangId);
+
+        if (!jenjangId) {
+            container.innerHTML = '<div class="text-center text-muted py-3">{% trans "Select education level first" %}</div>';
+            return;
+        }
+
+        // Show loading
+        container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> {% trans "Loading PA activities..." %}</div>';
+
+        // Fetch kegiatan PA dari API
+        fetch(`/api/kegiatan-pa-by-jenjang/${jenjangId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Kegiatan PA API response:', data);
+                if (data.success && data.kegiatan && data.kegiatan.length > 0) {
+                    let html = '';
+                    data.kegiatan.forEach(kegiatan => {
+                        const isChecked = currentKegiatanIds.includes(parseInt(kegiatan.id));
+                        html += `
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="kegiatan_pa" value="${kegiatan.id}" 
+                                   id="kegiatan${kegiatan.id}"
+                                   ${isChecked ? 'checked' : ''}>
+                            <label class="form-check-label" for="kegiatan${kegiatan.id}">
+                                ${kegiatan.nama_kegiatan} (${kegiatan.jumlah_sks} Credits - Target ${kegiatan.target_jam} hours)
+                            </label>
+                        </div>`;
+                    });
+                    container.innerHTML = html;
+                    console.log(`Loaded ${data.kegiatan.length} PA activities`);
+                } else {
+                    container.innerHTML = '<div class="text-center text-muted py-3">{% trans "No PA activities for this level" %}</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading PA activities:', error);
+                container.innerHTML = '<div class="text-center text-danger py-3">{% trans "Failed to load PA activities. Please refresh the page." %}</div>';
+            });
+    }
+
+    // ============================================================
+    // FUNGSI UPDATE SEMESTER BERDASARKAN JENJANG
+    // ============================================================
+    function updateSemesterByJenjang() {
+        const jenjangId = document.getElementById('jenjangSelect').value;
+        const semesterSelect = document.getElementById('semesterSelect');
+        
+        console.log('updateSemesterByJenjang() - jenjangId:', jenjangId);
+        
+        if (!jenjangId) {
+            semesterSelect.innerHTML = '<option value="">{% trans "Select Semester" %}</option>';
+            return;
+        }
+        
+        semesterSelect.innerHTML = '<option value="">{% trans "Loading semesters..." %}</option>';
+        
+        fetch(`/api/semester-by-jenjang/${jenjangId}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Semester API response:', data);
+                if (data.success && data.semesters && data.semesters.length > 0) {
+                    let options = '<option value="">{% trans "Select Semester" %}</option>';
+                    data.semesters.forEach(semester => {
+                        const selected = (currentSemesterId && parseInt(currentSemesterId) === semester.id) ? 'selected' : '';
+                        options += `<option value="${semester.id}" ${selected}>${semester.nama_semester}</option>`;
+                    });
+                    semesterSelect.innerHTML = options;
+                    console.log(`Loaded ${data.semesters.length} semesters`);
+                } else {
+                    semesterSelect.innerHTML = '<option value="">{% trans "No semesters available" %}</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading semesters:', error);
+                semesterSelect.innerHTML = '<option value="">{% trans "Error loading semesters" %}</option>';
+            });
+    }
+
+    // ============================================================
+    // INITIALIZE SEMESTER DROPDOWN (tanpa AJAX, dari data server)
+    // ============================================================
+    function initializeSemesterDropdown() {
+        const jenjangId = document.getElementById('jenjangSelect').value;
+        const semesterSelect = document.getElementById('semesterSelect');
+        
+        if (!jenjangId) {
+            semesterSelect.innerHTML = '<option value="">{% trans "Select Semester" %}</option>';
+            return;
+        }
+        
+        // Gunakan data semester_list dari server untuk initial load
+        const semesterData = {{ semester_list_json|default:'[]'|safe }};
+        
+        if (semesterData && semesterData.length > 0) {
+            let options = '<option value="">{% trans "Select Semester" %}</option>';
+            semesterData.forEach(semester => {
+                const selected = (currentSemesterId && parseInt(currentSemesterId) === semester.id) ? 'selected' : '';
+                options += `<option value="${semester.id}" ${selected}>${semester.nama_semester}</option>`;
+            });
+            semesterSelect.innerHTML = options;
+            console.log('Initialized semester dropdown with', semesterData.length, 'options');
+        } else {
+            // Fallback ke AJAX jika data server kosong
+            updateSemesterByJenjang();
+        }
+    }
+
+    // ============================================================
+    // TOGGLE PASSWORD FIELDS
+    // ============================================================
     const changePasswordCheckbox = document.getElementById('changePassword');
     if (changePasswordCheckbox) {
         changePasswordCheckbox.addEventListener('change', function () {
@@ -342,90 +524,48 @@
         });
     }
 
-    // Fungsi untuk load kegiatan PA dengan checkbox tercentang
-    function loadKegiatanPA() {
-        const jenjangId = document.getElementById('jenjangSelect').value;
-        const container = document.getElementById('kegiatanPAContainer');
-
-        if (!jenjangId) {
-            container.innerHTML = '<div class="text-center text-muted py-3">{% trans "Select education level first" %}</div>';
-            return;
-        }
-
-        // Show loading
-        container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div> {% trans "Loading PA activities..." %}</div>';
-
-        // Fetch kegiatan PA dari API
-        fetch(`/api/kegiatan-pa-by-jenjang/${jenjangId}/`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success && data.kegiatan && data.kegiatan.length > 0) {
-                    let html = '';
-                    data.kegiatan.forEach(kegiatan => {
-                        // Cek apakah kegiatan ini sudah dipilih sebelumnya
-                        const isChecked = currentKegiatanIds.includes(parseInt(kegiatan.id));
-                        console.log(`Activity ${kegiatan.id}: ${kegiatan.nama_kegiatan}, checked: ${isChecked}`);
-
-                        html += `
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" 
-                                   name="kegiatan_pa" value="${kegiatan.id}" 
-                                   id="kegiatan${kegiatan.id}"
-                                   ${isChecked ? 'checked' : ''}>
-                            <label class="form-check-label" for="kegiatan${kegiatan.id}">
-                                ${kegiatan.nama_kegiatan} (${kegiatan.jumlah_sks} Credits - Target ${kegiatan.target_jam} hours)
-                            </label>
-                        </div>`;
-                    });
-                    container.innerHTML = html;
-
-                    // Tampilkan jumlah checkbox tercentang
-                    const checkedCount = document.querySelectorAll('input[name="kegiatan_pa"]:checked').length;
-                    console.log(`Total ${checkedCount} PA activities checked`);
-                } else {
-                    container.innerHTML = '<div class="text-center text-muted py-3">{% trans "No PA activities for this level" %}</div>';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading PA activities:', error);
-                container.innerHTML = '<div class="text-center text-danger py-3">{% trans "Failed to load PA activities. Please refresh the page." %}</div>';
-            });
-    }
-
-    // Event listener untuk perubahan jenjang
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
     const jenjangSelect = document.getElementById('jenjangSelect');
     if (jenjangSelect) {
-        jenjangSelect.addEventListener('change', loadKegiatanPA);
+        // Hapus listener lama jika ada
+        const newJenjangSelect = jenjangSelect.cloneNode(true);
+        jenjangSelect.parentNode.replaceChild(newJenjangSelect, jenjangSelect);
+        
+        newJenjangSelect.addEventListener('change', function() {
+            console.log('Jenjang changed to:', this.value);
+            loadKegiatanPA();
+            updateSemesterByJenjang();
+        });
     }
 
-    // Load kegiatan PA saat modal dibuka
+    // ============================================================
+    // MODAL SHOWN EVENT - Load data saat modal dibuka
+    // ============================================================
     const editProfileModal = document.getElementById('editProfileModal');
     if (editProfileModal) {
         editProfileModal.addEventListener('shown.bs.modal', function () {
-            const jenjangSelect = document.getElementById('jenjangSelect');
-            if (jenjangSelect && jenjangSelect.value) {
-                // Tunggu sebentar untuk memastikan modal sepenuhnya terbuka
-                setTimeout(loadKegiatanPA, 300);
+            console.log('Modal opened - loading data...');
+            const jenjangSelectElem = document.getElementById('jenjangSelect');
+            const currentJenjangValue = jenjangSelectElem ? jenjangSelectElem.value : null;
+            
+            if (currentJenjangValue) {
+                loadKegiatanPA();
+                updateSemesterByJenjang();
+            } else {
+                console.log('No jenjang selected, showing empty state');
+                document.getElementById('kegiatanPAContainer').innerHTML = 
+                    '<div class="text-center text-muted py-3">{% trans "Select education level first" %}</div>';
+                document.getElementById('semesterSelect').innerHTML = 
+                    '<option value="">{% trans "Select Semester" %}</option>';
             }
         });
     }
 
-    // Auto load kegiatan PA saat page load jika jenjang sudah ada
-    document.addEventListener('DOMContentLoaded', function () {
-        const jenjangSelect = document.getElementById('jenjangSelect');
-        if (jenjangSelect && jenjangSelect.value && currentKegiatanIds.length > 0) {
-            console.log('Auto loading PA activities for selected level');
-            // Tunggu modal siap jika akan dibuka
-            setTimeout(loadKegiatanPA, 1000);
-        }
-    });
-
-    // Fungsi save profile dengan validasi
+    // ============================================================
+    // SAVE PROFILE FUNCTION
+    // ============================================================
     function saveProfile() {
         const form = document.getElementById('editProfileForm');
         const formData = new FormData(form);
@@ -443,6 +583,11 @@
 
             if (password !== confirmPassword) {
                 showNotification('{% trans "Password and confirmation do not match!" %}', 'danger');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showNotification('{% trans "Password must be at least 6 characters!" %}', 'danger');
                 return;
             }
         }
@@ -471,6 +616,7 @@
         // Send data via AJAX
         const url = '{% url "edit_profil" nim=mahasiswa.nrp %}';
         console.log('Saving to URL:', url);
+        console.log('Form data:', Object.fromEntries(formData));
 
         fetch(url, {
             method: 'POST',
@@ -514,7 +660,9 @@
             });
     }
 
-    // Fungsi save dosen pembimbing
+    // ============================================================
+    // SAVE SUPERVISOR FUNCTION
+    // ============================================================
     function saveDosen() {
         const form = document.getElementById('editDosenForm');
         const formData = new FormData(form);
@@ -585,7 +733,9 @@
             });
     }
 
-    // Fungsi untuk menampilkan notifikasi
+    // ============================================================
+    // NOTIFICATION FUNCTION
+    // ============================================================
     function showNotification(message, type) {
         // Hapus notifikasi lama
         const oldAlerts = document.querySelectorAll('.alert.position-fixed');
@@ -600,6 +750,8 @@
             right: 20px;
             min-width: 300px;
             max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         `;
 
         const icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill';
@@ -620,5 +772,208 @@
             }
         }, 5000);
     }
+
+    // ============================================================
+    // DOM READY - Initial load
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM fully loaded');
+        
+        // Initialize semester dropdown with server data
+        const jenjangSelectElem = document.getElementById('jenjangSelect');
+        if (jenjangSelectElem && jenjangSelectElem.value) {
+            // If there's already a jenjang selected, pre-load data
+            setTimeout(function() {
+                loadKegiatanPA();
+                updateSemesterByJenjang();
+            }, 100);
+        }
+    });
+
+        // ============================================================
+    // DETEKSI PERUBAHAN KEGIATAN PA SEBELUM SUBMIT
+    // ============================================================
+    let originalKegiatanIds = [...currentKegiatanIds];
+    let pendingFormData = null;
+    let pendingSaveCallback = null;
+
+    // Fungsi untuk mendapatkan kegiatan PA yang dipilih saat ini
+    function getSelectedKegiatanIds() {
+        const selected = [];
+        document.querySelectorAll('input[name="kegiatan_pa"]:checked').forEach(checkbox => {
+            selected.push(parseInt(checkbox.value));
+        });
+        return selected;
+    }
+
+    // Cek apakah ada perubahan pada kegiatan PA
+    function hasKegiatanChanged() {
+        const currentSelected = getSelectedKegiatanIds();
+        
+        if (originalKegiatanIds.length !== currentSelected.length) {
+            return true;
+        }
+        
+        // Sort and compare
+        const sortedOriginal = [...originalKegiatanIds].sort();
+        const sortedCurrent = [...currentSelected].sort();
+        
+        for (let i = 0; i < sortedOriginal.length; i++) {
+            if (sortedOriginal[i] !== sortedCurrent[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Fungsi untuk menampilkan modal konfirmasi reset progress
+    function showResetConfirmation(formData, saveCallback) {
+        const oldKegiatanNames = [];
+        const newKegiatanNames = [];
+        
+        // Ambil nama kegiatan lama
+        document.querySelectorAll('input[name="kegiatan_pa"]').forEach(checkbox => {
+            const kegiatanId = parseInt(checkbox.value);
+            const label = checkbox.nextElementSibling;
+            const kegiatanName = label ? label.textContent.split('(')[0].trim() : `Activity ${kegiatanId}`;
+            
+            if (originalKegiatanIds.includes(kegiatanId)) {
+                oldKegiatanNames.push(kegiatanName);
+            }
+            if (checkbox.checked) {
+                newKegiatanNames.push(kegiatanName);
+            }
+        });
+        
+        // Tampilkan daftar kegiatan di modal
+        document.getElementById('oldKegiatanList').innerHTML = oldKegiatanNames.join(', ') || '(none)';
+        document.getElementById('newKegiatanList').innerHTML = newKegiatanNames.join(', ') || '(none)';
+        
+        // Simpan data untuk digunakan saat konfirmasi
+        pendingFormData = formData;
+        pendingSaveCallback = saveCallback;
+        
+        // Tampilkan modal
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmResetProgressModal'));
+        confirmModal.show();
+    }
+
+    // Override saveProfile function dengan deteksi perubahan
+    const originalSaveProfile = saveProfile;
+    window.saveProfile = function() {
+        const form = document.getElementById('editProfileForm');
+        const formData = new FormData(form);
+        
+        // Validasi password jika diubah
+        const changePassword = document.getElementById('changePassword').checked;
+        if (changePassword) {
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+            
+            if (!password || !confirmPassword) {
+                showNotification('{% trans "Please fill in password and confirm password!" %}', 'danger');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('{% trans "Password and confirmation do not match!" %}', 'danger');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showNotification('{% trans "Password must be at least 6 characters!" %}', 'danger');
+                return;
+            }
+        }
+        
+        // Collect kegiatan PA yang dipilih
+        const kegiatanPaSelected = getSelectedKegiatanIds();
+        
+        // Validasi minimal 1 kegiatan PA
+        if (kegiatanPaSelected.length === 0) {
+            showNotification('{% trans "Please select at least one PA activity!" %}', 'danger');
+            return;
+        }
+        
+        // Cek apakah kegiatan PA berubah
+        if (hasKegiatanChanged()) {
+            // Tampilkan konfirmasi reset
+            formData.append('kegiatan_pa_selected', JSON.stringify(kegiatanPaSelected));
+            showResetConfirmation(formData, function() {
+                // Lanjutkan dengan save setelah konfirmasi
+                executeSaveProfile(pendingFormData, kegiatanPaSelected);
+            });
+        } else {
+            // Tidak ada perubahan kegiatan, save langsung
+            formData.append('kegiatan_pa_selected', JSON.stringify(kegiatanPaSelected));
+            executeSaveProfile(formData, kegiatanPaSelected);
+        }
+    };
+
+    // Fungsi eksekusi save profile yang sebenarnya
+    function executeSaveProfile(formData, kegiatanPaSelected) {
+        // Show loading
+        const saveBtn = document.getElementById('saveProfileBtn');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Saving..." %}';
+        saveBtn.disabled = true;
+        
+        // Send data via AJAX
+        const url = '{% url "edit_profil" nim=mahasiswa.nrp %}';
+        console.log('Saving to URL:', url);
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                showNotification(data.message || '{% trans "Profile updated successfully!" %}', 'success');
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+                modal.hide();
+                
+                // Reload page
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showNotification(data.error || '{% trans "Failed to update profile!" %}', 'danger');
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('{% trans "An error occurred while saving:" %} ' + error.message, 'danger');
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+        });
+    }
+
+    // Event listener untuk tombol konfirmasi reset
+    document.getElementById('confirmResetBtn')?.addEventListener('click', function() {
+        if (pendingSaveCallback) {
+            pendingSaveCallback();
+        }
+        // Tutup modal konfirmasi
+        const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmResetProgressModal'));
+        if (confirmModal) {
+            confirmModal.hide();
+        }
+    });
 </script>
 {% endblock %}

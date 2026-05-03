@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% trans "Registration - Academic Data" %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
@@ -15,6 +17,8 @@
         .step-active { background-color: #2563eb; color: white; }
         .step-done { background-color: #2563eb; color: white; }
         .step-inactive { background-color: #e0e0e0; color: #999; }
+        .btn-dark-custom { background-color: #0f172a; border-color: #0f172a; }
+        
         .mk-option {
             border: 1px solid #e0e0e0;
             border-radius: 8px;
@@ -41,7 +45,17 @@
             margin-right: 12px;
             cursor: pointer;
         }
-        .btn-dark-custom { background-color: #0f172a; border-color: #0f172a; }
+        
+        /* Select2 Bootstrap 5 Theme sudah include styling ini */
+        .select2-container--bootstrap-5 .select2-selection--single {
+            min-height: calc(2.25rem + 2px) !important;
+            border-radius: 0.375rem !important;
+        }
+        
+        .border-danger-custom {
+            border: 2px solid #dc3545 !important;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -79,6 +93,7 @@
                     </div>
                 </div>
             </div>
+            
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4 p-md-5">
                     
@@ -94,44 +109,31 @@
                         </div>
                     {% endif %}
 
-                    <form method="post">
+                    <form method="post" id="academicForm">
                         {% csrf_token %}
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">{% trans "Education Level" %} :<span class="text-danger">*</span></label>
-                                {{ form.jenjang }}
-                                {% if form.jenjang.errors %}<div class="text-danger small">{{ form.jenjang.errors }}</div>{% endif %}
-                            </div>
-
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold">{% trans "Current Semester" %} :<span class="text-danger">*</span></label>
-                                {{ form.semester }}
-                                {% if form.semester.errors %}<div class="text-danger small">{{ form.semester.errors }}</div>{% endif %}
-                            </div>
+                        <!-- Hidden field untuk jenjang_id dan prodi_id dari step 1 -->
+                        <input type="hidden" name="jenjang_id" value="{{ jenjang_obj.id|default:'' }}">
+                        <input type="hidden" name="prodi_id" value="{{ prodi_obj.id|default:'' }}">
+                        
+                        <!-- Semester -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{% trans "Current Semester" %} :<span class="text-danger">*</span></label>
+                            <select name="semester" id="id_semester" class="form-select" required>
+                                <option value="">Pilih Semester</option>
+                            </select>
+                            {% if form.semester.errors %}<div class="text-danger small">{{ form.semester.errors }}</div>{% endif %}
                         </div>
 
-                     <div class="mb-3">
-    <label class="form-label fw-bold">{% trans "Final Project Activities" %} :<span class="text-danger">*</span></label>
-    <p class="text-muted small">{% trans "Check all activities you are currently participating in for final project credit fulfillment" %}</p>
+                        <!-- Kegiatan Proyek Akhir -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{% trans "Final Project Activities" %} :<span class="text-danger">*</span></label>
+                            <p class="text-muted small">{% trans "Check all activities you are currently participating in for final project credit fulfillment" %}</p>
 
-    <div id="kegiatan-pa-container" class="border rounded p-3 bg-light">
-        {% for checkbox in form.kegiatan_pa_diambil %}
-        <div class="mk-option" onclick="toggleCheckbox(this)">
-            {{ checkbox.tag }}
-
-            <div>
-                <div class="fw-bold text-dark">{{ checkbox.choice_label }}</div>
-                <small class="text-muted">{% trans "Credit Details and Target Hours" %}</small>
-            </div>
-        </div>
-        {% endfor %}
-        {% if form.kegiatan_pa_diambil.errors %}
-            <div class="text-danger small mt-2">{{ form.kegiatan_pa_diambil.errors }}</div>
-        {% endif %}
-    </div>
-</div>
-
+                            <div id="kegiatan-pa-container" class="border rounded p-3 bg-light">
+                                <p class="text-muted">{% trans "Loading activities..." %}</p>
+                            </div>
+                        </div>
 
                         <div class="alert alert-primary bg-light border-0 d-flex align-items-center mb-4">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle-fill text-primary me-2" viewBox="0 0 16 16">
@@ -140,24 +142,40 @@
                             <span class="text-primary fw-bold small">{% trans "Total" %}: <span id="total-count">0</span> {% trans "activities selected" %}</span>
                         </div>
 
+                        <!-- Dosen Pembimbing dengan Select2 Searchable -->
                         <div class="mb-4">
                             <label class="form-label fw-bold d-block">{% trans "Academic Advisors" %} :<span class="text-danger">*</span></label>
                             <p class="text-muted small mb-3">{% trans "Select two mandatory advisors and one optional advisor." %}</p>
                             
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label small">{% trans "Advisor 1 (Mandatory)" %}</label>
-                                    {{ form.dosen_pembimbing1 }}
+                                    <label class="form-label small fw-bold">{% trans "Advisor 1 (Mandatory)" %}</label>
+                                    <select name="dosen_pembimbing1" id="id_dosen_pembimbing1" class="form-select" required>
+                                        <option value="">Pilih Pembimbing 1</option>
+                                        {% for dosen in dosen_list %}
+                                            <option value="{{ dosen.id }}">{{ dosen.nama_dosen }}</option>
+                                        {% endfor %}
+                                    </select>
                                     {% if form.dosen_pembimbing1.errors %}<div class="text-danger small">{{ form.dosen_pembimbing1.errors }}</div>{% endif %}
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label small">{% trans "Advisor 2 (Mandatory)" %}</label>
-                                    {{ form.dosen_pembimbing2 }}
+                                    <label class="form-label small fw-bold">{% trans "Advisor 2 (Mandatory)" %}</label>
+                                    <select name="dosen_pembimbing2" id="id_dosen_pembimbing2" class="form-select" required>
+                                        <option value="">Pilih Pembimbing 2</option>
+                                        {% for dosen in dosen_list %}
+                                            <option value="{{ dosen.id }}">{{ dosen.nama_dosen }}</option>
+                                        {% endfor %}
+                                    </select>
                                     {% if form.dosen_pembimbing2.errors %}<div class="text-danger small">{{ form.dosen_pembimbing2.errors }}</div>{% endif %}
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label small">{% trans "Advisor 3 (Optional)" %}</label>
-                                    {{ form.dosen_pembimbing3 }}
+                                    <label class="form-label small fw-bold">{% trans "Advisor 3 (Optional)" %}</label>
+                                    <select name="dosen_pembimbing3" id="id_dosen_pembimbing3" class="form-select">
+                                        <option value="">Pilih Pembimbing 3 (Opsional)</option>
+                                        {% for dosen in dosen_list %}
+                                            <option value="{{ dosen.id }}">{{ dosen.nama_dosen }}</option>
+                                        {% endfor %}
+                                    </select>
                                     {% if form.dosen_pembimbing3.errors %}<div class="text-danger small">{{ form.dosen_pembimbing3.errors }}</div>{% endif %}
                                 </div>
                             </div>
@@ -167,7 +185,6 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="{% url 'register_step' step=1 %}" class="btn btn-outline-secondary px-4"> &larr; {% trans "Back" %}</a>
-                            
                             <button type="submit" class="btn btn-dark-custom fw-bold text-white px-4">
                                 {% trans "Continue to Upload Photos" %} &nbsp; &rarr;
                             </button>
@@ -181,150 +198,177 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
-    // Function to handle clicks on option boxes
-    function handleMkOptionClick(event) {
-        const element = event.currentTarget;
-        const checkbox = element.querySelector('input[type="checkbox"]');
+$(document).ready(function() {
+    // =====================================================
+    // INITIALIZE SELECT2 SAMA PERSIS SEPERTI HALAMAN 1
+    // =====================================================
+    $('select').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: function() {
+            return $(this).data('placeholder') || 'Pilih...';
+        },
+        allowClear: true
+    });
+    
+    // =====================================================
+    // LOAD SEMESTER
+    // =====================================================
+    const jenjangId = "{{ jenjang_obj.id|default:'' }}";
+    
+    function loadSemesters() {
+        if (!jenjangId) return;
         
-        // Prevent double trigger
-        if (event.target === checkbox) return;
-        
-        // Toggle checkbox status
-        checkbox.checked = !checkbox.checked;
-        
-        // Trigger change event for checkbox
-        const changeEvent = new Event('change', { bubbles: true });
-        checkbox.dispatchEvent(changeEvent);
-        
-        updateStyle(element, checkbox);
-        updateCount();
-    }
-
-    // Update blue border style if checked
-    function updateStyle(element, checkbox) {
-        if (checkbox.checked) {
-            element.classList.add('selected');
-        } else {
-            element.classList.remove('selected');
-        }
-    }
-
-    // Count total selected
-    function updateCount() {
-        const checkboxes = document.querySelectorAll('input[name="kegiatan_pa_diambil"]:checked');
-        document.getElementById('total-count').innerText = checkboxes.length;
-    }
-
-    // Initialize all mk-option elements
-    function initializeMkOptions() {
-        const options = document.querySelectorAll('.mk-option');
-        options.forEach(opt => {
-            const checkbox = opt.querySelector('input[type="checkbox"]');
-            
-            if (checkbox) {
-                // Add bootstrap form-check-input class to checkbox
-                checkbox.classList.add('form-check-input');
+        $.ajax({
+            url: `/api/semester-by-jenjang/${jenjangId}/`,
+            method: 'GET',
+            success: function(data) {
+                const semesterSelect = $('#id_semester');
+                semesterSelect.empty().append('<option value="">Pilih Semester</option>');
                 
-                // Set initial style based on checked status
-                if (checkbox.checked) {
-                    opt.classList.add('selected');
+                if (data.semesters && data.semesters.length) {
+                    data.semesters.forEach(function(semester) {
+                        semesterSelect.append(`<option value="${semester.id}">${semester.nama_semester}</option>`);
+                    });
+                    semesterSelect.prop('disabled', false);
+                } else {
+                    semesterSelect.append('<option value="">Tidak ada semester</option>');
+                    semesterSelect.prop('disabled', true);
                 }
-                
-                // Event listener for checkbox changes
-                checkbox.addEventListener('change', function() {
-                    updateStyle(opt, this);
-                    updateCount();
-                });
-                
-                // Event listener for div clicks
-                opt.addEventListener('click', handleMkOptionClick);
+                // Refresh Select2
+                semesterSelect.trigger('change');
+            },
+            error: function() {
+                $('#id_semester').empty().append('<option value="">Error loading semester</option>').prop('disabled', true);
+                $('#id_semester').trigger('change');
             }
         });
-        updateCount();
     }
-
-    // Function to get selected checkbox values as array
-    function getSelectedKegiatanIds() {
-        const selected = [];
-        document.querySelectorAll('input[name="kegiatan_pa_diambil"]:checked').forEach(cb => {
-            selected.push(parseInt(cb.value));
-        });
-        return selected;
-    }
-
-    // Render checkboxes based on education level
-    function renderKegiatanByJenjang(jenjangId, previouslySelected = []) {
-        const kegiatanContainer = document.getElementById("kegiatan-pa-container");
+    
+    // =====================================================
+    // RENDER KEGIATAN PA
+    // =====================================================
+    function renderKegiatan() {
+        const container = $("#kegiatan-pa-container");
         
         if (!jenjangId) {
-            kegiatanContainer.innerHTML = `<p class="text-muted">{% trans "Select education level first" %}</p>`;
+            container.html('<p class="text-muted">Jenjang tidak tersedia</p>');
             return;
         }
-
-        fetch(`/api/kegiatan-pa-by-jenjang/${jenjangId}/`)
-            .then(res => {
-                if (!res.ok) throw new Error('Network response was not ok');
-                return res.json();
-            })
-            .then(data => {
-                if (!data.kegiatan || data.kegiatan.length === 0) {
-                    kegiatanContainer.innerHTML = `<p class="text-muted">{% trans "No activities available for this level" %}</p>`;
-                    return;
+        
+        $.ajax({
+            url: `/api/kegiatan-pa-by-jenjang/${jenjangId}/`,
+            method: 'GET',
+            success: function(data) {
+                if (data.success && data.kegiatan && data.kegiatan.length) {
+                    let html = '';
+                    data.kegiatan.forEach(function(k) {
+                        html += `
+                        <div class="mk-option">
+                            <input type="checkbox" name="kegiatan_pa_diambil" value="${k.id}" class="form-check-input" id="keg_${k.id}">
+                            <div>
+                                <div class="fw-bold text-dark">${k.nama_kegiatan}</div>
+                                <small class="text-muted">${k.jumlah_sks} SKS • Target ${k.target_jam} jam</small>
+                            </div>
+                        </div>`;
+                    });
+                    container.html(html);
+                    
+                    $('.mk-option').on('click', function(e) {
+                        if ($(e.target).is('input')) return;
+                        const checkbox = $(this).find('input[type="checkbox"]');
+                        checkbox.prop('checked', !checkbox.prop('checked'));
+                        $(this).toggleClass('selected', checkbox.prop('checked'));
+                        updateCount();
+                    });
+                    
+                    $('.mk-option input').on('change', function() {
+                        $(this).closest('.mk-option').toggleClass('selected', $(this).prop('checked'));
+                        updateCount();
+                    });
+                    
+                    updateCount();
+                } else {
+                    container.html('<p class="text-muted">Tidak ada kegiatan tersedia untuk jenjang ini</p>');
                 }
-
-                let html = "";
-                data.kegiatan.forEach(k => {
-                    const isChecked = previouslySelected.includes(k.id);
-                    html += `
-                    <label class="mk-option ${isChecked ? 'selected' : ''}">
-                        <input type="checkbox" name="kegiatan_pa_diambil" 
-                               value="${k.id}" ${isChecked ? 'checked' : ''}>
-                        <div>
-                            <div class="fw-bold text-dark">${k.nama_kegiatan}</div>
-                            <small class="text-muted">${k.jumlah_sks} {% trans "Credits" %} • {% trans "Target" %} ${k.target_jam} {% trans "hours" %}</small>
-                        </div>
-                    </label>`;
-                });
-
-                kegiatanContainer.innerHTML = html;
-                
-                // Reinitialize event handlers
-                initializeMkOptions();
-            })
-            .catch(error => {
-                console.error('Error fetching kegiatan:', error);
-                kegiatanContainer.innerHTML = `<p class="text-danger">{% trans "Error loading activity data" %}</p>`;
-            });
-    }
-
-    // Initialize when page loads
-    document.addEventListener("DOMContentLoaded", function() {
-        // Initial initialization
-        initializeMkOptions();
-        
-        // Setup event listener for education level dropdown
-        const jenjangSelect = document.querySelector('select[name="jenjang"]');
-        
-        if (jenjangSelect) {
-            // Save previous selections before changing
-            let previouslySelected = getSelectedKegiatanIds();
-            
-            jenjangSelect.addEventListener("change", function() {
-                // Save current selections before refresh
-                previouslySelected = getSelectedKegiatanIds();
-                
-                renderKegiatanByJenjang(this.value, previouslySelected);
-            });
-
-            // Trigger load if value already exists
-            if (jenjangSelect.value) {
-                renderKegiatanByJenjang(jenjangSelect.value, previouslySelected);
+            },
+            error: function() {
+                container.html('<p class="text-danger">Gagal memuat data kegiatan.</p>');
             }
+        });
+    }
+    
+    function updateCount() {
+        const count = $('input[name="kegiatan_pa_diambil"]:checked').length;
+        $('#total-count').text(count);
+    }
+    
+    // LOAD SEMUA DATA
+    loadSemesters();
+    renderKegiatan();
+    
+    // =====================================================
+    // VALIDASI FORM SEBELUM SUBMIT
+    // =====================================================
+    $('#academicForm').on('submit', function(e) {
+        let hasError = false;
+        let errorMessage = "Silakan lengkapi:\n";
+        
+        // Remove existing error highlights
+        $('.is-invalid').removeClass('is-invalid');
+        $('#kegiatan-pa-container').removeClass('border-danger-custom');
+        $('.select2-container').removeClass('is-invalid');
+        
+        // Validasi Semester
+        if (!$('#id_semester').val()) {
+            $('#id_semester').next('.select2-container').addClass('is-invalid');
+            errorMessage += "- Pilih semester\n";
+            hasError = true;
+        }
+        
+        // Validasi Kegiatan PA
+        if ($('input[name="kegiatan_pa_diambil"]:checked').length === 0) {
+            $('#kegiatan-pa-container').addClass('border-danger-custom');
+            errorMessage += "- Pilih minimal 1 kegiatan PA\n";
+            hasError = true;
+        }
+        
+        // Validasi Dosen 1
+        if (!$('#id_dosen_pembimbing1').val()) {
+            $('#id_dosen_pembimbing1').next('.select2-container').addClass('is-invalid');
+            errorMessage += "- Pilih Pembimbing 1\n";
+            hasError = true;
+        }
+        
+        // Validasi Dosen 2
+        if (!$('#id_dosen_pembimbing2').val()) {
+            $('#id_dosen_pembimbing2').next('.select2-container').addClass('is-invalid');
+            errorMessage += "- Pilih Pembimbing 2\n";
+            hasError = true;
+        }
+        
+        // Validasi dosen 1 dan 2 tidak boleh sama
+        const dosen1 = $('#id_dosen_pembimbing1').val();
+        const dosen2 = $('#id_dosen_pembimbing2').val();
+        
+        if (dosen1 && dosen2 && dosen1 === dosen2) {
+            $('#id_dosen_pembimbing1').next('.select2-container').addClass('is-invalid');
+            $('#id_dosen_pembimbing2').next('.select2-container').addClass('is-invalid');
+            errorMessage += "- Pembimbing 1 dan 2 tidak boleh sama\n";
+            hasError = true;
+        }
+        
+        if (hasError) {
+            e.preventDefault();
+            alert(errorMessage);
         }
     });
+});
 </script>
-
 </body>
 </html>

@@ -2,6 +2,36 @@
 {% load i18n %}
 
 <div class="container-fluid p-3">
+    <!-- FOTO KTM (Kartu Tanda Mahasiswa) - TAMPILAN TERPISAH DI ATAS -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 pt-3">
+                    <h5 class="fw-bold text-primary mb-0">
+                        <i class="bi bi-card-image me-2"></i>{% trans "Student ID Card (KTM)" %}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if foto_ktm and foto_ktm.url %}  <!-- ← PASTIKAN foto_ktm -->
+                        <a href="{{ foto_ktm.url }}" target="_blank">
+                            <img src="{{ foto_ktm.url }}" alt="{% trans 'Student ID Card' %}" 
+                                class="img-fluid rounded-3 shadow-sm" 
+                                style="max-height: 350px; object-fit: contain;">
+                        </a>
+                        <div class="mt-2">
+                            <small class="text-muted">{% trans "Click to view full image" %}</small>
+                        </div>
+                    {% else %}
+                        <div class="py-5 text-muted">
+                            <i class="bi bi-image fs-1 opacity-25"></i>
+                            <p class="mb-0 mt-2">{% trans "No student ID card uploaded" %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Foto Wajah -->
     <div class="row mb-5">
         <div class="col-12">
@@ -110,10 +140,6 @@
                             </div>
                         </div>
                         <div class="col-6 mb-3">
-                            <div class="text-muted small mb-1">{% trans "Year of Entry" %}</div>
-                            <div class="fw-bold">{{ mahasiswa.angkatan|default:"-" }}</div>
-                        </div>
-                        <div class="col-6 mb-3">
                             <div class="text-muted small mb-1">{% trans "Class" %}</div>
                             <div class="fw-bold">{{ mahasiswa.kelas|default:"-" }}</div>
                         </div>
@@ -133,7 +159,7 @@
         </div>
     </div>
 
-    <!-- Dosen Pembimbing (Minimalis) -->
+    <!-- Dosen Pembimbing -->
     {% if dosen_pembimbing_list %}
     <div class="row mb-5">
         <div class="col-12">
@@ -164,12 +190,12 @@
     </div>
     {% endif %}
 
-    <!-- Mata Kuliah Lab (Minimalis) -->
+    <!-- Kegiatan PA -->
     {% if kegiatan_pa_list %}
     <div class="row">
         <div class="col-12">
             <h5 class="fw-bold text-primary mb-3">
-                <i class="fas fa-flask me-2"></i>{% trans "Laboratory Courses" %}
+                <i class="fas fa-flask me-2"></i>{% trans "PA Activities" %}
             </h5>
         </div>
         
@@ -208,11 +234,9 @@ function downloadAllPhotos(mahasiswaId, nama, nrp) {
     const button = event.target;
     const originalText = button.innerHTML;
     
-    // Show loading
     button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Processing..." %}';
     button.disabled = true;
     
-    // Create download link
     const link = document.createElement('a');
     link.href = `?download=${mahasiswaId}`;
     link.style.display = 'none';
@@ -220,25 +244,22 @@ function downloadAllPhotos(mahasiswaId, nama, nrp) {
     link.click();
     document.body.removeChild(link);
     
-    // Reset button setelah 2 detik
     setTimeout(() => {
         button.innerHTML = originalText;
         button.disabled = false;
         
-        // Show success message
         const alertDiv = document.createElement('div');
         alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
         alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
         alertDiv.innerHTML = `
             <div class="d-flex align-items-center">
                 <i class="fas fa-check-circle me-2"></i>
-                <div>{% trans "Photo download successfully started" %}</div>
+                <div>{% trans "Photo download started successfully" %}</div>
                 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
             </div>
         `;
         document.body.appendChild(alertDiv);
         
-        // Auto remove after 3 seconds
         setTimeout(() => {
             if (alertDiv.parentNode) alertDiv.remove();
         }, 3000);
@@ -247,11 +268,6 @@ function downloadAllPhotos(mahasiswaId, nama, nrp) {
 </script>
 
 <style>
-.avatar-lg {
-    width: 70px;
-    height: 70px;
-}
-
 .avatar-sm {
     width: 40px;
     height: 40px;
@@ -275,11 +291,6 @@ function downloadAllPhotos(mahasiswaId, nama, nrp) {
 }
 
 @media (max-width: 768px) {
-    .avatar-lg {
-        width: 50px;
-        height: 50px;
-    }
-    
     .col-md-4, .col-md-6 {
         margin-bottom: 1rem;
     }

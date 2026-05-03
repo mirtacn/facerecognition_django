@@ -1,0 +1,867 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Lecturer Data" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="text-muted text-uppercase small mb-1">{% trans "Total Lecturers" %}</h6>
+                            <h3 class="fw-bold mb-0">{{ total_dosen }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 48px; height: 48px; border-radius: 50%;">
+                                <i class="fas fa-chalkboard-user fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="text-muted text-uppercase small mb-1">{% trans "Study Programs" %}</h6>
+                            <h3 class="fw-bold mb-0">{{ prodi_list|length }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 48px; height: 48px; border-radius: 50%;">
+                                <i class="fas fa-building fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h6 class="text-muted text-uppercase small mb-1">{% trans "Active Supervisions" %}</h6>
+                            <h3 class="fw-bold mb-0">{{ total_dosen }}</h3>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon-circle bg-info bg-opacity-10 text-info d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 48px; height: 48px; border-radius: 50%;">
+                                <i class="fas fa-users fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search -->
+    <div class="card border-0 shadow-sm mb-4 rounded-3">
+        <div class="card-body p-3">
+            <form method="get" action="" class="row g-3 align-items-center" id="searchForm">
+                <!-- Search -->
+                <div class="col-md-5">
+                    <label for="searchInput" class="form-label small fw-semibold text-muted">{% trans "Search Lecturer" %}</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control border-0 ps-0" 
+                               name="search" 
+                               id="searchInput"
+                               placeholder="{% trans 'Search by name, NIP, or study program...' %}"
+                               value="{{ search_query }}"
+                               autocomplete="off">
+                        {% if search_query %}
+                        <button type="button" class="btn btn-link text-muted clear-search" id="clearSearch">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Prodi Filter -->
+                <div class="col-md-4">
+                    <label for="prodiFilter" class="form-label small fw-semibold text-muted">{% trans "Filter by Study Program" %}</label>
+                    <select class="form-select" name="prodi" id="prodiFilter">
+                        <option value="">{% trans "All Study Programs" %}</option>
+                        {% for prodi in prodi_list %}
+                        <option value="{{ prodi }}" 
+                                {% if prodi_filter == prodi %}selected{% endif %}>
+                            {{ prodi }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-muted d-none d-md-block">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <a href="?export=excel{% if prodi_filter %}&prodi={{ prodi_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                           class="btn btn-success flex-grow-1">
+                            <i class="fas fa-file-excel me-2"></i>{% trans "Excel" %}
+                        </a>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahDosenModal">
+                            <i class="fas fa-plus me-2"></i>{% trans "Add Lecturer" %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Dosen Table -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 20%;">{% trans "NIP" %}</th>
+                            <th style="width: 30%;">{% trans "Lecturer Name" %}</th>
+                            <th style="width: 25%;">{% trans "Study Program" %}</th>
+                            <th style="width: 15%;">{% trans "Supervisions" %}</th>
+                            <th style="width: 10%;">{% trans "Action" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dosen in dosen_list %}
+                        <tr class="align-middle" data-dosen-id="{{ dosen.id }}">
+                            <td>
+                                <span class="font-monospace">{{ dosen.nip }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <strong style="font-weight: normal;">{{ dosen.nama_dosen }}</strong>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info text-white">
+                                    <i class="fas fa-building me-1"></i>
+                                    {{ dosen.prodi|default:"-" }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-users me-1"></i>
+                                    {{ dosen.mahasiswa_dosen_set.count }} {% trans "students" %}
+                                </span>
+                            </td>
+                            <td class="pe-4">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" 
+                                            class="btn btn-outline-primary btn-edit-dosen"
+                                            data-dosen-id="{{ dosen.id }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editDosenModal"
+                                            title="{% trans 'Edit' %}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-outline-danger btn-hapus-dosen"
+                                            data-dosen-id="{{ dosen.id }}"
+                                            data-dosen-nama="{{ dosen.nama_dosen }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#hapusDosenModal"
+                                            title="{% trans 'Delete' %}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-chalkboard-user fa-3x mb-3 opacity-25"></i>
+                                    <h5 class="mb-2">{% trans "No lecturer data found" %}</h5>
+                                    {% if prodi_filter or search_query %}
+                                    <p>{% trans "Try with other filters or keywords" %}</p>
+                                    {% else %}
+                                    <p>{% trans "Add new lecturer with the button above" %}</p>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Dosen -->
+<div class="modal fade" id="tambahDosenModal" tabindex="-1" aria-labelledby="tambahDosenModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="tambahDosenModalLabel">
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>{% trans "Add Lecturer" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="tambahDosenForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nip" class="form-label">{% trans "NIP" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="nip" 
+                               name="nip" 
+                               placeholder="{% trans 'Enter NIP...' %}"
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nama_dosen" class="form-label">{% trans "Lecturer Name" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="nama_dosen" 
+                               name="nama_dosen" 
+                               placeholder="{% trans 'Enter full name...' %}"
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prodi" class="form-label">{% trans "Study Program" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="prodi" 
+                               name="prodi" 
+                               placeholder="{% trans 'Enter study program...' %}"
+                               required>
+                        <div class="form-text text-muted mt-2">
+                            <i class="fas fa-info-circle"></i> {% trans "Example: Informatics Engineering, Information Systems, etc." %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>{% trans "Save" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Dosen -->
+<div class="modal fade" id="editDosenModal" tabindex="-1" aria-labelledby="editDosenModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="editDosenModalLabel">
+                    <i class="fas fa-edit me-2 text-warning"></i>{% trans "Edit Lecturer" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="editDosenForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_nip" class="form-label">{% trans "NIP" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="edit_nip" 
+                               name="nip" 
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_nama_dosen" class="form-label">{% trans "Lecturer Name" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="edit_nama_dosen" 
+                               name="nama_dosen" 
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_prodi" class="form-label">{% trans "Study Program" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="edit_prodi" 
+                               name="prodi" 
+                               required>
+                    </div>
+                    <div class="alert alert-info mt-3" id="usageInfo" style="display: none;">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <span id="usageText"></span>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>{% trans "Save Changes" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Hapus Dosen -->
+<div class="modal fade" id="hapusDosenModal" tabindex="-1" aria-labelledby="hapusDosenModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-danger" id="hapusDosenModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{% trans "Delete Confirmation" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="icon-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center mb-3" 
+                     style="width: 60px; height: 60px; border-radius: 50%;">
+                    <i class="fas fa-exclamation-triangle fs-4"></i>
+                </div>
+                <h5 class="fw-bold mb-2">{% trans "Delete Lecturer Data?" %}</h5>
+                <p class="text-muted mb-2">{% trans "Are you sure you want to delete lecturer" %}</p>
+                <p><strong id="namaDosenHapus" class="text-danger fs-5">-</strong>?</p>
+                <div id="warningMessage" class="alert alert-warning mt-3" style="display: none;">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span></span>
+                </div>
+                <p class="text-danger small mt-3">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    {% trans "Deleted data cannot be recovered." %}
+                </p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <form method="post" action="" id="hapusDosenForm" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-trash me-1"></i>{% trans "Delete" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table td, .table th {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.table td:nth-child(4),
+.table th:nth-child(4) {
+    text-align: center;
+}
+
+.table td:nth-child(5),
+.table th:nth-child(5) {
+    text-align: center;
+}
+
+.card {
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+.rounded-top-3 {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table th {
+    font-weight: 700;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.table td {
+    vertical-align: middle;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.btn-group .btn {
+    border-radius: 6px !important;
+    margin-right: 2px;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+}
+
+.btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-success:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.modal-content {
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.modal-body {
+    padding: 0.5rem 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+}
+
+.font-monospace {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .icon-circle i {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table thead {
+        display: none;
+    }
+    
+    .table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .table td {
+        display: block;
+        text-align: right;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .table td::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .btn-group {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const prodiFilter = document.getElementById('prodiFilter');
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+    const clearSearch = document.getElementById('clearSearch');
+    
+    let searchTimeout;
+    
+    // Auto submit saat prodi berubah
+    if (prodiFilter) {
+        prodiFilter.addEventListener('change', function() {
+            searchForm.submit();
+        });
+    }
+    
+    // Search dengan delay
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.length >= 2 || this.value.length === 0) {
+                    searchForm.submit();
+                }
+            }, 800);
+        });
+        
+        // Enter untuk search langsung
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimeout);
+                searchForm.submit();
+            }
+        });
+    }
+    
+    // Clear search
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            searchForm.submit();
+        });
+    }
+    
+    // Set data-label untuk responsive table
+    function setDataLabels() {
+        if (window.innerWidth < 576) {
+            const headers = ['No', 'NIP', 'Lecturer Name', 'Study Program', 'Supervisions', 'Action'];
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    if (index < headers.length) {
+                        cell.setAttribute('data-label', headers[index]);
+                    }
+                });
+            });
+        }
+    }
+    setDataLabels();
+    window.addEventListener('resize', setDataLabels);
+    
+    // CSRF Token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+    
+    // Handle Tambah Dosen
+    const tambahForm = document.getElementById('tambahDosenForm');
+    if (tambahForm) {
+        tambahForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch("{% url 'tambah_dosen' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('tambahDosenModal'));
+                    modal.hide();
+                    showAlert('success', data.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert('error', data.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'An error occurred');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Handle Edit button
+    const editForm = document.getElementById('editDosenForm');
+    const usageInfo = document.getElementById('usageInfo');
+    const usageText = document.getElementById('usageText');
+    let currentEditId = null;
+    
+    const editModal = document.getElementById('editDosenModal');
+    if (editModal) {
+        editModal.addEventListener('show.bs.modal', async function(event) {
+            const button = event.relatedTarget;
+            const dosenId = button.getAttribute('data-dosen-id');
+            currentEditId = dosenId;
+            
+            try {
+                const response = await fetch(`/admin/get-detail-dosen/${dosenId}/`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const dosen = data.dosen;
+                    
+                    document.getElementById('edit_nip').value = dosen.nip;
+                    document.getElementById('edit_nama_dosen').value = dosen.nama_dosen;
+                    document.getElementById('edit_prodi').value = dosen.prodi;
+                    editForm.action = `/admin/edit-dosen/${dosenId}/`;
+                    
+                    if (dosen.jumlah_bimbingan > 0) {
+                        usageInfo.style.display = 'block';
+                        usageText.innerHTML = `
+                            <strong>Usage Information:</strong><br>
+                            📊 Currently supervising ${dosen.jumlah_bimbingan} student(s)<br>
+                            ⚠️ Changing data will affect all related records
+                        `;
+                    } else {
+                        usageInfo.style.display = 'none';
+                    }
+                } else {
+                    showAlert('error', 'Failed to load data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'An error occurred');
+            }
+        });
+    }
+    
+    // Handle Edit form submit
+    if (editForm) {
+        editForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const url = this.action;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editDosenModal'));
+                    modal.hide();
+                    showAlert('success', data.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert('error', data.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'An error occurred');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Handle Delete button
+    const hapusModal = document.getElementById('hapusDosenModal');
+    const hapusForm = document.getElementById('hapusDosenForm');
+    const namaDosenHapus = document.getElementById('namaDosenHapus');
+    const warningMessage = document.getElementById('warningMessage');
+    let currentDeleteId = null;
+    
+    if (hapusModal) {
+        hapusModal.addEventListener('show.bs.modal', async function(event) {
+            const button = event.relatedTarget;
+            const dosenId = button.getAttribute('data-dosen-id');
+            const dosenNama = button.getAttribute('data-dosen-nama');
+            
+            currentDeleteId = dosenId;
+            namaDosenHapus.textContent = dosenNama;
+            hapusForm.action = `/admin/hapus-dosen/${dosenId}/`;
+            
+            try {
+                const response = await fetch(`/admin/get-detail-dosen/${dosenId}/`);
+                const data = await response.json();
+                
+                if (data.success && data.dosen.jumlah_bimbingan > 0) {
+                    warningMessage.style.display = 'block';
+                    warningMessage.querySelector('span').innerHTML = `
+                        ❌ Cannot delete this lecturer because they are currently supervising ${data.dosen.jumlah_bimbingan} student(s).<br>
+                        Please reassign the students first.
+                    `;
+                    document.querySelector('#hapusDosenModal .btn-danger').disabled = true;
+                } else {
+                    warningMessage.style.display = 'none';
+                    document.querySelector('#hapusDosenModal .btn-danger').disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+    
+    // Handle Delete form submit
+    if (hapusForm) {
+        hapusForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const url = this.action;
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Deleting...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('hapusDosenModal'));
+                    modal.hide();
+                    showAlert('success', data.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert('error', data.message);
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('error', 'An error occurred');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+    
+    // Helper function to show alert
+    function showAlert(type, message) {
+        const existingAlert = document.querySelector('.alert-dismissible.position-fixed');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+        `;
+        
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas ${icon} me-2 fs-5"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}
